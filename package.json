@@ -1,0 +1,58 @@
+{
+  "name": "@netsujo/agent-role-contracts",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "Offline validation for declared AI-agent roles, authority, review separation and handoffs.",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./schemas/*": "./schemas/*"
+  },
+  "bin": {
+    "agent-role-contracts": "./bin/agent-role-contracts.mjs"
+  },
+  "files": [
+    "src",
+    "bin",
+    "schemas",
+    "examples",
+    "docs",
+    "README.md",
+    "README.ja.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "schemas:check": "node scripts/build-schemas.mjs --check",
+    "schemas:build": "node scripts/build-schemas.mjs",
+    "check": "npm run schemas:check && npm test",
+    "demo": "node bin/agent-role-contracts.mjs explain --bundle examples/team.json --task examples/task.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suirindo/agent-role-contracts.git"
+  },
+  "homepage": "https://github.com/suirindo/agent-role-contracts#readme",
+  "bugs": {
+    "url": "https://github.com/suirindo/agent-role-contracts/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "ai-agents",
+    "coding-agents",
+    "governance",
+    "authority",
+    "review",
+    "handoff",
+    "validation"
+  ],
+  "author": "Netsujo株式会社"
+}

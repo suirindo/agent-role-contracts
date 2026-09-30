@@ -1,0 +1,14 @@
+{
+  "schema_version": "0.1",
+  "id": "example-task-002",
+  "type": "code-change",
+  "objective": "Explain a code change with a declared test plan.",
+  "inputs": {
+    "scope": "src/example.mjs",
+    "change_kind": "code",
+    "test_plan": "Run the local contract checks."
+  },
+  "acceptance_criteria": [
+    "The change and open questions are stated."
+  ]
+}

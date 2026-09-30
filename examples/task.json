@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "example-task-001",
+  "type": "documentation-change",
+  "objective": "Explain a small documentation change and its review.",
+  "inputs": {
+    "scope": "docs/example.md",
+    "change_kind": "docs"
+  },
+  "acceptance_criteria": [
+    "The change and open questions are stated."
+  ]
+}

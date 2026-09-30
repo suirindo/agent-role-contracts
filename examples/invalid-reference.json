@@ -1,0 +1,321 @@
+{
+  "schema_version": "0.1",
+  "policy_version": "example-v1",
+  "policy": {
+    "capabilities": [
+      "filesystem.read",
+      "filesystem.write.scoped",
+      "review.perform"
+    ],
+    "read_only_forbids": [
+      "filesystem.write.scoped"
+    ]
+  },
+  "roles": [
+    {
+      "contract": {
+        "id": "coordinator",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Clarify the task and the review relationship.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [
+            "change_kind",
+            "test_plan"
+          ],
+          "conditional_required_inputs": [
+            {
+              "when": {
+                "input": "change_kind",
+                "equals": "code"
+              },
+              "required_inputs": [
+                "test_plan"
+              ]
+            }
+          ],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The bounded objective is addressed."
+          ],
+          "escalation_conditions": [
+            "Required evidence is missing."
+          ]
+        },
+        "authority": {
+          "authority_mode": "read_only",
+          "capabilities": [
+            "filesystem.read"
+          ],
+          "prohibited_capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "allowed_write_scopes": [],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [
+            "implementer",
+            "reviewer"
+          ],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [
+            "project.review-policy"
+          ],
+          "optional_knowledge": [],
+          "repository_context": [
+            "example-repository"
+          ],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": false
+        }
+      },
+      "body": "# coordinator\n\nThis is a fictional role. Follow the declared inputs and scope, and report uncertainty.\n"
+    },
+    {
+      "contract": {
+        "id": "implementer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Propose the scoped change.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [
+            "change_kind",
+            "test_plan"
+          ],
+          "conditional_required_inputs": [
+            {
+              "when": {
+                "input": "change_kind",
+                "equals": "code"
+              },
+              "required_inputs": [
+                "test_plan"
+              ]
+            }
+          ],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The bounded objective is addressed."
+          ],
+          "escalation_conditions": [
+            "Required evidence is missing."
+          ]
+        },
+        "authority": {
+          "authority_mode": "write_scoped",
+          "capabilities": [
+            "filesystem.read",
+            "filesystem.write.scoped"
+          ],
+          "prohibited_capabilities": [
+            "review.perform"
+          ],
+          "allowed_write_scopes": [
+            "src/**",
+            "docs/**"
+          ],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [
+            "reviewer",
+            "ghost"
+          ],
+          "reports_to": "coordinator",
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [
+            "project.review-policy"
+          ],
+          "optional_knowledge": [],
+          "repository_context": [
+            "example-repository"
+          ],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": false
+        }
+      },
+      "body": "# implementer\n\nThis is a fictional role. Follow the declared inputs and scope, and report uncertainty.\n"
+    },
+    {
+      "contract": {
+        "id": "reviewer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Review evidence without changing the implementation.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [
+            "change_kind",
+            "test_plan"
+          ],
+          "conditional_required_inputs": [
+            {
+              "when": {
+                "input": "change_kind",
+                "equals": "code"
+              },
+              "required_inputs": [
+                "test_plan"
+              ]
+            }
+          ],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The bounded objective is addressed."
+          ],
+          "escalation_conditions": [
+            "Required evidence is missing."
+          ]
+        },
+        "authority": {
+          "authority_mode": "read_only",
+          "capabilities": [
+            "filesystem.read",
+            "review.perform"
+          ],
+          "prohibited_capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "allowed_write_scopes": [],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [],
+          "reports_to": "coordinator",
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [
+            "project.review-policy"
+          ],
+          "optional_knowledge": [],
+          "repository_context": [
+            "example-repository"
+          ],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": true
+        }
+      },
+      "body": "# reviewer\n\nThis is a fictional role. Follow the declared inputs and scope, and report uncertainty.\n"
+    }
+  ],
+  "knowledge": [
+    {
+      "id": "project.review-policy",
+      "uri": "repository://example-repository/docs/review-policy.md"
+    }
+  ],
+  "routes": [
+    {
+      "task_type": "documentation-change",
+      "accountable": "coordinator",
+      "executors": [
+        "implementer"
+      ],
+      "reviewers": [
+        "reviewer"
+      ],
+      "require_human_approval": true
+    },
+    {
+      "task_type": "code-change",
+      "accountable": "coordinator",
+      "executors": [
+        "implementer"
+      ],
+      "reviewers": [
+        "reviewer"
+      ],
+      "require_human_approval": true
+    }
+  ]
+}

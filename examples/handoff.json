@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1",
+  "task_id": "example-task-001",
+  "from_agent": "implementer",
+  "suggested_next_agent": "reviewer",
+  "current_status": "ready_for_review",
+  "objective": "Explain a small documentation change and its review.",
+  "completed": [
+    "Fictional example: a proposal was described."
+  ],
+  "evidence": [
+    {
+      "file": "docs/example.md",
+      "result": "Fictional example only. No real source file was checked."
+    }
+  ],
+  "decisions": [
+    "Request a separate declared reviewer."
+  ],
+  "risks": [
+    "Actual reviewer identity is not verified."
+  ],
+  "unresolved": [],
+  "required_next_action": "Review the stated evidence.",
+  "confidence": 0.7
+}
