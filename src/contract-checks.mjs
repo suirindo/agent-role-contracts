@@ -72,12 +72,12 @@ function runtimeStringFindings(value, path) {
   const findings = [];
   const normalized = value.toLowerCase().replaceAll('\\', '/');
   if (/(?:^|\/)\.(?:claude|codex)(?:\/|$)/.test(normalized)) {
-    findings.push(`${path}: runtime固有のパス`);
+    findings.push(`${path}: runtime-specific path`);
   }
   for (const line of value.split(/\r?\n/)) {
     const match = line.match(/^\s*([A-Za-z][A-Za-z0-9_-]*)\s*[:=]/);
     if (match && runtimeFieldKeys.has(normalizedRuntimeKey(match[1]))) {
-      findings.push(`${path}: runtime固有の項目 ${normalizedRuntimeKey(match[1])}`);
+      findings.push(`${path}: runtime-specific key ${normalizedRuntimeKey(match[1])}`);
     }
   }
   return findings;
@@ -89,7 +89,7 @@ export function runtimeNeutralFindings(value, path = '$') {
     else if (item && typeof item === 'object') {
       for (const [key, child] of Object.entries(item)) {
         const normalizedKey = normalizedRuntimeKey(key);
-        if (runtimeFieldKeys.has(normalizedKey)) findings.push(`${itemPath}.${key}: runtime固有の項目 ${normalizedKey}`);
+        if (runtimeFieldKeys.has(normalizedKey)) findings.push(`${itemPath}.${key}: runtime-specific key ${normalizedKey}`);
         inspect(child, `${itemPath}.${key}`);
       }
     } else if (typeof item === 'string') findings.push(...runtimeStringFindings(item, itemPath));

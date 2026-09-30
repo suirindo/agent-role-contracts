@@ -11,8 +11,8 @@ const json = JSON.stringify;
 test('runtime path detector does not treat a tilde-prefixed filename as a home-directory runtime path', () => {
   assert.deepEqual(runtimeNeutralFindings('~.claude'), []);
   assert.deepEqual(runtimeNeutralFindings('~.codex'), []);
-  assert.ok(runtimeNeutralFindings('~/.claude/agents/example.md').some(message => message.includes('runtime固有のパス')));
-  assert.ok(runtimeNeutralFindings('nested/.codex/config.json').some(message => message.includes('runtime固有のパス')));
+  assert.ok(runtimeNeutralFindings('~/.claude/agents/example.md').some(message => message.includes('runtime-specific path')));
+  assert.ok(runtimeNeutralFindings('nested/.codex/config.json').some(message => message.includes('runtime-specific path')));
 });
 
 test('public reports keep fail-closed claims fixed across entrypoints', () => {
@@ -76,4 +76,28 @@ test('inert schema property names constructor and prototype are accepted', () =>
 
 test('__proto__ remains rejected at the public JSON boundary', () => {
   assert.equal(validateBundle('{"__proto__":{}}').errors[0].code, 'RESERVED_JSON_KEY');
+});
+
+test('duplicate role and relation-cycle diagnostics use resolvable bundle paths', () => {
+  const duplicate = load('team');
+  duplicate.roles[1].contract.id = duplicate.roles[0].contract.id;
+  const duplicateReport = validateBundle(json(duplicate));
+  const duplicateError = duplicateReport.errors.find(error => error.code === 'ROLE_ID_DUPLICATE');
+  assert.equal(duplicateError?.path, 'bundle/roles/1/contract/id');
+
+  const cycle = load('team');
+  const left = cycle.roles[0].contract;
+  const right = cycle.roles[1].contract;
+  left.authority.may_delegate_to = [right.id];
+  right.authority.may_delegate_to = [left.id];
+  const cycleReport = validateBundle(json(cycle));
+  const cycleError = cycleReport.errors.find(error => error.code === 'ROLE_RELATION_CYCLE');
+  assert.equal(cycleError?.path, 'bundle/roles/0/contract/authority/may_delegate_to');
+});
+
+test('runtime-neutral public diagnostics are English', () => {
+  const findings = runtimeNeutralFindings({ permissionMode: 'unsafe', note: '~/.claude/settings.json' });
+  assert.ok(findings.some(message => message.includes('runtime-specific key permissionmode')));
+  assert.ok(findings.some(message => message.includes('runtime-specific path')));
+  assert.equal(findings.some(message => /[ぁ-んァ-ン一-龯]/.test(message)), false);
 });

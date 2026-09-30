@@ -34,18 +34,18 @@ function read(text,schema,label) {
  try {inspect(value);} catch(e) {return {errors:[issue(e.message,label,'JSON exceeds the supported data profile')]};}
  return {value,errors:validateSchema(value,schema).errors.map(e=>({...e,path:label+e.path}))};
 }
-function duplicateErrors(rows,key,code,path) {
+function duplicateErrors(rows,key,code,path,fieldPrefix='') {
  const seen=new Set();const errors=[];
- rows.forEach((v,i)=>{if(seen.has(v[key]))errors.push(issue(code,`${path}/${i}/${key}`,`Duplicate ${key}: ${v[key]}`));seen.add(v[key]);});
+ rows.forEach((v,i)=>{if(seen.has(v[key]))errors.push(issue(code,`${path}/${i}/${fieldPrefix}${key}`,`Duplicate ${key}: ${v[key]}`));seen.add(v[key]);});
  return errors;
 }
 function cycleErrors(roles,relation) {
- const map=new Map(roles.map(r=>[r.id,r]));const visited=new Set(),stack=new Set(),errors=[];
+ const map=new Map(roles.map((role,index)=>[role.id,{role,index}]));const visited=new Set(),stack=new Set(),errors=[];
  function walk(id) {
-  if(stack.has(id)) {errors.push(issue('ROLE_RELATION_CYCLE',`roles/${id}/${relation}`,`Cycle in ${relation}`));return;}
+  if(stack.has(id)) {const entry=map.get(id);errors.push(issue('ROLE_RELATION_CYCLE',`bundle/roles/${entry.index}/contract/authority/${relation}`,`Cycle in ${relation}`));return;}
   if(visited.has(id)||!map.has(id))return;
   stack.add(id);
-  const raw=map.get(id).authority[relation];
+  const raw=map.get(id).role.authority[relation];
   for(const target of Array.isArray(raw)?raw:raw?[raw]:[])walk(target);
   stack.delete(id);visited.add(id);
  }
@@ -77,7 +77,7 @@ function checkBundle(text) {
  if(parsed.errors.length)return {errors:parsed.errors};
  const b=parsed.value,roles=b.roles.map(r=>r.contract),ids=new Set(roles.map(r=>r.id));
  const byId=new Map(roles.map(r=>[r.id,r]));const knowledge=new Map(b.knowledge.map(k=>[k.id,k.uri]));
- const errors=[...duplicateErrors(roles,'id','ROLE_ID_DUPLICATE','bundle/roles'),...duplicateErrors(b.knowledge,'id','KNOWLEDGE_ID_AMBIGUOUS','bundle/knowledge'),...duplicateErrors(b.routes,'task_type','ROUTE_AMBIGUOUS','bundle/routes')];
+ const errors=[...duplicateErrors(roles,'id','ROLE_ID_DUPLICATE','bundle/roles','contract/'),...duplicateErrors(b.knowledge,'id','KNOWLEDGE_ID_AMBIGUOUS','bundle/knowledge'),...duplicateErrors(b.routes,'task_type','ROUTE_AMBIGUOUS','bundle/routes')];
  for(const cap of b.policy.read_only_forbids)if(!b.policy.capabilities.includes(cap))errors.push(issue('POLICY_UNKNOWN_CAPABILITY','bundle/policy',`Unknown read_only_forbids capability: ${cap}`));
  const aliases=new Map();
  for(const [i,{contract:r,body}] of b.roles.entries()) {

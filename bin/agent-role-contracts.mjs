@@ -44,7 +44,7 @@ try {
   if(format==='json')console.log(safeJson(r,2));
   else {
    console.log(`${r.valid?'PASS':'FAIL'}: ${r.kind} (declarations only; execution NOT authorized)`);
-   if(r.accountable)console.log(safeText(`Accountable: ${r.accountable}\nImplementers: ${r.executors.join(', ')}\nReviewers: ${r.reviewers.join(', ')}\nHuman approval required: ${r.human_approval_required}`));
+   if(r.accountable)for(const line of [`Accountable: ${r.accountable}`,`Implementers: ${r.executors.join(', ')}`,`Reviewers: ${r.reviewers.join(', ')}`,`Human approval required: ${r.human_approval_required}`])console.log(safeText(line));
    for(const role of r.roles||[])console.log(safeText(`Role ${role.id}: ${role.authority_mode}; allowed=[${role.capabilities.join(', ')}]; prohibited=[${role.prohibited_capabilities.join(', ')}]`));
    for(const e of r.errors)console.log(safeText(`${e.code} ${e.path}: ${e.message}`));
   }

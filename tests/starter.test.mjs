@@ -21,8 +21,9 @@ test('starter task shows separate write executor and read-only reviewer',()=>{
  const r=run(['explain','--bundle',example('starter-bundle'),'--task',example('starter-task'),'--format','text']);
  assert.equal(r.status,0,r.stderr);
  assert.match(r.stdout,/PASS: explain/);
- assert.match(r.stdout,/Implementers: implementer/);
- assert.match(r.stdout,/Reviewers: reviewer/);
+ assert.match(r.stdout,/^Implementers: implementer$/m);
+ assert.match(r.stdout,/^Reviewers: reviewer$/m);
+ assert.equal(r.stdout.includes(String.fromCharCode(92)+'u000a'),false);
  assert.match(r.stdout,/execution NOT authorized/);
 });
 

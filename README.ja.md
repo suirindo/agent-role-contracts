@@ -83,7 +83,7 @@ CLIは指定した通常ファイルだけを読み、stdout/stderrへ結果を�
 
 ## 検査器の対応範囲
 
-同梱スキーマはDraft-07の形式です。検査器は同梱スキーマで使うキーワードだけを扱う限定実装です。JSON Schema一般実装ではありません.未対応のキーワードやdialectはエラーにします。利用者が任意スキーマを登録して実行する公開APIはありません。詳細は`docs/SCHEMA_PROFILE.md`を参照してください。
+同梱スキーマはDraft-07の形式です。検査器は同梱スキーマで使うキーワードだけを扱う限定実装です。JSON Schema一般実装ではありません。未対応のキーワードやdialectはエラーにします。利用者が任意スキーマを登録して実行する公開APIはありません。詳細は`docs/SCHEMA_PROFILE.md`を参照してください。
 
 ## 開発用確認
 
@@ -93,4 +93,4 @@ npm run check
 
 ソースのテストと、schema JSONから生成したデータモジュールの一致を確認します。`schemas/`が正本です。変更後は`npm run schemas:build`で再生成します。生成物は実行コードを評価する仕組みではなく、静的なスキーマデータです。
 
-抽出元との差分は`docs/COMPATIBILITY.md`、公開までの残作業は`docs/RELEASE_GATES.md`に記載しています。現行の全社システムとの完全互換、本番運用比較、独立QCは未完了です。
+抽出元との互換・非互換境界は`docs/COMPATIBILITY.md`、公開版の受入方針は`docs/RELEASE_GATES.md`に記載しています。
