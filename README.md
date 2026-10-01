@@ -1,25 +1,56 @@
 # Agent Role Contracts
 
-Check declared roles, authority relationships and handoffs without starting an agent.
+Catch tasks that exceed an AI agent's declared write scope, and conflicting implementer/reviewer roles, before you hand off work.
 
 Version `0.1.0` checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
 
-## Five-minute first check
+## Quick Start — three minutes
 
-No npm packages, API key or network are needed. With Node.js available, run the bundled two-role starter as-is:
-
-```sh
-node bin/agent-role-contracts.mjs validate --bundle examples/starter-bundle.json
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task.json --format text
-```
-
-The second command should print `PASS`, with `implementer` as the write-scoped executor and `reviewer` as the separate read-only reviewer. Then run the intentionally out-of-authority task:
+**Requirements:** Git and **Node.js 22.5 or newer**, with npm. Clone once, then run the demo:
 
 ```sh
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task-outside-scope.json --format text
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo --silent
 ```
 
-That command must exit 1 with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`. The starter is deliberately prewritten: first-use should demonstrate the contract check before asking a new user to author the full role schema.
+No `npm install`, API key, agent runtime or account is needed. Only cloning uses the network; the demo runs offline. The commands use Git and npm and do not require Bash, Docker or OS-specific tools.
+
+### Expected output
+
+```text
+Agent Role Contracts: check a task before handing it to an agent.
+
+1. Normal task
+   Scope: src/example.mjs; allowed: src/**
+   PASS: declarations are consistent.
+   Implementer: implementer (write_scoped)
+   Reviewer: reviewer (read_only; separate declared role)
+
+2. Request an out-of-scope change
+   Scope: secrets/production.txt; allowed: src/**
+   FAIL (expected): TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY
+
+3. Repair the task scope
+   Scope: secrets/production.txt -> src/example.mjs
+   PASS: declarations are consistent again.
+
+Demo complete: PASS -> FAIL (expected) -> PASS.
+Checks declarations only; execution is NOT authorized.
+Next: docs/QUICKSTART.md (change the scope and rerun the checker).
+```
+
+The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
+
+### Why it matters
+
+A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
+
+### Try your own task next
+
+- [Change a task scope and check it yourself](docs/QUICKSTART.md).
+- [Explore coordination and handoffs](#full-three-role-example).
+- [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
+- [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
 ## Full three-role example
 
@@ -51,7 +82,7 @@ The runtime-specific declaration check is intentionally finite. It detects a sma
 
 Role `body` text is inline. The public contract has no prompt-file path field, and the Core does not discover `ROLE.md` or any other role file.
 
-The package imports no company configuration and performs no application I/O at core import time. Node still loads its JavaScript modules. Only the CLI opens explicitly supplied regular files. It never executes evidence `command` strings, invokes agents or writes configuration. A stable last-component symlink is rejected on supported CI platforms. POSIX keeps `O_NOFOLLOW`; Windows additionally uses a pre-open `lstat` check. This is not a general filesystem sandbox, and the Windows pre-check is not claimed to prevent a hostile process from swapping a path between inspection and open. The JSON-text-only API rejects executable objects and never loads JavaScript configuration.
+The package imports no company configuration and performs no application I/O at core import time. Node still loads its JavaScript modules. The core does not open application files. The CLI opens only explicitly supplied regular files; the quickstart runner reads the three bundled starter fixtures named in its source. Neither executes evidence `command` strings, invokes agents or writes configuration. The CLI rejects a stable last-component symlink on supported CI platforms. POSIX keeps `O_NOFOLLOW`; Windows additionally uses a pre-open `lstat` check. This is not a general filesystem sandbox, and the Windows pre-check is not claimed to prevent a hostile process from swapping a path between inspection and open. The JSON-text-only API rejects executable objects and never loads JavaScript configuration.
 
 ## Install
 
