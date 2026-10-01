@@ -1,0 +1,35 @@
+{
+  "schema_version": "0.2",
+  "id": "fictional-treasury-policy-v1",
+  "task_type": "treasury-operation",
+  "allowed_chain_ids": [
+    "11155111"
+  ],
+  "allowed_senders": [
+    "0x1111111111111111111111111111111111111111"
+  ],
+  "allowed_recipients": [
+    "0x2222222222222222222222222222222222222222"
+  ],
+  "allowed_spenders": [
+    "0x3333333333333333333333333333333333333333"
+  ],
+  "asset_limits": [
+    {
+      "chain_id": "11155111",
+      "asset": "0x4444444444444444444444444444444444444444",
+      "max_transfer_base_units": "500000000",
+      "max_approval_base_units": "100000000",
+      "max_fee_base_units": "1000000000000000"
+    },
+    {
+      "chain_id": "11155111",
+      "asset": "native",
+      "max_transfer_base_units": "100000000000000000",
+      "max_approval_base_units": "0",
+      "max_fee_base_units": "1000000000000000"
+    }
+  ],
+  "human_approver": "treasury-owner",
+  "max_evidence_age_seconds": 300
+}

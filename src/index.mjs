@@ -6,7 +6,8 @@ import { validateSchema } from './schema.mjs';
 import { parseJsonRejectDuplicateKeys } from './strict-json.mjs';
 import { buildReport } from './report.mjs';
 import { conditionalInputErrors, requiredInputsForContract, authorityErrors, runtimeNeutralFindings } from './contract-checks.mjs';
-export const VERSION = '0.1.0';
+import { FINANCIAL_PROFILE, FINANCIAL_LIMITATIONS, financialProposalErrors, financialSubjectDigest, financialEvidenceErrors } from './finance.mjs';
+export const VERSION = '0.2.0-alpha.1';
 export const MAX_INPUT_BYTES = 1048576;
 const own=(v,k)=>Object.hasOwn(v,k);
 const order=(a,b)=>a<b?-1:a>b?1:0;
@@ -158,4 +159,42 @@ export function validateHandoff(bundleJson,taskJson,handoffJson) {
  if(v.current_status==='complete' && v.unresolved.length)errors.push(issue('HANDOFF_COMPLETE_UNRESOLVED','handoff/unresolved','Complete contradicts recorded unresolved items'));
  if(v.current_status==='blocked' && !v.unresolved.length)errors.push(issue('HANDOFF_BLOCKER_MISSING','handoff/unresolved','Blocked requires a recorded unresolved item'));
  return report('handoff',errors,{task_id:t.task.id,from_agent:v.from_agent,next_agent:v.suggested_next_agent,declared_status:v.current_status});
+}
+
+function financialContext(bundleJson, taskJson, policyJson, transactionJson, transactionPath) {
+ const b=checkBundle(bundleJson);if(b.errors.length)return {errors:b.errors};
+ const t=checkTask(b,taskJson);if(t.errors.length)return {errors:t.errors};
+ const p=read(policyJson,schemas['financial-policy'],'financial_policy');if(p.errors.length)return {errors:p.errors};
+ const tx=read(transactionJson,schemas['financial-intent'].properties.transaction,transactionPath);if(tx.errors.length)return {errors:tx.errors};
+ const errors=financialProposalErrors(b.bundle,t.task,t.route,p.value,tx.value,transactionPath);
+ return {b,t,policy:p.value,transaction:tx.value,errors};
+}
+
+async function financialDetails(context) {
+ try {
+  const subject_digest=await financialSubjectDigest(context.b.bundle,context.t.task,context.policy,context.transaction);
+  return {details:{financial_profile:FINANCIAL_PROFILE,subject_digest,task_id:context.t.task.id,policy_id:context.policy.id,transaction:context.transaction,...FINANCIAL_LIMITATIONS},errors:[]};
+ } catch {
+  return {details:{...FINANCIAL_LIMITATIONS},errors:[issue('FINANCE_DIGEST_UNAVAILABLE','subject_digest','The runtime must provide Web Crypto SHA-256; no digest or acceptance was produced')]};
+ }
+}
+
+/** Async, offline proposal description. The digest is a binding, not a signature. */
+export async function describeFinancialIntent(bundleJson, taskJson, policyJson, transactionJson) {
+ const context=financialContext(bundleJson,taskJson,policyJson,transactionJson,'transaction');
+ if(context.errors.length)return report('financial-subject',context.errors,{validation_stage:'proposal',...FINANCIAL_LIMITATIONS});
+ const result=await financialDetails(context);
+ return report('financial-subject',result.errors,{validation_stage:'proposal',...result.details});
+}
+
+/** Async declaration preflight. Callers supply the evaluation clock explicitly. */
+export async function validateFinancialIntent(bundleJson, taskJson, policyJson, intentJson, evaluatedAt) {
+ const intent=read(intentJson,schemas['financial-intent'],'financial_intent');
+ if(intent.errors.length)return report('financial-intent',intent.errors,{validation_stage:'intent',...FINANCIAL_LIMITATIONS});
+ const context=financialContext(bundleJson,taskJson,policyJson,JSON.stringify(intent.value.transaction),'financial_intent/transaction');
+ if(context.errors.length)return report('financial-intent',context.errors,{validation_stage:'intent',...FINANCIAL_LIMITATIONS});
+ const result=await financialDetails(context);
+ if(result.errors.length)return report('financial-intent',result.errors,{validation_stage:'intent',...result.details});
+ const errors=financialEvidenceErrors(context.t.route,context.policy,intent.value,result.details.subject_digest,evaluatedAt);
+ return report('financial-intent',errors,{validation_stage:'intent',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details});
 }

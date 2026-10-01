@@ -1,0 +1,11 @@
+{
+  "operation": "erc20_transfer",
+  "chain_id": "11155111",
+  "sender": "0x1111111111111111111111111111111111111111",
+  "asset": "0x4444444444444444444444444444444444444444",
+  "target": "0x2222222222222222222222222222222222222222",
+  "amount_base_units": "250000000",
+  "max_fee_base_units": "1000000000000000",
+  "nonce": "7",
+  "current_allowance_base_units": null
+}
