@@ -104,7 +104,7 @@ test('workflow keeps verification unprivileged and stages one exact artifact wit
   assert.match(workflow, /cancel-in-progress: false/);
 });
 
-import { verifyAttestationAudit } from './verify-publication.mjs';
+import { verifyAttestationAudit, isolatedNpmConfig } from './verify-publication.mjs';
 const statement = { _type: 'https://in-toto.io/Statement/v1', predicateType: 'https://slsa.dev/provenance/v1', subject: [{ name: 'pkg:npm/%40netsujo/agent-role-contracts@0.2.0', digest: { sha512: digest(bytes, 'sha512') } }], predicate: { buildDefinition: { buildType: 'https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1', externalParameters: { workflow: { repository: `https://github.com/${REPOSITORY}`, ref: 'refs/tags/v0.2.0', path: '.github/workflows/npm-stage-release.yml' } }, resolvedDependencies: [{ uri: `git+https://github.com/${REPOSITORY}@refs/tags/v0.2.0`, digest: { gitCommit: subject.commit } }] }, runDetails: { builder: { id: 'https://github.com/actions/runner/github-hosted' } } } };
 function auditFor(payload) { return { invalid: [], missing: [], verified: [{ name: PACKAGE, version: subject.version, registry: 'https://registry.npmjs.org/', attestationBundles: [{ predicateType: 'https://slsa.dev/provenance/v1', bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(payload)).toString('base64') } } }] }] }; }
 
@@ -151,5 +151,19 @@ test('source gate checks real Git HEAD, peeled tag, source version and dirty/unt
     rmSync(join(dir, 'extra.txt'));
     writeFileSync(join(dir, 'package.json'), JSON.stringify({ ...pkg, version: '0.3.0' }));
     assert.throws(() => verifySource(dir, actual), /RELEASE_SOURCE_DIRTY/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test('isolated npm config uses distinct files accepted by the real CLI without loading user config', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'arc-npm-config-'));
+  try {
+    const config = isolatedNpmConfig(dir);
+    assert.notEqual(config[0].split('=')[1], config[1].split('=')[1]);
+    assert.equal(readFileSync(join(dir, 'user.npmrc'), 'utf8'), '');
+    assert.equal(readFileSync(join(dir, 'global.npmrc'), 'utf8'), '');
+    const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const version = execFileSync(npm, ['--version', ...config], { cwd: dir, encoding: 'utf8', shell: process.platform === 'win32' });
+    assert.match(version.trim(), /^[0-9]+\.[0-9]+\.[0-9]+$/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

@@ -9,6 +9,14 @@ import { digest, PACKAGE, REPOSITORY, NPM_VERSION } from './release-binding.mjs'
 const assert = (condition, code) => { if (!condition) throw new Error(code); };
 const PROVENANCE = 'https://slsa.dev/provenance/v1';
 
+export function isolatedNpmConfig(dir) {
+  const user = join(dir, 'user.npmrc');
+  const global = join(dir, 'global.npmrc');
+  writeFileSync(user, '', { flag: 'wx' });
+  writeFileSync(global, '', { flag: 'wx' });
+  return [`--userconfig=${user}`, `--globalconfig=${global}`, '--registry=https://registry.npmjs.org/', `--cache=${join(dir, 'cache')}`];
+}
+
 // The input must be npm audit signatures --json --include-attestations output.
 // Only the CLI's successfully verified bundles can satisfy this gate.
 export function verifyAttestationAudit(audit, subject, bytes) {
@@ -39,7 +47,7 @@ async function main() {
   const subject = { version, commit, sha256 };
   const dir = mkdtempSync(join(tmpdir(), 'arc-publication-verify-'));
   try {
-    const config = ['--userconfig=/dev/null', '--globalconfig=/dev/null', '--registry=https://registry.npmjs.org/', `--cache=${join(dir, 'cache')}`];
+    const config = isolatedNpmConfig(dir);
     const npm = (args) => execFileSync('npm', [...args, ...config], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024 });
     assert(npm(['--version']).trim() === NPM_VERSION, 'PUBLICATION_NPM_VERSION_MISMATCH');
     const metadata = parseJsonRejectDuplicateKeys(npm(['view', `${PACKAGE}@${version}`, '--json']), 'PUBLICATION_METADATA_INVALID');
