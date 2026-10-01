@@ -32,7 +32,7 @@
     "schemas:check": "node scripts/build-schemas.mjs --check",
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
-    "demo": "node bin/agent-role-contracts.mjs explain --bundle examples/team.json --task examples/task.json"
+    "demo": "node examples/quickstart.mjs"
   },
   "repository": {
     "type": "git",

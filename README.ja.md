@@ -4,22 +4,32 @@
 
 Version `0.1.0` は、宣言された役割・権限・レビュー分離・作業範囲・引き継ぎを検査します。runtime権限の付与、本人確認、エージェント実行、OSやGitHubの権限制御は行いません。
 
-## 5分で最初の検査を通す
+## 3分で体験する Quick Start
 
-`npm install`、APIキー、ネットワーク接続は不要です。Node.jsが利用できる環境で、まず同梱の2-role starterをそのまま実行します。
-
-```sh
-node bin/agent-role-contracts.mjs validate --bundle examples/starter-bundle.json
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task.json --format text
-```
-
-2番目のコマンドは`PASS`になり、`implementer`が書き込み範囲付きexecutor、`reviewer`が別のread-only reviewerとして表示されます。次に、意図的に権限外へ出るtaskを実行します。
+**前提条件：GitとNode.js 22.5以上（npm同梱）。** 次の2コマンドでデモを実行できます。
 
 ```sh
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task-outside-scope.json --format text
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo --silent
 ```
 
-これは`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を出して終了コード1になるのが正しい結果です。初回利用では長いrole schemaを書かせず、まず「宣言した権限とtaskの不整合を事前に止める」挙動を確認させます。
+`npm install`、APIキー、エージェントの実行環境、アカウントは不要です。ネットワーク接続はclone時だけ使い、デモはオフラインで動きます。BashやDockerにも依存しません。
+
+実際の検査器を呼び出して、次の流れを確認します。
+
+1. `src/**`の範囲内にある`src/example.mjs`のタスクは`PASS`する。実装役とread-onlyのレビュー役も表示する。
+2. 範囲外の`secrets/production.txt`を要求すると、`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を検知する。
+3. タスクJSONのscopeをメモリ内で`src/example.mjs`に戻すと、再び`PASS`する。
+
+最後に`Demo complete: PASS -> FAIL (expected) -> PASS.`が表示され、終了コード0になります。想定した不整合の検知も含めて、デモの成功です。ファイル不足や想定外の結果は`DEMO_ERROR`を表示して終了コード2になります。対象scopeのファイルを開いたり、エージェントを起動したりはしません。
+
+期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
+
+### 何が変わるか
+
+プロンプトで`src/**`への限定を指示していても、次のタスクが別の場所を要求することがあります。役割とタスクの宣言を検査器へ渡すと、その不整合を具体的な診断コードで確認できます。実装役とレビュー役の兼務宣言も検知します。PASSは宣言の整合を示し、実際の権限制御やレビュー担当者の独立性確認は実行側で行う必要があります。
+
+次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
 ## 詳細な3-role例
 
