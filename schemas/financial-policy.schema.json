@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/onchain-finance-v02/schemas/financial-policy.schema.json",
+  "title": "Agent Role Contracts financial-policy preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "task_type",
+    "allowed_chain_ids",
+    "allowed_senders",
+    "allowed_recipients",
+    "allowed_spenders",
+    "asset_limits",
+    "human_approver",
+    "max_evidence_age_seconds"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.2"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 96
+    },
+    "task_type": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 96
+    },
+    "allowed_chain_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$",
+        "maxLength": 78
+      },
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "allowed_senders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      },
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "allowed_recipients": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      },
+      "minItems": 0,
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "allowed_spenders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      },
+      "minItems": 0,
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "asset_limits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chain_id",
+          "asset",
+          "max_transfer_base_units",
+          "max_approval_base_units",
+          "max_fee_base_units"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "maxLength": 78
+          },
+          "asset": {
+            "type": "string",
+            "pattern": "^(native|0x[0-9a-fA-F]{40})$"
+          },
+          "max_transfer_base_units": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          },
+          "max_approval_base_units": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          },
+          "max_fee_base_units": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true
+    },
+    "human_approver": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 96
+    },
+    "max_evidence_age_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    }
+  }
+}

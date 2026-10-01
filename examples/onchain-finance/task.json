@@ -1,0 +1,14 @@
+{
+  "schema_version": "0.1",
+  "id": "vendor-payment-1",
+  "type": "treasury-operation",
+  "objective": "Propose a fictional ERC-20 payment for independent review.",
+  "inputs": {
+    "scope": "intents/vendor-payment.json"
+  },
+  "acceptance_criteria": [
+    "The declared proposal stays inside the treasury policy.",
+    "A different declared role reviews the exact proposal.",
+    "The declared human owner approves the same subject."
+  ]
+}

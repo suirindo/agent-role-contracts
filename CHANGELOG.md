@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-alpha.1 — development preview, not published
+
+- Add offline onchain-finance proposal checks for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals.
+- Add per-proposal chain/asset/sender/target/amount/fee policy checks with exact uint256 comparisons.
+- Bind declared simulation, routed review and human approval to the complete canonical subject and an explicitly supplied evaluation clock.
+- Add asynchronous `describeFinancialIntent` and `validateFinancialIntent` APIs, `finance-subject` / `finance` CLI commands, public finance schemas and a runnable English treasury demo.
+- Preserve the existing v0.1 schemas and synchronous API behavior. No runtime execution, RPC, wallet, signing, broadcasting, dependency or telemetry was added.
+
 ## 0.1.0
 
 First public baseline.

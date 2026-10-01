@@ -1,0 +1,245 @@
+{
+  "schema_version": "0.1",
+  "policy_version": "fictional-treasury-v1",
+  "policy": {
+    "capabilities": [
+      "filesystem.read",
+      "filesystem.write.scoped",
+      "review.perform"
+    ],
+    "read_only_forbids": [
+      "filesystem.write.scoped"
+    ]
+  },
+  "roles": [
+    {
+      "contract": {
+        "id": "treasury-proposer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Propose a treasury operation as a JSON declaration.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The task stays within its declared authority."
+          ],
+          "escalation_conditions": [
+            "Escalate when authority or acceptance evidence is insufficient."
+          ]
+        },
+        "authority": {
+          "authority_mode": "write_scoped",
+          "capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "prohibited_capabilities": [
+            "review.perform"
+          ],
+          "allowed_write_scopes": [
+            "intents/**"
+          ],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [
+            "risk-reviewer"
+          ],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [],
+          "optional_knowledge": [],
+          "repository_context": [],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": false
+        }
+      },
+      "body": "# treasury-proposer\n\nFictional role. Produce an intent proposal; do not sign or broadcast it.\n"
+    },
+    {
+      "contract": {
+        "id": "risk-reviewer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Review the exact treasury proposal without modifying it.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The task stays within its declared authority."
+          ],
+          "escalation_conditions": [
+            "Escalate when authority or acceptance evidence is insufficient."
+          ]
+        },
+        "authority": {
+          "authority_mode": "read_only",
+          "capabilities": [
+            "filesystem.read",
+            "review.perform"
+          ],
+          "prohibited_capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "allowed_write_scopes": [],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [],
+          "optional_knowledge": [],
+          "repository_context": [],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": true
+        }
+      },
+      "body": "# risk-reviewer\n\nFictional role. Review the exact subject and retain unresolved items.\n"
+    },
+    {
+      "contract": {
+        "id": "treasury-owner",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Make the declared human treasury decision.",
+          "responsibilities": [
+            "Work only within the declared task."
+          ],
+          "out_of_scope": [
+            "Runtime execution is not provided by this package."
+          ],
+          "success_criteria": [
+            "Report evidence and unresolved items."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The task stays within its declared authority."
+          ],
+          "escalation_conditions": [
+            "Escalate when authority or acceptance evidence is insufficient."
+          ]
+        },
+        "authority": {
+          "authority_mode": "human_only",
+          "capabilities": [],
+          "prohibited_capabilities": [
+            "filesystem.read",
+            "filesystem.write.scoped",
+            "review.perform"
+          ],
+          "allowed_write_scopes": [],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role reviews the implementation."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [],
+          "optional_knowledge": [],
+          "repository_context": [],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": true
+        }
+      },
+      "body": "# treasury-owner\n\nFictional human decision boundary. This declaration does not authenticate a person.\n"
+    }
+  ],
+  "knowledge": [],
+  "routes": [
+    {
+      "task_type": "treasury-operation",
+      "accountable": "treasury-owner",
+      "executors": [
+        "treasury-proposer"
+      ],
+      "reviewers": [
+        "risk-reviewer"
+      ],
+      "require_human_approval": true
+    }
+  ]
+}

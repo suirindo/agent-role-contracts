@@ -1,0 +1,112 @@
+# Onchain finance intent checks — v0.2 preview
+
+Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The preview package version is `0.2.0-alpha.1`; this feature is not in the published npm `0.1.0` release.
+
+## Try the demo
+
+From this candidate's repository root:
+
+```sh
+npm run demo:finance --silent
+```
+
+Git and Node.js 22.5 or newer with npm are the prerequisites. There are no dependencies or install steps. The demo reads only its named local fixtures, calls the actual checker, changes copies in memory and exits 0 only when every expected outcome occurs. Missing fixtures or unexpected results exit 2.
+
+All addresses, token and evidence are fictional. The demo uses the explicit fixture clock `2030-01-01T00:00:03Z`; this is not a live chain or current-time test. Updating fixture hashes in step 6 illustrates declaration binding. It does not create a real simulation, review or approval.
+
+Expected outcomes:
+
+| Proposal | Result |
+|---|---|
+| Treasury payment inside the declared limit | PASS |
+| Proposal switches chain | `FINANCE_CHAIN_NOT_ALLOWED` |
+| Payment exceeds its limit by one base unit | `FINANCE_TRANSFER_LIMIT_EXCEEDED` |
+| Unlimited token allowance | `FINANCE_UNLIMITED_APPROVAL_REFUSED` |
+| Amount changes after review | `FINANCE_SUBJECT_MISMATCH` |
+| New fictional declarations cover the changed proposal | PASS |
+
+## Concrete uses
+
+- A company treasury checks declared token payments against approved networks, assets, recipients and per-proposal ceilings.
+- A DAO operations team expresses who proposes, who reviews and which human-only role makes the decision.
+- A DeFi agent workflow checks a bounded ERC-20 approval proposal against its spender and allowance ceiling before passing the proposal onward.
+
+These are integration examples, not verified deployments or adoption claims. Supply the bundle and financial policy from a trusted source independently of the agent-generated proposal. Replacing both policy and proposal can make an unsafe proposal internally consistent. The checker does not authenticate policy supply.
+
+## Inputs
+
+| File | Meaning |
+|---|---|
+| `bundle.json` | v0.1 roles, authority and route: proposer, read-only reviewer, accountable human-only owner |
+| `task.json` | v0.1 task, objective, scope and acceptance criteria |
+| `policy.json` | v0.2 chain/sender/target allowlists, chain-bound assets, per-proposal transfer/approval/fee limits and evidence age |
+| `transaction.json` | One declared native transfer, ERC-20 transfer or ERC-20 approval |
+| `intent.json` | Proposal plus simulation, review and human-approval declarations |
+
+Amount, allowance, nonce, chain ID and block number are canonical decimal strings bounded to uint256. Numbers, signs, decimals, exponents, whitespace and leading zeroes are rejected. There is no floating-point arithmetic or implicit token-decimal conversion. Zero-value transfers and approval revocations are supported; zero-address endpoints are outside this profile.
+
+Addresses are compared by their 20-byte hex value; EIP-55 checksums and address ownership are not evaluated. Asset limits are keyed by both chain and asset. `native` denotes the chain's native currency. `target` is a recipient for transfers and a spender for ERC-20 approvals.
+
+`max_fee_base_units` is a declared ceiling expressed in the chain's native-currency base units. It does not estimate gas or verify the actual fee fields of a serialized transaction. Caps apply to each proposal independently. Repeated proposals and batches do not share a budget.
+
+For `erc20_approve`, `current_allowance_base_units` must be declared. A nonzero-to-nonzero allowance change is refused. A real consumer must reset, obtain fresh onchain state and new review before proposing a new nonzero allowance. The checker never reads the existing allowance. The uint256 maximum allowance is always refused. For transfers, the allowance field must be `null`.
+
+## API
+
+The new APIs are asynchronous JSON-text APIs. Existing `validateBundle`, `explainTask` and `validateHandoff` stay synchronous.
+
+```js
+import {
+  describeFinancialIntent,
+  validateFinancialIntent,
+} from '@netsujo/agent-role-contracts'; // local v0.2 preview package
+
+// JSON strings supplied by your application, from separately trusted inputs.
+const subject = await describeFinancialIntent(
+  bundleJson, taskJson, policyJson, transactionJson,
+);
+
+// Obtain real external evidence/decisions bound to subject.subject_digest.
+// Do not manufacture them by merely copying the hash into declarations.
+const result = await validateFinancialIntent(
+  bundleJson, taskJson, policyJson, intentJson,
+  new Date().toISOString(),
+);
+```
+
+`describeFinancialIntent` checks the proposal and produces a `financial-subject` report. Its PASS describes a proposal without accepting any evidence. `validateFinancialIntent` requires all three evidence/decision declarations and produces a `financial-intent` report. Every report retains the original fail-closed claims and explicitly states the additional finance limitations.
+
+The subject digest is SHA-256 over canonical JSON containing the finance-profile identifier and complete parsed bundle, task, financial policy and transaction. Object-member order does not matter; array order and every declared value do. Changing an objective, acceptance criterion, role body, policy cap, scope, nonce, fee or transaction value invalidates old bindings. The digest uses local Web Crypto; no network or key is used. A hash is not a signature.
+
+Timestamps must be real UTC calendar times, with optional three-digit milliseconds. The supplied evaluation clock must be at or after the evidence times and within the policy age. Declared order is simulation → review → human approval. The API does not read a clock; callers must supply a trustworthy current evaluation time. Passing an old time can make old declarations pass. The CLI defaults to its local UTC clock, and `--at` is an explicit deterministic-test override.
+
+Simulation declarations must name the proposal's chain and declare success. Standard ERC-20 operations require a declared boolean `true` return, including when no revert is reported. Nonstandard empty-return tokens are outside this preview. Native transfers require a `null` return value. The checker does not perform or authenticate simulation.
+
+## CLI
+
+Describe the fictional proposal:
+
+```sh
+node bin/agent-role-contracts.mjs finance-subject --bundle examples/onchain-finance/bundle.json --task examples/onchain-finance/task.json --policy examples/onchain-finance/policy.json --transaction examples/onchain-finance/transaction.json
+```
+
+Check the fictional evidence with its fixture clock:
+
+```sh
+node bin/agent-role-contracts.mjs finance --bundle examples/onchain-finance/bundle.json --task examples/onchain-finance/task.json --policy examples/onchain-finance/policy.json --intent examples/onchain-finance/intent.json --at 2030-01-01T00:00:03Z --format text
+```
+
+Exit codes stay 0 consistent declarations, 1 invalid declarations, 2 CLI/file error. JSON is the default format. Only explicitly supplied bounded regular files are read; symlink/UTF-8/size rules are unchanged.
+
+## Execution boundary
+
+PASS establishes only consistency of the supplied declarations. It does not authenticate humans/reviewers, verify evidence or blockchain state, inspect calldata, implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. The package has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
+
+An execution system remains responsible for trusted policy and time, authenticated decisions, live state, exact serialized transaction correspondence, current nonce/fee checks, aggregate budgets, replay prevention, stopping conditions, simulation and actual custody permissions. Bind its immediate pre-execution checks to the same subject and enforce its own controls. Never treat this preview's PASS as permission to move funds.
+
+## Standards used
+
+- [ERC-20](https://eips.ethereum.org/EIPS/eip-20): transfer/approve uint256 amounts and boolean return handling; allowance update considerations. Zero-value transfers remain supported.
+- [EIP-155](https://eips.ethereum.org/EIPS/eip-155): chain identity in signed transactions. This checker compares declared chain IDs; it does not implement signing or replay protection.
+
+The financial policy and finite preview rules are Netsujo's application profile, not Ethereum protocol requirements. Free MIT OSS, with no account, wallet or telemetry requirement. Built by [Netsujo](https://netsujo.jp/en), a Web3 startup.

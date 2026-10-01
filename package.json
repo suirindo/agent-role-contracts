@@ -1,9 +1,9 @@
 {
   "name": "@netsujo/agent-role-contracts",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.1",
   "license": "MIT",
   "type": "module",
-  "description": "Offline validation for declared AI-agent roles, authority, review separation and handoffs.",
+  "description": "Offline AI-agent role and onchain-finance proposal declaration checks.",
   "engines": {
     "node": ">=22.5"
   },
@@ -32,7 +32,8 @@
     "schemas:check": "node scripts/build-schemas.mjs --check",
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
-    "demo": "node examples/quickstart.mjs"
+    "demo": "node examples/quickstart.mjs",
+    "demo:finance": "node examples/onchain-finance/demo.mjs"
   },
   "repository": {
     "type": "git",
@@ -43,7 +44,8 @@
     "url": "https://github.com/suirindo/agent-role-contracts/issues"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "next"
   },
   "keywords": [
     "ai-agents",
@@ -52,7 +54,11 @@
     "authority",
     "review",
     "handoff",
-    "validation"
+    "validation",
+    "web3",
+    "onchain-finance",
+    "treasury",
+    "erc20"
   ],
-  "author": "Netsujo株式会社"
+  "author": "Netsujo\u682a\u5f0f\u4f1a\u793e"
 }
