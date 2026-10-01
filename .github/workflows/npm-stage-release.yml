@@ -2,26 +2,124 @@ name: npm stage release
 
 on:
   workflow_dispatch:
+    inputs:
+      expected_commit:
+        description: 'Approved full commit SHA at the protected release tag'
+        required: true
+        type: string
+      package_version:
+        description: 'Approved stable package version (tag must be vVERSION)'
+        required: true
+        type: string
+      expected_tarball_sha256:
+        description: 'SHA-256 of the reviewed tarball packed with npm 11.20.0'
+        required: true
+        type: string
 
 permissions:
   contents: read
-  id-token: write
+
+# Never interrupt a possibly completed staging effect or issue a blind retry.
+concurrency:
+  group: npm-stage-${{ github.repository }}-${{ inputs.package_version }}
+  cancel-in-progress: false
+
+env:
+  EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+  PACKAGE_VERSION: ${{ inputs.package_version }}
+  EXPECTED_TARBALL_SHA256: ${{ inputs.expected_tarball_sha256 }}
+  RELEASE_REF_PROTECTED: ${{ github.ref_protected }}
 
 jobs:
-  stage:
+  verify:
+    if: ${{ github.ref_type == 'tag' && github.ref_protected }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      artifact_id: ${{ steps.bundle.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify approved protected tag and source identity
+        run: node .github/release/release-binding.mjs source .
+      - name: Use fixed staged-publishing-capable npm
+        run: |
+          npm install --global npm@11.20.0 --ignore-scripts
+          test "$(npm --version)" = '11.20.0'
+      - name: Verify source and release checks without OIDC permission
+        run: |
+          npm run check
+          node --test .github/release/*.test.mjs
+          node .github/release/release-binding.mjs source .
+      - name: Pack once and verify reviewed bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-bundle"
+          npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/release-bundle" > "$RUNNER_TEMP/release-bundle/pack.json"
+          node .github/release/release-binding.mjs manifest "$RUNNER_TEMP/release-bundle"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        id: bundle
+        with:
+          name: approved-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/release-bundle/*.tgz
+            ${{ runner.temp }}/release-bundle/release-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+  stage:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-      - name: Use staged-publishing-capable npm
-        run: npm install --global npm@11.20.0
-      - name: Verify exact source
-        run: npm run check
-      - name: Stage package for maintainer approval
-        run: npm stage publish --access public
+      - name: Use fixed staged-publishing-capable npm
+        run: |
+          npm install --global npm@11.20.0 --ignore-scripts
+          test "$(npm --version)" = '11.20.0'
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.verify.outputs.artifact_id }}
+          path: ${{ runner.temp }}/release-stage/bundle
+          merge-multiple: true
+          digest-mismatch: error
+      - name: Revalidate the exact immutable bundle before staging
+        run: node .github/release/release-binding.mjs bundle "$RUNNER_TEMP/release-stage/bundle"
+      - name: Stage the verified tarball once with required provenance
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'STAGING_STARTED_OUTCOME_UNCERTAIN_UNTIL_RECEIPT' > "$RUNNER_TEMP/release-stage/stage-status.txt"
+          npm stage publish "$RUNNER_TEMP/release-stage/bundle/netsujo-agent-role-contracts-$PACKAGE_VERSION.tgz" --access public --provenance --ignore-scripts --json --registry=https://registry.npmjs.org > "$RUNNER_TEMP/release-stage/stage-response.json"
+          node .github/release/release-binding.mjs receipt "$RUNNER_TEMP/release-stage"
+          printf '%s\n' 'STAGED_AWAITING_MAINTAINER_READBACK_AND_APPROVAL' > "$RUNNER_TEMP/release-stage/stage-status.txt"
+      - name: Preserve staging outcome and exact approval identity
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: stage-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/release-stage/bundle/release-manifest.json
+            ${{ runner.temp }}/release-stage/stage-response.json
+            ${{ runner.temp }}/release-stage/stage-receipt.json
+            ${{ runner.temp }}/release-stage/stage-status.txt
+          if-no-files-found: error
+          retention-days: 30
