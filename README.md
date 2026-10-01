@@ -1,12 +1,60 @@
 # Agent Role Contracts
 
-Check declared roles, authority relationships and handoffs without starting an agent.
+Agent Role Contracts is an offline CLI and library for checking JSON declarations of agent roles, authority relationships, review separation, task scope and handoffs before an agent starts.
 
-Version `0.1.0` checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
+Version `0.1.0` checks declarations only. A `PASS` does **not** grant runtime authority, authenticate identity, execute agents, validate evidence, enforce filesystem access or replace an existing company Agent OS. Use it to catch contradictions in a declared contract; pair it with the runtime controls and review process your environment requires.
 
-## Five-minute first check
+## Try it in three minutes
 
-No npm packages, API key or network are needed. With Node.js available, run the bundled two-role starter as-is:
+You need Node.js 22.5 or later. The package is tested in CI on Node.js 22.5 and 24. No API key is needed, and the checker makes no network request while it runs.
+
+### From the published package
+
+Start in an empty directory. Pinning `0.1.0` makes this walkthrough match the public release exactly:
+
+```sh
+mkdir agent-role-contracts-first-check
+cd agent-role-contracts-first-check
+npm init --yes
+npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+```
+
+If npm reports an `EPERM` error about root-owned files in its shared cache, do not use `sudo`. Retry the install with a cache that belongs only to this directory:
+
+```sh
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+```
+
+Run the bundled two-role starter as-is:
+
+```sh
+npx --no-install agent-role-contracts validate \
+  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
+  --format text
+npx --no-install agent-role-contracts explain \
+  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
+  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
+  --format text
+```
+
+The first command prints `PASS: bundle`. The second prints `PASS: explain`, with `implementer` as the write-scoped executor and `reviewer` as the separate read-only reviewer. This is a declaration result, not permission to run either role.
+
+Now run the deliberately out-of-authority task:
+
+```sh
+npx --no-install agent-role-contracts explain \
+  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
+  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task-outside-scope.json \
+  --format text
+```
+
+That command intentionally exits 1 and reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`. It demonstrates fail-closed scope checking; it does not inspect or protect a real `secrets/production.txt` path.
+
+To make the example your own, copy the three starter JSON files into your project, change the IDs, scopes and capabilities to match your declared policy, then point the same commands at your copies. Keep a separate reviewer role when you want the checker to verify review separation.
+
+### From this repository
+
+No npm packages, API key or network are needed. With Node.js available, the same starter can run directly from a checkout:
 
 ```sh
 node bin/agent-role-contracts.mjs validate --bundle examples/starter-bundle.json
@@ -45,7 +93,7 @@ The hosted CI matrix covers Ubuntu / Node.js 22.5.0, Ubuntu / Node.js 24, macOS 
 
 Checks cover structure, duplicate IDs and aliases, authority contradictions, role references and cycles, explicit routes, declared self-review, required/conditional inputs, registered knowledge references and task-bound handoff consistency. Unknown task types fail rather than silently falling back. Input fields are checked against every routed role; staged production of later inputs is not implemented. For routed `write_scoped` or `operator` executors, `inputs.scope` must be one portable relative scope contained by that executor's declared `allowed_write_scopes`. A `write_scoped` or `operator` role must also actually allow at least one capability that the bundle policy lists in `read_only_forbids`; the Core does not guess write semantics from capability names. This is declaration-level containment only: no filesystem path is opened, no glob is expanded and no runtime access is granted. `human_only` roles must declare both executable `capabilities` and `allowed_write_scopes` as empty; they represent human decision/approval boundaries, not machine mutation authority.
 
-A PASS checks declarations only. Every result states that execution authorization, runtime enforcement, identity verification, evidence verification, source-file checks, sensitive-data scanning and output-schema validation are false. A knowledge URI is not fetched or resolved against the filesystem. `output_schema` is retained metadata, not an executed user schema. No scoring purports to measure model quality.
+A PASS checks declarations only. The default JSON result states that execution authorization, runtime enforcement, identity verification, evidence verification, source-file checks, sensitive-data scanning and output-schema validation are false; text output states that execution is not authorized. A knowledge URI is not fetched or resolved against the filesystem. `output_schema` is retained metadata, not an executed user schema. No scoring purports to measure model quality.
 
 The runtime-specific declaration check is intentionally finite. It detects a small generic set of runtime configuration keys and selected `.claude` / `.codex` path forms. It is not proof that a declaration is universally runtime-neutral, and it is not a security, secret, malware or prompt-safety scanner.
 
