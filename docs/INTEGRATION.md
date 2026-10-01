@@ -4,7 +4,7 @@ Agent Role Contracts validates the JSON declarations supplied to it. A PASS is a
 
 ## Bind the check to the proposed work
 
-Use the JSON-text API (`validateBundle`, `explainTask`, `validateHandoff`) or the CLI on explicit inputs. Keep the exact bundle, task and any handoff input with the result, and identify the checker version used. A result from different inputs is not evidence for the current task. The checker does not manage this record or verify its integrity.
+Use the JSON-text API (`validateBundle`, `explainTask`, `validateHandoff`) or the CLI on explicit inputs. Supply the approved bundle and policy from a trusted source; arbitrary task or user-supplied authority declarations must not become the integration’s authorization policy. Bind the result to the bundle digest and task revision, and verify identity and approval freshness immediately before execution. Keep the exact bundle, task and any handoff input with the result, and identify the checker version used. A result from different inputs is not evidence for the current task. The checker does not manage this record or verify its integrity.
 
 If the CLI exits 1 (inconsistent declarations) or 2 (argument/input-file failure), stop the dependent execution. Missing, malformed or unverifiable results should also stop that execution. When an adapter uses the API, it must inspect the reported result and handle errors; merely receiving a return value is insufficient. Do not widen authority automatically to turn a failure into a PASS.
 
