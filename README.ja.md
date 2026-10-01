@@ -25,6 +25,8 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
+公開済みnpm `0.1.0`をcloneせず試す手順は、英語正本の[Try the published package instead](README.md#try-the-published-package-instead-no-clone)にあります。GitHub上のデモとnpm公開版は更新時点が異なる場合があります。
+
 ### 何が変わるか
 
 プロンプトで`src/**`への限定を指示していても、次のタスクが別の場所を要求することがあります。役割とタスクの宣言を検査器へ渡すと、その不整合を具体的な診断コードで確認できます。実装役とレビュー役の兼務宣言も検知します。PASSは宣言の整合を示し、実際の権限制御やレビュー担当者の独立性確認は実行側で行う必要があります。
@@ -64,6 +66,8 @@ PASSは**宣言同士の整合**だけを意味します。実際の担当者・
 結果には常に`execution_authorized=false`、`runtime_enforcement=false`、`identity_verified=false`、`evidence_verified=false`、`source_files_checked=false`、`sensitive_data_scanned=false`、`output_schema_validated=false`を付けます。
 
 runtime固有宣言の検出は意図的に限定されています。汎用的なruntime設定キーの一部と、選択した`.claude` / `.codex`パス形式を検出しますが、あらゆるruntime固有表現を網羅するものではありません。runtime中立性の証明でも、セキュリティ・秘密情報・マルウェア・プロンプト安全性のスキャナでもありません。
+
+実サービスへ組み込む際の本人確認、独立レビュー、証拠、人間の承認、鮮度、実行権限の境界は[Integration guide](docs/INTEGRATION.md)を参照してください。
 
 ## 自分の設定へ変更する
 

@@ -64,6 +64,8 @@ If `npm install` reports `EPERM` about root-owned files in a shared npm cache, d
 NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
 ```
 
+The repository demo can be newer than the published package. The commands above deliberately use the pinned npm release and its bundled fixtures.
+
 ### Why it matters
 
 A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
@@ -73,6 +75,7 @@ A prompt can ask an agent to stay in `src/**`, while the next task requests a ch
 - [Change a task scope and check it yourself](docs/QUICKSTART.md).
 - [Explore coordination and handoffs](#full-three-role-example).
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
+- [Integrate the checker without treating PASS as execution permission](docs/INTEGRATION.md).
 - [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
 ## Full three-role example
