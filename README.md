@@ -1,73 +1,79 @@
 # Agent Role Contracts
 
-Agent Role Contracts is an offline CLI and library for checking JSON declarations of agent roles, authority relationships, review separation, task scope and handoffs before an agent starts.
+Catch tasks that exceed an AI agent's declared write scope, and conflicting implementer/reviewer roles, before you hand off work.
 
-Version `0.1.0` checks declarations only. A `PASS` does **not** grant runtime authority, authenticate identity, execute agents, validate evidence, enforce filesystem access or replace an existing company Agent OS. Use it to catch contradictions in a declared contract; pair it with the runtime controls and review process your environment requires.
+Version `0.1.0` checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
 
-## Try it in three minutes
+## Quick Start — three minutes
 
-You need Node.js 22.5 or later. The package is tested in CI on Node.js 22.5 and 24. No API key is needed, and the checker makes no network request while it runs.
+**Requirements:** Git and **Node.js 22.5 or newer**, with npm. Clone once, then run the demo:
 
-### From the published package
+```sh
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo --silent
+```
 
-Start in an empty directory. Pinning `0.1.0` makes this walkthrough match the public release exactly:
+No `npm install`, API key, agent runtime or account is needed. Only cloning uses the network; the demo runs offline. The commands use Git and npm and do not require Bash, Docker or OS-specific tools.
+
+### Expected output
+
+```text
+Agent Role Contracts: check a task before handing it to an agent.
+
+1. Normal task
+   Scope: src/example.mjs; allowed: src/**
+   PASS: declarations are consistent.
+   Implementer: implementer (write_scoped)
+   Reviewer: reviewer (read_only; separate declared role)
+
+2. Request an out-of-scope change
+   Scope: secrets/production.txt; allowed: src/**
+   FAIL (expected): TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY
+
+3. Repair the task scope
+   Scope: secrets/production.txt -> src/example.mjs
+   PASS: declarations are consistent again.
+
+Demo complete: PASS -> FAIL (expected) -> PASS.
+Checks declarations only; execution is NOT authorized.
+Next: docs/QUICKSTART.md (change the scope and rerun the checker).
+```
+
+The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
+
+### Try the published package instead (no clone)
+
+To run the exact public `0.1.0` package without cloning the repository, start in an empty directory:
 
 ```sh
 mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
 npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
-```
-
-If npm reports an `EPERM` error about root-owned files in its shared cache, do not use `sudo`. Retry the install with a cache that belongs only to this directory:
-
-```sh
-NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
-```
-
-Run the bundled two-role starter as-is:
-
-```sh
-npx --no-install agent-role-contracts validate \
-  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
-  --format text
 npx --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
   --format text
 ```
 
-The first command prints `PASS: bundle`. The second prints `PASS: explain`, with `implementer` as the write-scoped executor and `reviewer` as the separate read-only reviewer. This is a declaration result, not permission to run either role.
+The last command prints `PASS: explain`. It checks the bundled two-role declaration; it does not authorize either role to run. To see the intended fail-closed result, replace `starter-task.json` with `starter-task-outside-scope.json`: the command reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` and exits **1**.
 
-Now run the deliberately out-of-authority task:
-
-```sh
-npx --no-install agent-role-contracts explain \
-  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
-  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task-outside-scope.json \
-  --format text
-```
-
-That command intentionally exits 1 and reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`. It demonstrates fail-closed scope checking; it does not inspect or protect a real `secrets/production.txt` path.
-
-To make the example your own, copy the three starter JSON files into your project, change the IDs, scopes and capabilities to match your declared policy, then point the same commands at your copies. Keep a separate reviewer role when you want the checker to verify review separation.
-
-### From this repository
-
-No npm packages, API key or network are needed. With Node.js available, the same starter can run directly from a checkout:
+If `npm install` reports `EPERM` about root-owned files in a shared npm cache, do not use `sudo`. Retry the install with a cache local to this directory:
 
 ```sh
-node bin/agent-role-contracts.mjs validate --bundle examples/starter-bundle.json
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task.json --format text
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
 ```
 
-The second command should print `PASS`, with `implementer` as the write-scoped executor and `reviewer` as the separate read-only reviewer. Then run the intentionally out-of-authority task:
+### Why it matters
 
-```sh
-node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task examples/starter-task-outside-scope.json --format text
-```
+A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
 
-That command must exit 1 with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`. The starter is deliberately prewritten: first-use should demonstrate the contract check before asking a new user to author the full role schema.
+### Try your own task next
+
+- [Change a task scope and check it yourself](docs/QUICKSTART.md).
+- [Explore coordination and handoffs](#full-three-role-example).
+- [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
+- [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
 ## Full three-role example
 
@@ -93,13 +99,13 @@ The hosted CI matrix covers Ubuntu / Node.js 22.5.0, Ubuntu / Node.js 24, macOS 
 
 Checks cover structure, duplicate IDs and aliases, authority contradictions, role references and cycles, explicit routes, declared self-review, required/conditional inputs, registered knowledge references and task-bound handoff consistency. Unknown task types fail rather than silently falling back. Input fields are checked against every routed role; staged production of later inputs is not implemented. For routed `write_scoped` or `operator` executors, `inputs.scope` must be one portable relative scope contained by that executor's declared `allowed_write_scopes`. A `write_scoped` or `operator` role must also actually allow at least one capability that the bundle policy lists in `read_only_forbids`; the Core does not guess write semantics from capability names. This is declaration-level containment only: no filesystem path is opened, no glob is expanded and no runtime access is granted. `human_only` roles must declare both executable `capabilities` and `allowed_write_scopes` as empty; they represent human decision/approval boundaries, not machine mutation authority.
 
-A PASS checks declarations only. The default JSON result states that execution authorization, runtime enforcement, identity verification, evidence verification, source-file checks, sensitive-data scanning and output-schema validation are false; text output states that execution is not authorized. A knowledge URI is not fetched or resolved against the filesystem. `output_schema` is retained metadata, not an executed user schema. No scoring purports to measure model quality.
+A PASS checks declarations only. Every result states that execution authorization, runtime enforcement, identity verification, evidence verification, source-file checks, sensitive-data scanning and output-schema validation are false. A knowledge URI is not fetched or resolved against the filesystem. `output_schema` is retained metadata, not an executed user schema. No scoring purports to measure model quality.
 
 The runtime-specific declaration check is intentionally finite. It detects a small generic set of runtime configuration keys and selected `.claude` / `.codex` path forms. It is not proof that a declaration is universally runtime-neutral, and it is not a security, secret, malware or prompt-safety scanner.
 
 Role `body` text is inline. The public contract has no prompt-file path field, and the Core does not discover `ROLE.md` or any other role file.
 
-The package imports no company configuration and performs no application I/O at core import time. Node still loads its JavaScript modules. Only the CLI opens explicitly supplied regular files. It never executes evidence `command` strings, invokes agents or writes configuration. A stable last-component symlink is rejected on supported CI platforms. POSIX keeps `O_NOFOLLOW`; Windows additionally uses a pre-open `lstat` check. This is not a general filesystem sandbox, and the Windows pre-check is not claimed to prevent a hostile process from swapping a path between inspection and open. The JSON-text-only API rejects executable objects and never loads JavaScript configuration.
+The package imports no company configuration and performs no application I/O at core import time. Node still loads its JavaScript modules. The core does not open application files. The CLI opens only explicitly supplied regular files; the quickstart runner reads the three bundled starter fixtures named in its source. Neither executes evidence `command` strings, invokes agents or writes configuration. The CLI rejects a stable last-component symlink on supported CI platforms. POSIX keeps `O_NOFOLLOW`; Windows additionally uses a pre-open `lstat` check. This is not a general filesystem sandbox, and the Windows pre-check is not claimed to prevent a hostile process from swapping a path between inspection and open. The JSON-text-only API rejects executable objects and never loads JavaScript configuration.
 
 ## Install
 
