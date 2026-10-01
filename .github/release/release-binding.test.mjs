@@ -104,19 +104,29 @@ test('workflow keeps verification unprivileged and stages one exact artifact wit
   assert.match(workflow, /cancel-in-progress: false/);
 });
 
-import { verifyAttestationAudit, isolatedNpmConfig } from './verify-publication.mjs';
+import { verifyAttestationAudit, isolatedNpmConfig, signerPolicy } from './verify-publication.mjs';
+// Structural signer fixtures do not establish cryptographic trust.
+const signerFixture = { identity: {
+  subjectAlternativeName: `https://github.com/${REPOSITORY}/.github/workflows/npm-stage-release.yml@refs/tags/v${subject.version}`,
+  extensions: { issuer: 'https://token.actions.githubusercontent.com' },
+  oids: [
+    { oid: { id: [1, 3, 6, 1, 4, 1, 57264, 1, 11] }, value: Buffer.from('\u000c\u000dgithub-hosted') },
+    { oid: { id: [1, 3, 6, 1, 4, 1, 57264, 1, 13] }, value: Buffer.concat([Buffer.from([12, 40]), Buffer.from(subject.commit)]) },
+  ],
+} };
+
 const statement = { _type: 'https://in-toto.io/Statement/v1', predicateType: 'https://slsa.dev/provenance/v1', subject: [{ name: 'pkg:npm/%40netsujo/agent-role-contracts@0.2.0', digest: { sha512: digest(bytes, 'sha512') } }], predicate: { buildDefinition: { buildType: 'https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1', externalParameters: { workflow: { repository: `https://github.com/${REPOSITORY}`, ref: 'refs/tags/v0.2.0', path: '.github/workflows/npm-stage-release.yml' } }, resolvedDependencies: [{ uri: `git+https://github.com/${REPOSITORY}@refs/tags/v0.2.0`, digest: { gitCommit: subject.commit } }] }, runDetails: { builder: { id: 'https://github.com/actions/runner/github-hosted' } } } };
 function auditFor(payload) { return { invalid: [], missing: [], verified: [{ name: PACKAGE, version: subject.version, registry: 'https://registry.npmjs.org/', attestationBundles: [{ predicateType: 'https://slsa.dev/provenance/v1', bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(payload)).toString('base64') } } }] }] }; }
 
 test('post-publication gate requires verified signatures plus exact attested source and bytes', () => {
-  const outcome = verifyAttestationAudit(auditFor(statement), subject, bytes);
+  const outcome = verifyAttestationAudit(auditFor(statement), subject, bytes, signerFixture);
   assert.equal(outcome.status, 'ATTESTED_SUBJECT_MATCH');
   assert.equal(outcome.provenance, undefined);
-  assert.equal(verifyAttestationAudit(auditFor(statement), { ...subject, status: 'VERIFIED_PUBLICATION' }, bytes).status, 'ATTESTED_SUBJECT_MATCH');
-  assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), invalid: [{}] }, subject, bytes));
-  assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), missing: [{}] }, subject, bytes));
-  assert.throws(() => verifyAttestationAudit({ invalid: [], missing: [], verified: [] }, subject, bytes));
-  assert.throws(() => verifyAttestationAudit(auditFor(statement), subject, Buffer.from('different')));
+  assert.equal(verifyAttestationAudit(auditFor(statement), { ...subject, status: 'VERIFIED_PUBLICATION' }, bytes, signerFixture).status, 'ATTESTED_SUBJECT_MATCH');
+  assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), invalid: [{}] }, subject, bytes, signerFixture));
+  assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), missing: [{}] }, subject, bytes, signerFixture));
+  assert.throws(() => verifyAttestationAudit({ invalid: [], missing: [], verified: [] }, subject, bytes, signerFixture));
+  assert.throws(() => verifyAttestationAudit(auditFor(statement), subject, Buffer.from('different'), signerFixture));
 });
 
 test('post-publication gate rejects attestation source substitution and non-hosted builder', () => {
@@ -130,7 +140,7 @@ test('post-publication gate rejects attestation source substitution and non-host
     (s) => { s.predicate.buildDefinition.resolvedDependencies.push(s.predicate.buildDefinition.resolvedDependencies[0]); },
   ]) {
     const changed = clone(statement); mutate(changed);
-    assert.throws(() => verifyAttestationAudit(auditFor(changed), subject, bytes));
+    assert.throws(() => verifyAttestationAudit(auditFor(changed), subject, bytes, signerFixture));
   }
 });
 
@@ -176,11 +186,38 @@ test('rejects noncanonical provenance payload encoding with PUBLICATION_BASE64_I
   for (const altered of [payload + '%%%', payload + '\n', payload.slice(0, 3) + ' ' + payload.slice(3), '', 'Zh==']) {
     const audit = clone(valid);
     audit.verified[0].attestationBundles[0].bundle.dsseEnvelope.payload = altered;
-    assert.throws(() => verifyAttestationAudit(audit, subject, bytes), /PUBLICATION_BASE64_INVALID/);
+    assert.throws(() => verifyAttestationAudit(audit, subject, bytes, signerFixture), /PUBLICATION_BASE64_INVALID/);
   }
 });
 
 test('rejects contradictory artifact SHA256 and extra subject identity fields', () => {
   assert.throws(() => verifyManifest({ ...manifest, artifact: { ...manifest.artifact, sha256: 'b'.repeat(64) } }, bytes, subject), /RELEASE_MANIFEST_ARTIFACT_SHA256_MISMATCH/);
   assert.throws(() => createManifest(pack, bytes, { ...subject, package: 'other' }), /RELEASE_SUBJECT_INVALID/);
+});
+
+test('rejects a signer outside the approved workflow despite matching payload claims', () => {
+  for (const mutate of [
+    (s) => { delete s.identity; },
+    (s) => { s.identity.extensions.issuer = 'https://other.example'; },
+    (s) => { s.identity.subjectAlternativeName = 'https://github.com/other/repo/.github/workflows/npm-stage-release.yml@refs/tags/v0.2.0'; },
+    (s) => { s.identity.subjectAlternativeName += '\n'; },
+    (s) => { s.identity.oids = []; },
+    (s) => { s.identity.oids[0].value = Buffer.from('\u000c\u000bself-hosted'); },
+    (s) => { s.identity.oids[1].value = Buffer.concat([Buffer.from([12, 40]), Buffer.from('b'.repeat(40))]); },
+  ]) {
+    const signer = clone(signerFixture); mutate(signer);
+    assert.throws(() => verifyAttestationAudit(auditFor(statement), subject, bytes, signer), /PUBLICATION_SIGNER_IDENTITY_MISMATCH|PUBLICATION_SIGNER_OID_MISMATCH/);
+  }
+});
+
+
+test('signer policy binds the full workflow URI and DER-encoded hosted runner and commit', () => {
+  const policy = signerPolicy(subject);
+  const uri = signerFixture.identity.subjectAlternativeName;
+  const match = new RegExp(policy.certificateIdentityURI);
+  assert.equal(match.test(uri), true);
+  for (const altered of ['prefix' + uri, uri + '/suffix', uri + '\n', uri.replace('github.com', 'githubXcom'), uri.replace('stage-release.yml', 'stage-releaseXyml')]) assert.equal(match.test(altered), false);
+  assert.equal(Buffer.from(policy.certificateOIDs['1.3.6.1.4.1.57264.1.11']).toString('hex'), '0c0d6769746875622d686f73746564');
+  assert.equal(Buffer.from(policy.certificateOIDs['1.3.6.1.4.1.57264.1.13']).toString('hex'), '0c28' + Buffer.from(subject.commit).toString('hex'));
+  assert.equal(verifyAttestationAudit(auditFor(statement), subject, bytes, signerFixture).status, 'ATTESTED_SUBJECT_MATCH');
 });
