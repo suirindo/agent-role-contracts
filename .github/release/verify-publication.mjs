@@ -17,8 +17,16 @@ export function isolatedNpmConfig(dir) {
   return [`--userconfig=${user}`, `--globalconfig=${global}`, '--registry=https://registry.npmjs.org/', `--cache=${join(dir, 'cache')}`];
 }
 
-// The input must be npm audit signatures --json --include-attestations output.
-// Only the CLI's successfully verified bundles can satisfy this gate.
+export function decodeProvenancePayload(payload) {
+  assert(typeof payload === 'string' && payload.length > 0 && payload.length <= 1048576 && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?(?![\s\S])/.test(payload), 'PUBLICATION_BASE64_INVALID');
+  const decoded = Buffer.from(payload, 'base64');
+  assert(decoded.toString('base64') === payload, 'PUBLICATION_BASE64_INVALID');
+  return parseJsonRejectDuplicateKeys(decoded, 'PUBLICATION_PROVENANCE_INVALID');
+}
+
+// Pure subject matching consumes already verified npm audit output. It cannot
+// establish cryptographic verification for caller-authored JSON or test fixtures.
+// Only main(), after a successful npm audit, claims VERIFIED_PUBLICATION.
 export function verifyAttestationAudit(audit, subject, bytes) {
   assert(Array.isArray(audit?.invalid) && audit.invalid.length === 0 && Array.isArray(audit.missing) && audit.missing.length === 0, 'PUBLICATION_SIGNATURES_INVALID');
   assert(Array.isArray(audit.verified), 'PUBLICATION_ATTESTATIONS_ABSENT');
@@ -27,8 +35,7 @@ export function verifyAttestationAudit(audit, subject, bytes) {
   const attestations = packages[0].attestationBundles?.filter((item) => item.predicateType === PROVENANCE);
   assert(attestations?.length === 1, 'PUBLICATION_PROVENANCE_ABSENT');
   const payload = attestations[0].bundle?.dsseEnvelope?.payload;
-  assert(typeof payload === 'string', 'PUBLICATION_PROVENANCE_INVALID');
-  const statement = parseJsonRejectDuplicateKeys(Buffer.from(payload, 'base64'), 'PUBLICATION_PROVENANCE_INVALID');
+  const statement = decodeProvenancePayload(payload);
   assert(statement._type === 'https://in-toto.io/Statement/v1' && statement.predicateType === PROVENANCE, 'PUBLICATION_PROVENANCE_INVALID');
   assert(statement.subject?.length === 1 && statement.subject[0].name === `pkg:npm/%40netsujo/agent-role-contracts@${subject.version}` && statement.subject[0].digest?.sha512 === digest(bytes, 'sha512'), 'PUBLICATION_PROVENANCE_BYTES_MISMATCH');
   const definition = statement.predicate?.buildDefinition;
@@ -38,7 +45,7 @@ export function verifyAttestationAudit(audit, subject, bytes) {
   const dependencies = definition.resolvedDependencies;
   assert(dependencies?.length === 1 && dependencies[0].uri === `git+https://github.com/${REPOSITORY}@refs/tags/v${subject.version}` && dependencies[0].digest?.gitCommit === subject.commit, 'PUBLICATION_COMMIT_MISMATCH');
   assert(statement.predicate.runDetails?.builder?.id === 'https://github.com/actions/runner/github-hosted', 'PUBLICATION_BUILDER_INVALID');
-  return { status: 'VERIFIED_PUBLICATION', package: PACKAGE, ...subject, sha256: digest(bytes), provenance: 'VERIFIED_BY_NPM_AUDIT_AND_EXACT_SUBJECT_BINDING' };
+  return { status: 'ATTESTED_SUBJECT_MATCH', package: PACKAGE, version: subject.version, commit: subject.commit, sha256: digest(bytes) };
 }
 
 async function main() {
@@ -63,7 +70,8 @@ async function main() {
     const installed = parseJsonRejectDuplicateKeys(readFileSync(join(dir, 'node_modules', '@netsujo', 'agent-role-contracts', 'package.json')));
     assert(installed.name === PACKAGE && installed.version === version, 'PUBLICATION_INSTALL_MISMATCH');
     const audit = parseJsonRejectDuplicateKeys(npm(['audit', 'signatures', '--json', '--include-attestations']), 'PUBLICATION_AUDIT_INVALID');
-    console.log(JSON.stringify(verifyAttestationAudit(audit, subject, bytes), null, 2));
+    const match = verifyAttestationAudit(audit, subject, bytes);
+    console.log(JSON.stringify({ ...match, status: 'VERIFIED_PUBLICATION', provenance: 'VERIFIED_BY_NPM_AUDIT_AND_EXACT_SUBJECT_BINDING' }, null, 2));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 

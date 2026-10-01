@@ -33,6 +33,12 @@ export function binding(env) {
   return { repository: REPOSITORY, tag, commit, version, sha256, runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT };
 }
 
+export function verifySubject(subject) {
+  const keys = ['repository', 'tag', 'commit', 'version', 'sha256', 'runId', 'runAttempt'].sort();
+  assert(subject && typeof subject === 'object' && !Array.isArray(subject) && JSON.stringify(Object.keys(subject).sort()) === JSON.stringify(keys) && keys.every((key) => typeof subject[key] === 'string'), 'RELEASE_SUBJECT_INVALID');
+  assert(subject.repository === REPOSITORY && VERSION.test(subject.version ?? '') && subject.tag === `v${subject.version}` && COMMIT.test(subject.commit ?? '') && SHA256.test(subject.sha256 ?? '') && /^[1-9][0-9]*(?![\s\S])/.test(subject.runId ?? '') && /^[1-9][0-9]*(?![\s\S])/.test(subject.runAttempt ?? ''), 'RELEASE_SUBJECT_INVALID');
+}
+
 export function verifyPackage(pkg, lock, subject) {
   assert(pkg.name === PACKAGE && pkg.version === subject.version && pkg.private !== true, 'RELEASE_PACKAGE_MISMATCH');
   assert(pkg.repository?.type === 'git' && pkg.repository.url === `git+https://github.com/${REPOSITORY}.git`, 'RELEASE_SOURCE_REPOSITORY_INVALID');
@@ -62,14 +68,17 @@ export function verifyPack(pack, bytes, subject) {
 }
 
 export function createManifest(pack, bytes, subject) {
-  return { schemaVersion: 1, package: PACKAGE, ...subject, npmVersion: NPM_VERSION, artifact: verifyPack(pack, bytes, subject) };
+  verifySubject(subject);
+  return { schemaVersion: 1, package: PACKAGE, repository: subject.repository, tag: subject.tag, commit: subject.commit, version: subject.version, sha256: subject.sha256, runId: subject.runId, runAttempt: subject.runAttempt, npmVersion: NPM_VERSION, artifact: verifyPack(pack, bytes, subject) };
 }
 
 export function verifyManifest(manifest, bytes, subject) {
+  verifySubject(subject);
   assert(manifest?.schemaVersion === 1 && manifest.package === PACKAGE && manifest.npmVersion === NPM_VERSION, 'RELEASE_MANIFEST_INVALID');
   for (const key of Object.keys(subject)) assert(manifest[key] === subject[key], 'RELEASE_MANIFEST_SUBJECT_MISMATCH');
   const entry = manifest.artifact;
   assert(entry?.filename === filename(subject.version), 'RELEASE_MANIFEST_FILENAME_INVALID');
+  assert(entry.sha256 === subject.sha256, 'RELEASE_MANIFEST_ARTIFACT_SHA256_MISMATCH');
   verifyPack([{ name: PACKAGE, version: subject.version, filename: entry.filename, size: entry.bytes, integrity: entry.integrity, shasum: entry.shasum }], bytes, subject);
   return manifest;
 }

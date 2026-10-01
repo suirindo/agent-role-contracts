@@ -110,7 +110,9 @@ function auditFor(payload) { return { invalid: [], missing: [], verified: [{ nam
 
 test('post-publication gate requires verified signatures plus exact attested source and bytes', () => {
   const outcome = verifyAttestationAudit(auditFor(statement), subject, bytes);
-  assert.equal(outcome.status, 'VERIFIED_PUBLICATION');
+  assert.equal(outcome.status, 'ATTESTED_SUBJECT_MATCH');
+  assert.equal(outcome.provenance, undefined);
+  assert.equal(verifyAttestationAudit(auditFor(statement), { ...subject, status: 'VERIFIED_PUBLICATION' }, bytes).status, 'ATTESTED_SUBJECT_MATCH');
   assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), invalid: [{}] }, subject, bytes));
   assert.throws(() => verifyAttestationAudit({ ...auditFor(statement), missing: [{}] }, subject, bytes));
   assert.throws(() => verifyAttestationAudit({ invalid: [], missing: [], verified: [] }, subject, bytes));
@@ -166,4 +168,19 @@ test('isolated npm config uses distinct files accepted by the real CLI without l
     const version = execFileSync(npm, ['--version', ...config], { cwd: dir, encoding: 'utf8', shell: process.platform === 'win32' });
     assert.match(version.trim(), /^[0-9]+\.[0-9]+\.[0-9]+$/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('rejects noncanonical provenance payload encoding with PUBLICATION_BASE64_INVALID', () => {
+  const valid = auditFor(statement);
+  const payload = valid.verified[0].attestationBundles[0].bundle.dsseEnvelope.payload;
+  for (const altered of [payload + '%%%', payload + '\n', payload.slice(0, 3) + ' ' + payload.slice(3), '', 'Zh==']) {
+    const audit = clone(valid);
+    audit.verified[0].attestationBundles[0].bundle.dsseEnvelope.payload = altered;
+    assert.throws(() => verifyAttestationAudit(audit, subject, bytes), /PUBLICATION_BASE64_INVALID/);
+  }
+});
+
+test('rejects contradictory artifact SHA256 and extra subject identity fields', () => {
+  assert.throws(() => verifyManifest({ ...manifest, artifact: { ...manifest.artifact, sha256: 'b'.repeat(64) } }, bytes, subject), /RELEASE_MANIFEST_ARTIFACT_SHA256_MISMATCH/);
+  assert.throws(() => createManifest(pack, bytes, { ...subject, package: 'other' }), /RELEASE_SUBJECT_INVALID/);
 });
