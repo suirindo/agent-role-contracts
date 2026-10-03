@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.1 — unreleased G3 source candidate on merged G2
+
+- Add generic lifecycle description/validation APIs, strict lifecycle schema 0.4, CLI commands and six checked demo outcomes.
+- Bind declarations to current G1 subjects and independently check artifact identities; verify no execution, authenticity, bytes, replay or runtime acceptance.
+- Preserve finance/Safe semantics and seven core, one adapter and four finance schemas. G0, G1 and G2 are merged and implemented in repository main; G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G3 builds on merged G2 and remains unmerged and unreleased, pending independent review/hosted acceptance; G2 sequencing is no longer a blocker. Merge does not imply npm publication, production adoption, runtime permission or deployment.
+
+## 0.4.0-alpha.1 — unreleased development candidate
+
+- Integrate the explicit filesystem-write adapter subpath, declaration-only CLI, one mapping schema and sixth demo; preserve core and finance/Safe behavior.
+
 ## 0.3.0-alpha.1 — unreleased development candidate
 
 - Restore a generic-first product direction and order future work around task/action binding, adapters and evidence interoperability rather than finance-specific features.

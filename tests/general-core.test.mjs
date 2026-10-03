@@ -9,6 +9,7 @@ import * as core from '@netsujo/agent-role-contracts/core';
 import * as finance from '@netsujo/agent-role-contracts/profiles/onchain-finance';
 import * as legacy from '../src/index.mjs';
 import coreSchemas from '../src/schemas.core.generated.mjs';
+import adapterSchemas from '../src/schemas.adapters.generated.mjs';
 import financeSchemas from '../src/schemas.finance.generated.mjs';
 import allSchemas from '../src/schemas.generated.mjs';
 import { scenarios, makeScenario, evaluateScenario } from '../examples/cross-domain/scenarios.mjs';
@@ -28,30 +29,55 @@ for (const scenario of scenarios) {
 }
 
 test('core and optional profile entrypoints preserve existing root function identities', () => {
-  assert.deepEqual(Object.keys(core).sort(), ['MAX_INPUT_BYTES','VERSION','explainTask','validateBundle','validateHandoff','describeTaskAction','validateTaskActionBinding'].sort());
+  assert.deepEqual(Object.keys(core).sort(), ['MAX_INPUT_BYTES','VERSION','explainTask','validateBundle','validateHandoff','describeTaskAction','validateTaskActionBinding','describeTaskLifecycle','validateTaskLifecycle'].sort());
   assert.deepEqual(Object.keys(finance).sort(), ['describeFinancialIntent','validateFinancialIntent','validateFinancialExecution','validateSafeProposal'].sort());
   assert.deepEqual(Object.keys(legacy).sort(), [...Object.keys(core), ...Object.keys(finance)].sort());
   for (const [key, value] of Object.entries({ ...core, ...finance })) assert.equal(legacy[key], value);
 });
 test('schema sets are disjoint and the compatibility aggregate loses no schemas', () => {
-  assert.deepEqual(Object.keys(coreSchemas).sort(), ['role-contract','bundle','task','handoff','task-action','task-action-binding'].sort());
+  assert.deepEqual(Object.keys(coreSchemas).sort(), ['role-contract','bundle','task','handoff','task-action','task-action-binding','task-lifecycle'].sort());
   assert.deepEqual(Object.keys(financeSchemas).sort(), ['financial-policy','financial-intent','financial-execution','safe-proposal'].sort());
-  assert.deepEqual(allSchemas, { ...coreSchemas, ...financeSchemas });
+  assert.deepEqual(Object.keys(adapterSchemas), ['filesystem-write-mapping']);
+  assert.equal(new Set([...Object.keys(coreSchemas), ...Object.keys(adapterSchemas), ...Object.keys(financeSchemas)]).size, 12);
+  assert.deepEqual(allSchemas, { ...coreSchemas, ...adapterSchemas, ...financeSchemas });
 });
 
-test('core, CLI and quickstart work when every finance module is physically absent', t => {
+test('core, CLI and quickstart work when adapter and every finance module is physically absent', t => {
   const dir = mkdtempSync(join(tmpdir(), 'arc-core-only-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir, 'src')); mkdirSync(join(dir, 'bin')); mkdirSync(join(dir, 'examples'));
   for (const name of readdirSync(join(root, 'src'))) {
-    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
+    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe') || name.includes('adapter')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
     cpSync(join(root, 'src', name), join(dir, 'src', name));
   }
   cpSync(join(root, 'bin/agent-role-contracts.mjs'), join(dir, 'bin/agent-role-contracts.mjs'));
   for (const name of ['team.json','task.json','handoff.json','starter-bundle.json','starter-task.json','starter-task-outside-scope.json','quickstart.mjs']) cpSync(join(root,'examples',name),join(dir,'examples',name));
   cpSync(join(root, 'examples/cross-domain'), join(dir, 'examples/cross-domain'), { recursive: true });
   cpSync(join(root, 'examples/action-binding'), join(dir, 'examples/action-binding'), { recursive: true });
+  cpSync(join(root, 'examples/task-lifecycle'), join(dir, 'examples/task-lifecycle'), { recursive: true });
   const runs = [
+    ['examples/task-lifecycle/demo.mjs'],
+    ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      import { readFileSync, writeFileSync } from 'node:fs';
+      import { spawnSync } from 'node:child_process';
+      import { describeTaskAction } from './src/core.mjs';
+      const bundle=readFileSync('examples/team.json','utf8'),task=readFileSync('examples/task.json','utf8');
+      const action=JSON.stringify({schema_version:'0.3',id:'isolated',kind:'document',parameters:{text:'hello'}});
+      const subject=await describeTaskAction(bundle,task,action); assert.equal(subject.valid,true);
+      const route=JSON.parse(bundle).routes.find(r=>r.task_type===JSON.parse(task).type);
+      const event=(event_id,phase,actor_role_id,decision)=>({event_id,phase,actor_role_id,decision,subject_digest:subject.subject_digest});
+      const lifecycle={schema_version:'0.4',run_id:'isolated',subject_digest:subject.subject_digest,events:[event('review','review',route.reviewers[0],'blocked')]};
+      if(route.require_human_approval)lifecycle.events.push(event('approval','approval',route.accountable,'denied'));
+      writeFileSync('action.json',action);writeFileSync('lifecycle.json',JSON.stringify(lifecycle));
+      for(const command of ['lifecycle-describe','lifecycle']){
+        const result=spawnSync(process.execPath,['bin/agent-role-contracts.mjs',command,'--bundle','examples/team.json','--task','examples/task.json','--action','action.json','--lifecycle','lifecycle.json','--format','text'],{encoding:'utf8'});
+        assert.equal(result.status,0,result.stderr);assert.ok(result.stdout.includes('Current subject: '+subject.subject_digest));assert.ok(result.stdout.includes('Declared phases:'));
+      }
+    `],
+    ['--input-type=module','-e', `import {readFileSync,writeFileSync} from 'node:fs'; import {describeTaskAction} from './src/core.mjs'; const b=readFileSync('examples/starter-bundle.json','utf8'), t=readFileSync('examples/starter-task.json','utf8'); const a={schema_version:'0.3',id:'isolated',kind:'propose-change',parameters:{revision:1}}; const subject=await describeTaskAction(b,t,JSON.stringify(a)); if(!subject.valid)process.exit(1);const route=JSON.parse(b).routes[0];const binding={schema_version:'0.3',subject_digest:subject.subject_digest,reviews:route.reviewers.map(role_id=>({role_id,decision:'pass',subject_digest:subject.subject_digest}))};if(route.require_human_approval)binding.human_approval={role_id:route.accountable,decision:'approved',subject_digest:subject.subject_digest};writeFileSync('action.json',JSON.stringify(a));writeFileSync('binding.json',JSON.stringify(binding));`],
+    ['bin/agent-role-contracts.mjs','action-subject','--bundle','examples/starter-bundle.json','--task','examples/starter-task.json','--action','action.json'],
+    ['bin/agent-role-contracts.mjs','action-bind','--bundle','examples/starter-bundle.json','--task','examples/starter-task.json','--action','action.json','--binding','binding.json'],
     ['examples/action-binding/demo.mjs'],
     ['--input-type=module', '-e', `import { readFileSync } from 'node:fs'; import { validateBundle } from './src/core.mjs'; if (!validateBundle(readFileSync('examples/team.json','utf8')).valid) process.exit(1);`],
     ['bin/agent-role-contracts.mjs','--help'],
@@ -71,7 +97,7 @@ test('optional profile failure is explicit when its files are unavailable', t =>
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir,'src')); mkdirSync(join(dir,'bin'));
   for (const name of readdirSync(join(root, 'src'))) {
-    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
+    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe') || name.includes('adapter')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
     cpSync(join(root,'src',name),join(dir,'src',name));
   }
   cpSync(join(root,'bin/agent-role-contracts.mjs'),join(dir,'bin/agent-role-contracts.mjs'));

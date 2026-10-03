@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.3.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
+**開発プレビュー：`0.5.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -47,19 +47,54 @@ npm --prefix agent-role-contracts run demo:general --silent
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
 
-## G1 タスク・アクションbinding候補
+## G1 タスク・アクションbinding
 
-G1は**実装済み候補**です。統合と独立した受入確認が必要であり、リリース済み・採用済みとは主張しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
+G0のcore分離とG1のタスク・アクションbindingは**merge・実装済み**です。sourceのmergeはnpm公開や利用者による採用を意味しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
 
 ```sh
 node examples/action-binding/demo.mjs
 ```
 
-候補版の`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
+`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
 
 各例でdigestを取得し、routeのreviewerによるpassと`route.accountable`による必須承認を宣言してPASSを確認します。その後、意味のあるtask入力またはaction parameterを変更し、元のbindingが`G1_SUBJECT_MISMATCH`で失敗することを確認します。完全なcanonical subjectはprofile、**policy・roles・routesを含むbundle全体、task全体、宣言action全体**を対象とし、レビュー・承認の宣言は現在のsubjectに結び付きます。
 
-digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2の外部adapter semanticsは未実装で、parameter名からtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
+digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2は以下の限定的なfilesystem-write adapterを提供しますが、parameter名だけからtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
+
+## G2 filesystem-write adapter
+
+G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleはmerge済みG2を基盤とする未公開候補で、独立レビュー・hosted acceptance待ちです。
+
+optional APIは次のとおりです。
+
+```js
+import { validateFilesystemWriteMapping } from '@netsujo/agent-role-contracts/adapters/filesystem-write';
+const result = await validateFilesystemWriteMapping(bundleJson, taskJson, actionJson, mappingJson);
+```
+
+profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。G1 actionは`schema_version: "0.3"`、kindは`filesystem-write`、parametersは厳密に`{path, content_sha256}`です。mappingは`subject_digest`、operation `write_file`、同じ`path`と`content_sha256`を宣言します。対応するoperationはこの1種類だけで、未知のparameter・semanticsを拒否し、task scopeと実行役の宣言権限を検査します。任意のSaaS・database・API・その他resourceの意味には対応しません。
+
+`content_sha256`は呼出元が供給する、宣言上の完全性識別子です。成果物bytesの読込・検証、filesystem状態・pathの存在確認は行いません。mappingのPASSは宣言の整合だけを示し、権限付与・実行・レビュー承認を意味しません。executorの本人確認も、アクセス権の強制も行いません。G1のレビュー・承認bindingは現在の完全なsubjectに対する別の検査であり、adapterは承認を生成しません。金融・Safeは引き続き任意profileです。
+
+[filesystemデモ](examples/filesystem-write-adapter/demo.mjs)は汎用scenario builderとfixtureを再利用し、`src/example.mjs`、`reports/cleaned.csv`、`drafts/reply.md`への書込宣言を扱います。各例で一致するmappingのPASSを確認後、pathまたはcontent digestを変更し、特定の診断で失敗することを要求します。digestは架空で、対象ファイルは開かず書き込みません。
+
+```sh
+node examples/filesystem-write-adapter/demo.mjs
+```
+
+この未公開候補にはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
+
+## G3 lifecycle候補
+
+G3 lifecycleは**実装済み候補で、独立レビュー・hosted acceptance待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+
+```sh
+npm run demo:lifecycle
+```
+
+この未公開candidateでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`で、このbranchのmerge baseです。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3はmerge済みG2を基盤とする現在の未公開候補で、独立レビュー・hosted acceptance待ちです。G2のsequencingはblockerではありません。mergeはnpm公開・本番採用・runtime権限・deploymentを意味しません。G3は未merge・未公開です。finance・Safeは任意profileです。
+
+外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
 
 ## 詳細な3-role例
 
