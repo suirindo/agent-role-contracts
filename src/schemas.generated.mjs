@@ -1270,7 +1270,7 @@ export default {
   },
   "financial-policy": {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/onchain-finance-v02/schemas/financial-policy.schema.json",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/financial-policy.schema.json",
     "title": "Agent Role Contracts financial-policy preview",
     "type": "object",
     "additionalProperties": false,
@@ -1402,7 +1402,7 @@ export default {
   },
   "financial-intent": {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/onchain-finance-v02/schemas/financial-intent.schema.json",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/financial-intent.schema.json",
     "title": "Agent Role Contracts financial-intent preview",
     "type": "object",
     "additionalProperties": false,
@@ -1598,7 +1598,7 @@ export default {
   },
   "financial-execution": {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/financial-execution-receipt-v02/schemas/financial-execution.schema.json",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/financial-execution.schema.json",
     "title": "Agent Role Contracts financial-execution preview",
     "type": "object",
     "additionalProperties": false,

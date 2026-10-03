@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/financial-execution-receipt-v02/schemas/financial-execution.schema.json",
+  "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/financial-execution.schema.json",
   "title": "Agent Role Contracts financial-execution preview",
   "type": "object",
   "additionalProperties": false,
