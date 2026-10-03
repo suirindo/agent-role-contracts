@@ -14,7 +14,6 @@ function checkLimitations(result) {
 }
 
 try {
-  // This optional adapter must be integrated before the demo can run.
   const { validateFilesystemWriteMapping } = await import('../../src/filesystem-write-adapter.mjs');
   const read = name => JSON.parse(readFileSync(new URL('../' + name + '.json', import.meta.url), 'utf8'));
   const templates = { bundle: read('team'), task: read('task'), handoff: read('handoff') };

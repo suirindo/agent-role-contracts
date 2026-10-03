@@ -14,3 +14,9 @@ test('both README files identify the current public version',()=>{
 test('binding demo is part of the development package commands',()=>{
  assert.equal(JSON.parse(read('package.json')).scripts['demo:binding'],'node examples/action-binding/demo.mjs');
 });
+
+test('filesystem adapter is an explicit subpath with its own demo command',()=>{
+ const pkg=JSON.parse(read('package.json'));
+ assert.equal(pkg.exports['./adapters/filesystem-write'],'./src/filesystem-write-adapter.mjs');
+ assert.equal(pkg.scripts['demo:filesystem-adapter'],'node examples/filesystem-write-adapter/demo.mjs');
+});

@@ -23,7 +23,7 @@ function sandbox(t) {
  writeFileSync(join(dir,'src/filesystem-write-adapter.mjs'),`export async function validateFilesystemWriteMapping(...inputs) {
  if(inputs.length!==4||inputs.some((s,i)=>JSON.parse(s).slot!==i))throw Error('ARGUMENT_ORDER');
  const m=JSON.parse(inputs[3]);await new Promise(resolve=>setTimeout(resolve,1));
- return {valid:!m.invalid,kind:'filesystem-write-mapping',execution_authorized:false,task_id:'task-1',action_id:'action-1',subject_digest:'sha256:abc',adapter_profile:'filesystem-write',mapping:m.unparsed?undefined:{operation:'write',path:m.path||'/absent/target',content_digest:'sha256:def'},eligible_executor_ids:['executor-1'],mapping_matches_subject:!m.invalid,errors:m.invalid?[{code:'MAPPING_INVALID',path:'mapping',message:'Invalid declaration'}]:[]};
+ return {valid:!m.invalid,kind:'filesystem-write-mapping',execution_authorized:false,task_id:'task-1',action_id:'action-1',subject_digest:'sha256:abc',adapter_profile:'filesystem-write',mapping:m.unparsed?undefined:{operation:'write',path:m.path||'/absent/target',content_sha256:'sha256:def'},eligible_executors:['executor-1'],mapping_matches_action:!m.invalid,errors:m.invalid?[{code:'MAPPING_INVALID',path:'mapping',message:'Invalid declaration'}]:[]};
  }`);
  const paths=Array.from({length:4},(_,slot)=>{const p=join(dir,`input ${slot}.json`);writeFileSync(p,JSON.stringify({slot}));return p;});
  return {dir,entry,paths};
@@ -73,13 +73,49 @@ test('test-double: generic commands trigger neither module; finance never import
  const r=run(entry,[cmd,'--bundle',paths[0],'--task',paths[1],'--policy',paths[2],...extra]);assert.equal(r.status,2);assert.match(r.stderr,/FINANCE_IMPORT_TRIGGERED/);assert.doesNotMatch(r.stderr,/ADAPTER_IMPORT_TRIGGERED/);
  }
 });
-// Explicit integration dependency: these must fail, rather than skip, until the
+// Explicit integration: these must fail, rather than skip, until the
 // real adapter lane supplies the module and its declaration report contract.
-test('integration dependency: real adapter exports async mapping validator',async()=>{
+test('integration: real adapter exports async mapping validator',async()=>{
  const adapter=await import('../src/filesystem-write-adapter.mjs');assert.equal(typeof adapter.validateFilesystemWriteMapping,'function');
  const pending=adapter.validateFilesystemWriteMapping('{}','{}','{}','{}');assert.equal(typeof pending.then,'function');const report=await pending;assert.equal(report.valid,false);assert.ok(report.errors.length);
 });
-test('integration dependency: real CLI rejects invalid mapping declarations with exit 1',t=>{
+test('integration: real CLI rejects invalid mapping declarations with exit 1',t=>{
  const {paths}=sandbox(t);for(const p of paths)writeFileSync(p,'{}');
  const r=run(cli,args(paths));assert.equal(r.status,1,r.stderr);const report=JSON.parse(r.stdout);assert.equal(report.valid,false);assert.equal(report.execution_authorized,false);assert.ok(report.errors.length);
+});
+
+test('real adapter CLI works without finance/Safe and preserves declaration-only reports', async t => {
+ const dir=mkdtempSync(join(tmpdir(),'arc-adapter-only-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ mkdirSync(join(dir,'src'));mkdirSync(join(dir,'bin'));
+ for(const name of readdirSync(join(root,'src'))) {
+  if(!name.endsWith('.mjs') || /finance|safe/.test(name) || ['index.mjs','schemas.generated.mjs'].includes(name))continue;
+  cpSync(join(root,'src',name),join(dir,'src',name));
+ }
+ cpSync(cli,join(dir,'bin/agent-role-contracts.mjs'));
+ const bundle=readFileSync(join(root,'examples/starter-bundle.json'),'utf8');
+ const task=readFileSync(join(root,'examples/starter-task.json'),'utf8');
+ const action={schema_version:'0.3',id:'cli-real-write',kind:'filesystem-write',parameters:{path:JSON.parse(task).inputs.scope,content_sha256:'sha256:'+'a'.repeat(64)}};
+ const {describeTaskAction}=await import('../src/core.mjs');
+ const subject=await describeTaskAction(bundle,task,JSON.stringify(action));assert.equal(subject.valid,true);
+ const mapping={schema_version:'0.1',subject_digest:subject.subject_digest,operation:'write_file',...action.parameters};
+ const paths=[bundle,task,JSON.stringify(action),JSON.stringify(mapping)].map((value,i)=>{const path=join(dir,`declaration-${i}.json`);writeFileSync(path,value);return path;});
+ const entry=join(dir,'bin/agent-role-contracts.mjs');
+ const good=run(entry,args(paths));assert.equal(good.status,0,good.stderr);
+ const report=JSON.parse(good.stdout);assert.equal(report.mapping_matches_action,true);assert.ok(report.eligible_executors.length);
+ for(const key of ['adapter_authenticated','subject_authenticated','review_authenticated','human_approval_authenticated','execution_authorized','write_permission_enforced','content_bytes_verified','action_executed'])assert.equal(report[key],false);
+ const text=run(entry,[...args(paths),'--format','text']);assert.equal(text.status,0,text.stderr);assert.match(text.stdout,/Content digest: sha256:a{64}/);assert.match(text.stdout,/Mapping match: true/);assert.match(text.stdout,/Declaration consistency only/);
+ for(const [key,value,code] of [['subject_digest','sha256:'+'0'.repeat(64),'G2_SUBJECT_MISMATCH'],['path','outside/file.txt','G2_PATH_MISMATCH'],['content_sha256','sha256:'+'b'.repeat(64),'G2_CONTENT_MISMATCH']]) {
+  writeFileSync(paths[3],JSON.stringify({...mapping,[key]:value}));const bad=run(entry,args(paths));assert.equal(bad.status,1,bad.stderr);assert.ok(JSON.parse(bad.stdout).errors.some(e=>e.code===code));
+ }
+});
+
+test('real finance CLI works with adapter modules physically absent', t => {
+ const dir=mkdtempSync(join(tmpdir(),'arc-finance-only-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ mkdirSync(join(dir,'src'));mkdirSync(join(dir,'bin'));
+ for(const name of readdirSync(join(root,'src')))if(name.endsWith('.mjs')&&!name.includes('adapter')&&name!=='schemas.generated.mjs')cpSync(join(root,'src',name),join(dir,'src',name));
+ const entry=join(dir,'bin/agent-role-contracts.mjs');cpSync(cli,entry);
+ const f=name=>join(root,'examples/onchain-finance',name+'.json');
+ const result=run(entry,['finance','--bundle',f('bundle'),'--task',f('task'),'--policy',f('policy'),'--intent',f('intent'),'--at','2030-01-01T00:00:03Z']);
+ assert.equal(result.status,0,result.stderr);assert.equal(JSON.parse(result.stdout).valid,true);
 });

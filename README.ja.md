@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.3.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
+**開発プレビュー：`0.4.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -61,9 +61,9 @@ digestが示すのは整合対象の完全性であり、真正性や実行許�
 
 ## G2 filesystem-write adapter候補
 
-G2 filesystem-writeは**実装済み候補で、統合・独立レビュー待ち**です。リリース済み・採用済みではありません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3の証拠・lifecycle相互運用は設計のみです。
+G2 filesystem-writeは**実装済み候補で、独立レビュー待ち**です。リリース済み・採用済みではありません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3の証拠・lifecycle相互運用は設計のみです。
 
-統合先のoptional APIは次のとおりです。
+optional APIは次のとおりです。
 
 ```js
 import { validateFilesystemWriteMapping } from '@netsujo/agent-role-contracts/adapters/filesystem-write';
@@ -80,7 +80,7 @@ profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-実行にはadapter sourceの統合が必要です。optional package subpathは統合先のAPIであり、公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
+この未公開候補にはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
 ## 詳細な3-role例
 

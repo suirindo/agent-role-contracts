@@ -50,10 +50,10 @@ The current architecture candidate preserves the existing root exports, synchron
 | `macos-latest` | `22` | macOS compatibility |
 | `windows-latest` | `22` | Windows compatibility |
 
-`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/finance imports, all ten schema exports, the CLI and all five demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
+`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/adapter/finance imports, all 11 schema exports (6 core + 1 adapter + 4 finance/Safe), the CLI and all six demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
 
 Draft pull requests skip hosted CI unless the workflow is manually dispatched. Local checks do not establish four-platform acceptance: all four jobs must pass on the candidate's exact HEAD, followed by independent review. This matrix describes required coverage, not a claim that a particular candidate has passed.
 
-## G1 development candidate (0.3.0-alpha.1, unreleased)
+## G2 development candidate (0.4.0-alpha.1, unreleased)
 
-The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. Six generic core schemas and four unchanged finance/Safe schemas ship together. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.
+The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. 11 schemas ship as three disjoint groups: 6 core, 1 adapter and 4 unchanged finance/Safe. The explicit `/adapters/filesystem-write` subpath validates only mapping declaration consistency; it is absent from root and `/core` exports. Generic CLI commands load neither adapter nor finance, and each optional command loads only its own module. Mapping PASS does not supply G1 review/approval PASS or permission. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.

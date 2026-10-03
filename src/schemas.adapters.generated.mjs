@@ -2,7 +2,7 @@
 export default {
   "filesystem-write-mapping": {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/v0.3.0-alpha.1/schemas/filesystem-write-mapping.schema.json",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/v0.4.0-alpha.1/schemas/filesystem-write-mapping.schema.json",
     "title": "Agent Role Contracts filesystem-write-mapping",
     "type": "object",
     "additionalProperties": false,

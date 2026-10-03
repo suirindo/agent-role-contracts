@@ -57,10 +57,11 @@ try {
    console.log(`${r.valid?'PASS':'FAIL'}: ${r.kind} (declarations only; execution NOT authorized)`);
    if(cmd==='adapter-filesystem-write') {
     for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Subject','subject_digest'],['Adapter profile','adapter_profile']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));
-    if(r.mapping)for(const [label,key] of [['Operation','operation'],['Path','path'],['Content digest','content_digest']])if(r.mapping[key]!==undefined)console.log(safeText(`${label}: ${r.mapping[key]}`));
-    console.log(safeText(`Eligible declared executor IDs: ${(r.eligible_executor_ids||[]).join(', ')}`));
-    if(r.mapping_matches_subject!==undefined)console.log(safeText(`Mapping match: ${r.mapping_matches_subject}`));
+    if(r.mapping)for(const [label,key] of [['Operation','operation'],['Path','path'],['Content digest','content_sha256']])if(r.mapping[key]!==undefined)console.log(safeText(`${label}: ${r.mapping[key]}`));
+    console.log(safeText(`Eligible declared executor IDs: ${(r.eligible_executors||[]).join(', ')}`));
+    if(r.mapping_matches_action!==undefined)console.log(safeText(`Mapping match: ${r.mapping_matches_action}`));
     console.log('Declaration consistency only; content, filesystem, permission, and execution are NOT verified/enforced.');
+    console.log('Identity is not authenticated. G1 review/approval binding is separate; mapping PASS supplies no review or approval.');
    }
    if(cmd==='action-subject'||cmd==='action-bind') {
     for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Subject','subject_digest']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));

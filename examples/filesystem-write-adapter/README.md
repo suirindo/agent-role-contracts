@@ -1,11 +1,11 @@
 # Filesystem-write mapping example
 
-G0 and G1 are merged and implemented. G2 filesystem-write is an implemented candidate pending integration and independent review, not released or adopted. G3 remains design-only. This docs lane depends on the adapter implementation; running against the base without `src/filesystem-write-adapter.mjs` exits 2 with `DEMO_ERROR`.
+G0 and G1 are merged and implemented. G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. G3 remains design-only.
 
-After integration, run from the repository root with Node.js 22.5 or newer:
+Run from the repository root with Node.js 22.5 or newer:
 
 ```sh
-node examples/filesystem-write-adapter/demo.mjs
+npm run demo:filesystem-adapter
 ```
 
 The executable demo reads only the existing generic JSON fixtures and reuses `makeScenario` from the cross-domain examples. It never opens or writes the declared target files.

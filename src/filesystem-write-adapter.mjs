@@ -43,7 +43,7 @@ export async function validateFilesystemWriteMapping(bundleJson, taskJson, actio
  if (keys.length !== 2 || !Object.hasOwn(params, 'path') || !Object.hasOwn(params, 'content_sha256') ||
      typeof params.path !== 'string' || typeof params.content_sha256 !== 'string' ||
      (params.content_sha256.length !== 71 || !/^sha256:[0-9a-f]{64}$/.test(params.content_sha256)) ||
-     (/[^A-Za-z0-9/._-]/.test(params.path) || !scopeContains(params.path, params.path)) || params.path.endsWith('/**')) {
+     (/[^A-Za-z0-9/._-]/.test(params.path) || !scopeContains(params.path, params.path)) || params.path.endsWith('/**') || params.path.split('/').some(part => part.endsWith('.') || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) {
   add('G2_ACTION_PARAMETERS', 'action/parameters', 'Expected exactly a portable file path and canonical content_sha256 strings');
  }
  if (mapping.subject_digest !== subject.subject_digest) add('G2_SUBJECT_MISMATCH', 'mapping/subject_digest', 'Mapping must bind the complete current G1 subject');

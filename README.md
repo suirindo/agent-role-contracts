@@ -2,7 +2,7 @@
 
 Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
-**Development preview: `0.3.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
+**Development preview: `0.4.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
 
 ## Quick Start — three minutes
 
@@ -82,7 +82,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter candidate
 
-G2 filesystem-write is an **implemented candidate pending integration and independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 evidence/lifecycle interoperability remains design-only.
+G2 filesystem-write is an **implemented candidate awaiting independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 evidence/lifecycle interoperability remains design-only.
 
 The integration API is an optional import:
 
@@ -101,7 +101,7 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-This command requires the adapter source to be integrated; the optional package subpath is an integration target, not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
+This unreleased candidate includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## Full three-role example
 

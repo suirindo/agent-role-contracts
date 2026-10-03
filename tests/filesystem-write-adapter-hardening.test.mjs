@@ -10,7 +10,7 @@ import { validateFilesystemWriteMapping } from '../src/filesystem-write-adapter.
 const json = JSON.stringify;
 const fields = ['bundle', 'task', 'action', 'mapping'];
 const load = name => JSON.parse(readFileSync(new URL(`../examples/${name}.json`, import.meta.url), 'utf8'));
-const digest = 'a'.repeat(64); // A declaration, never a claim about actual bytes.
+const digest = 'sha256:' + 'a'.repeat(64); // A declaration, never a claim about actual bytes.
 const falseClaims = [
   'adapter_authenticated', 'content_bytes_verified', 'filesystem_state_verified',
   'path_exists_verified', 'write_permission_enforced', 'action_executed',
@@ -45,7 +45,7 @@ async function fixture(scope = 'src/example.mjs', path = 'src/example.mjs') {
   const d = { bundle: load('starter-bundle'), task: load('starter-task'),
     action: { schema_version: '0.3', id: 'filesystem-hardening', kind: 'filesystem-write',
       parameters: { path, content_sha256: digest } },
-    mapping: { schema_version: '0.3', subject_digest: '', operation: 'write_file',
+    mapping: { schema_version: '0.1', subject_digest: '', operation: 'write_file',
       path, content_sha256: digest } };
   d.task.inputs.scope = scope;
   await refresh(d);
@@ -77,7 +77,7 @@ for (const [name, mutate] of [
   ['task input', d => { d.task.inputs.scope = 'src/**'; }],
   ['task acceptance', d => { d.task.acceptance_criteria.push('Explain the change.'); }],
   ['action id', d => { d.action.id += '-changed'; }],
-  ['action digest', d => { d.action.parameters.content_sha256 = 'b'.repeat(64); d.mapping.content_sha256 = 'b'.repeat(64); }],
+  ['action digest', d => { d.action.parameters.content_sha256 = 'sha256:' + 'b'.repeat(64); d.mapping.content_sha256 = 'sha256:' + 'b'.repeat(64); }],
 ]) test(`stale mapping subject fails after ${name}; current subject restores PASS`, async () => {
   const d = await fixture(), old = d.mapping.subject_digest;
   mutate(d);
@@ -109,7 +109,7 @@ for (const subject of ['sha256:' + '0'.repeat(64), '', 'sha256:' + 'A'.repeat(64
 }
 for (const key of ['path', 'content_sha256']) test(`mapping ${key} must exactly match action`, async () => {
   const d = await fixture('src/**');
-  d.mapping[key] = key === 'path' ? 'src/another.mjs' : 'b'.repeat(64);
+  d.mapping[key] = key === 'path' ? 'src/another.mjs' : 'sha256:' + 'b'.repeat(64);
   fail(await validate(d));
 });
 for (const key of ['shell', 'command', 'url', 'mode', 'delete', 'chmod', 'symlink', 'overwrite', 'provider']) {
@@ -235,7 +235,7 @@ test('reordered JSON keys preserve complete G1 subject and adapter result', asyn
 });
 test('arbitrary declared bytes/path do not inspect filesystem, clock, network or process', async t => {
   const d = await fixture('src/**', 'src/never-created-g2-hardening/file.mjs');
-  d.action.parameters.content_sha256 = d.mapping.content_sha256 = '0'.repeat(64);
+  d.action.parameters.content_sha256 = d.mapping.content_sha256 = 'sha256:' + '0'.repeat(64);
   await refresh(d);
   // Read source BEFORE traps. Conservative pure-module guard also rejects static
   // Node I/O imports, dynamic imports and indirect process access in this module.
