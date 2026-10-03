@@ -33,3 +33,16 @@ test('public candidate surface has no known internal QC diagnostic prefix', () =
     for (const marker of ['agent-os'+'-core','0.1.0-'+'preparation.','example.invalid/'+'agent-os-core']) assert.equal(text.includes(marker), false, file);
   }
 });
+
+test('G3 public candidate exports and schema totals remain additive', async () => {
+  const core = await import('../src/core.mjs');
+  const root = await import('../src/index.mjs');
+  const { default: schemas } = await import('../src/schemas.generated.mjs');
+  for (const name of ['describeTaskLifecycle', 'validateTaskLifecycle']) {
+    assert.equal(typeof core[name], 'function');
+    assert.equal(root[name], core[name]);
+  }
+  assert.equal(core.VERSION, '0.5.0-alpha.1');
+  assert.equal(Object.keys(schemas).length, 12);
+  assert.equal(schemas['task-lifecycle'].properties.schema_version.const, '0.4');
+});

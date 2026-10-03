@@ -1,5 +1,7 @@
 # Compatibility and extraction boundary
 
+G0 and G1 are merged. This local stacked candidate includes G2 filesystem-write and G3 lifecycle source candidates; neither G2 nor this stacked result is merged to remote main. G2 PR #17 remains Draft and unmerged. Sequencing, review and hosted acceptance remain pending; no release or adoption is claimed.
+
 Agent Role Contracts v0.1.0 is a bounded extraction and generalization of declaration-checking ideas used in Netsujo's internal AI-agent development operations. It is not a byte-compatible or runtime-compatible replacement for Netsujo's internal Agent OS or Orchestrator.
 
 ## Reused and adapted concepts
@@ -50,10 +52,14 @@ The current architecture candidate preserves the existing root exports, synchron
 | `macos-latest` | `22` | macOS compatibility |
 | `windows-latest` | `22` | Windows compatibility |
 
-`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/adapter/finance imports, all 11 schema exports (6 core + 1 adapter + 4 finance/Safe), the CLI and all six demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
+`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/adapter/finance imports, all 12 schema exports (7 core + 1 adapter + 4 finance/Safe), the CLI and all seven demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
 
 Draft pull requests skip hosted CI unless the workflow is manually dispatched. Local checks do not establish four-platform acceptance: all four jobs must pass on the candidate's exact HEAD, followed by independent review. This matrix describes required coverage, not a claim that a particular candidate has passed.
 
-## G2 development candidate (0.4.0-alpha.1, unreleased)
+## Stacked G2 + G3 source candidate (0.5.0-alpha.1, unreleased)
 
-The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. 11 schemas ship as three disjoint groups: 6 core, 1 adapter and 4 unchanged finance/Safe. The explicit `/adapters/filesystem-write` subpath validates only mapping declaration consistency; it is absent from root and `/core` exports. Generic CLI commands load neither adapter nor finance, and each optional command loads only its own module. Mapping PASS does not supply G1 review/approval PASS or permission. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.
+The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. 12 schemas ship as three disjoint groups: 7 core, 1 adapter and 4 unchanged finance/Safe. The explicit `/adapters/filesystem-write` subpath validates only mapping declaration consistency; it is absent from root and `/core` exports. Generic CLI commands load neither adapter nor finance, and each optional command loads only its own module. Mapping PASS does not supply G1 review/approval PASS or permission. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.
+
+## G3 source candidate (0.5.0-alpha.1, unreleased)
+
+Root and `/core` export async `describeTaskLifecycle` and `validateTaskLifecycle`. Seven core schemas, one adapter schema and four unchanged finance/Safe schemas form the twelve-schema aggregate. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` binds the current G1 subject. Describe checks structure and subject/artifact identity; validate additionally checks routed actors, phase decisions and required review/approval declarations. `lifecycle_matches_subject` always reflects full validation; artifact identity consistency is independent. Negative decisions remain valid declarations. Run IDs are correlation only; locators are inert and artifact bytes are never read. No runtime, authenticity, replay or state-machine enforcement is provided. G2 and G3 are included in this local stacked candidate, pending sequencing, review and hosted acceptance. No npm publication is claimed.

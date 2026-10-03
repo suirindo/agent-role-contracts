@@ -1,6 +1,8 @@
 # Filesystem-write mapping example
 
-G0 and G1 are merged and implemented. G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. G3 remains design-only.
+G0 and G1 are merged. This local stacked candidate includes G2 filesystem-write and G3 lifecycle source candidates; neither G2 nor this stacked result is merged to remote main. G2 PR #17 remains Draft and unmerged. Sequencing, review and hosted acceptance remain pending; no release or adoption is claimed.
+
+G0 and G1 are merged and implemented. G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. G3 lifecycle is also included in this stacked source candidate.
 
 Run from the repository root with Node.js 22.5 or newer:
 

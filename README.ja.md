@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.4.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
+**開発プレビュー：`0.5.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -61,7 +61,7 @@ digestが示すのは整合対象の完全性であり、真正性や実行許�
 
 ## G2 filesystem-write adapter候補
 
-G2 filesystem-writeは**実装済み候補で、独立レビュー待ち**です。リリース済み・採用済みではありません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3の証拠・lifecycle相互運用は設計のみです。
+G2 filesystem-writeは**実装済み候補で、独立レビュー待ち**です。リリース済み・採用済みではありません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleもこのstacked source candidateに含まれます。
 
 optional APIは次のとおりです。
 
@@ -84,13 +84,13 @@ node examples/filesystem-write-adapter/demo.mjs
 
 ## G3 lifecycle候補
 
-G3 lifecycleは**実装済み候補で、統合・独立レビュー待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+G3 lifecycleは**実装済み候補で、独立レビュー待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
 
 ```sh
-node examples/task-lifecycle/demo.mjs
+npm run demo:lifecycle
 ```
 
-このbaseにはlifecycle APIがないため、`/core`の`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`の統合が必要です。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G2はこのbaseでは設計のみです。G2の作業は別に保持し、merge済みと仮定しません。finance・Safeは任意profileです。
+この未公開candidateでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G2 filesystem-writeとG3 lifecycleはこのlocal stacked candidateに含まれます。G0/G1はmerge済みですが、G2 PR #17はDraft・未mergeで、stacked resultもremote mainには未mergeです。sequencing・review・hosted acceptanceは未完了です。finance・Safeは任意profileです。
 
 外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
 

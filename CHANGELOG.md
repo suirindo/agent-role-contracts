@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0-alpha.1 — unreleased local G2 + G3 stacked source candidate
+
+- Add generic lifecycle description/validation APIs, strict lifecycle schema 0.4, CLI commands and six checked demo outcomes.
+- Bind declarations to current G1 subjects and independently check artifact identities; verify no execution, authenticity, bytes, replay or runtime acceptance.
+- Preserve finance/Safe semantics and seven core, one adapter and four finance schemas. G2 PR #17 and this stacked candidate remain unmerged to remote main, pending sequencing/review/hosted acceptance. No npm publication.
+
 ## 0.4.0-alpha.1 — unreleased development candidate
 
 - Integrate the explicit filesystem-write adapter subpath, declaration-only CLI, one mapping schema and sixth demo; preserve core and finance/Safe behavior.

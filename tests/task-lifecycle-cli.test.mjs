@@ -28,7 +28,7 @@ async function lifecycleReport(kind,args) {
  await Promise.resolve();
  if(args.length!==4||args.some((s,i)=>typeof s!=='string'||JSON.parse(s).slot!==i))throw Error('ARGUMENT_ORDER');
  const input=JSON.parse(args[3]),valid=!input.invalid;
- return {valid,kind,execution_authorized:false,task_id:'task-1',action_id:'action-1',run_id:input.run_id||'run-1',subject_digest:'sha256:current',declared_subject_digest:'sha256:declared',event_count:2,event_phases:['review','execution'],artifact_count:1,...(input.absent?{}:{lifecycle_matches_subject:valid,artifact_identity_consistent:valid}),errors:valid?[]:[{code:'LIFECYCLE_INVALID',path:'lifecycle',message:'Invalid declaration'}]};
+ return {valid,kind,execution_authorized:false,task_id:'task-1',action_id:'action-1',run_id:input.run_id||'run-1',current_subject_digest:'sha256:current',declared_subject_digest:'sha256:declared',event_count:2,declared_phases:['review','execution'],artifact_count:1,...(input.absent?{}:{lifecycle_matches_subject:valid,artifact_identity_consistent:valid}),errors:valid?[]:[{code:'LIFECYCLE_INVALID',path:'lifecycle',message:'Invalid declaration'}]};
 }
 `;
   writeFileSync(join(dir,'src/core.mjs'),source);
@@ -52,7 +52,7 @@ for(const cmd of commands) {
  });
  test(`test-double: ${cmd} text labels and declaration limits`,t=>{
   const {entry,paths}=sandbox(t);const text=()=>run(entry,[...args(cmd,paths),'--format','text']);const r=text();assert.equal(r.status,0,r.stderr);
-  for(const value of ['Task: task-1','Action: action-1','Run: run-1','Current subject: sha256:current','Declared subject: sha256:declared','Event count: 2','Event phases: review, execution','Artifact count: 1','Declarations only; actor identity, review, approval, execution, artifact bytes, runtime acceptance and replay enforcement are NOT verified/enforced.'])assert.ok(r.stdout.includes(value),r.stdout);
+  for(const value of ['Task: task-1','Action: action-1','Run: run-1','Current subject: sha256:current','Declared subject: sha256:declared','Event count: 2','Declared phases: review, execution','Artifact count: 1','Declarations only; actor identity, review, approval, execution, artifact bytes, runtime acceptance and replay enforcement are NOT verified/enforced.'])assert.ok(r.stdout.includes(value),r.stdout);
   assert.doesNotMatch(r.stdout,/real execution|events verified/i);
   if(cmd==='lifecycle') {
    assert.match(r.stdout,/Lifecycle matches subject: true/);assert.match(r.stdout,/Artifact identity consistent: true/);
@@ -78,7 +78,8 @@ for(const cmd of ['validate','explain','handoff','action-subject','action-bind',
 test('static lifecycle CLI boundary and help',()=>{
  const source=readFileSync(cli,'utf8');const imports=[...source.matchAll(/^import .* from ['"]([^'"]+)['"]/gm)].map(m=>m[1]);assert.deepEqual(imports.filter(s=>!s.startsWith('node:')),['../src/core.mjs']);
  assert.match(source,/cmd\.startsWith\('finance'\) \? await import\('\.\.\/src\/finance-profile\.mjs'\)/);
- assert.equal([...source.matchAll(/\bimport\(/g)].length,1);
+ assert.equal([...source.matchAll(/\bimport\(/g)].length,2);
+ assert.match(source,/cmd==='adapter-filesystem-write' \? await import\('\.\.\/src\/filesystem-write-adapter\.mjs'\)/);
  for(const api of ['describeTaskLifecycle','validateTaskLifecycle'])assert.ok(source.includes('await core.'+api+'('));
  const help=run(cli,['--help']);assert.equal(help.status,0);for(const cmd of commands)assert.ok(help.stdout.includes(cmd+' --bundle B --task T --action A --lifecycle L [--format json|text]'));
 });

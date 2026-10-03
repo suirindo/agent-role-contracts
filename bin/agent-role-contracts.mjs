@@ -66,7 +66,7 @@ try {
     console.log('Identity is not authenticated. G1 review/approval binding is separate; mapping PASS supplies no review or approval.');
    }
    if(cmd==='lifecycle-describe'||cmd==='lifecycle') {
-    for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Run','run_id'],['Current subject','subject_digest'],['Declared subject','declared_subject_digest'],['Event count','event_count'],['Event phases','event_phases'],['Artifact count','artifact_count']])if(r[key]!==undefined)console.log(safeText(`${label}: ${Array.isArray(r[key])?r[key].join(', '):r[key]}`));
+    for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Run','run_id'],['Current subject','current_subject_digest'],['Declared subject','declared_subject_digest'],['Event count','event_count'],['Declared phases','declared_phases'],['Artifact count','artifact_count']])if(r[key]!==undefined)console.log(safeText(`${label}: ${Array.isArray(r[key])?r[key].join(', '):r[key]}`));
     if(cmd==='lifecycle')for(const [label,key] of [['Lifecycle matches subject','lifecycle_matches_subject'],['Artifact identity consistent','artifact_identity_consistent']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));
     console.log('Declarations only; actor identity, review, approval, execution, artifact bytes, runtime acceptance and replay enforcement are NOT verified/enforced.');
    }

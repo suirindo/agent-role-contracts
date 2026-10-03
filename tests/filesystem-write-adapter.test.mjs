@@ -82,10 +82,12 @@ test('no implicit I/O, clock or network; adapter imports no finance or Safe',asy
  const source=readFileSync(new URL('../src/filesystem-write-adapter.mjs',import.meta.url),'utf8');
  assert.doesNotMatch(source,/node:|\bfetch\s*\(|\bDate\b|\bprocess\b|\bimport\s*\(|finance|safe/i);
 });
-test('generated core and finance are byte unchanged and schema groups disjoint',()=>{
- for(const name of ['core','finance'])assert.equal(readFileSync(new URL('../src/schemas.'+name+'.generated.mjs',import.meta.url),'utf8'),execFileSync('git',['show','c91e92e6cb8e75e60d5e06413807583a2deba0ef:src/schemas.'+name+'.generated.mjs'],{encoding:'utf8'}));
- assert.equal(Object.keys(core).length,6);assert.equal(Object.keys(finance).length,4);assert.equal(Object.keys(adapters).length,1);
- const keys=[...Object.keys(core),...Object.keys(adapters),...Object.keys(finance)];assert.equal(new Set(keys).size,11);assert.deepEqual(aggregate,{...core,...adapters,...finance});
+test('existing core schemas and finance bytes are unchanged and schema groups disjoint',()=>{
+ const originalCore=JSON.parse(execFileSync('git',['show','c91e92e6cb8e75e60d5e06413807583a2deba0ef:src/schemas.core.generated.mjs'],{encoding:'utf8'}).split('export default ')[1].trim().slice(0,-1));
+ const {['task-lifecycle']: lifecycle,...existingCore}=core;assert.deepEqual(existingCore,originalCore);assert.equal(lifecycle.properties.schema_version.const,'0.4');
+ for(const name of ['finance'])assert.equal(readFileSync(new URL('../src/schemas.'+name+'.generated.mjs',import.meta.url),'utf8'),execFileSync('git',['show','c91e92e6cb8e75e60d5e06413807583a2deba0ef:src/schemas.'+name+'.generated.mjs'],{encoding:'utf8'}));
+ assert.equal(Object.keys(core).length,7);assert.equal(Object.keys(finance).length,4);assert.equal(Object.keys(adapters).length,1);
+ const keys=[...Object.keys(core),...Object.keys(adapters),...Object.keys(finance)];assert.equal(new Set(keys).size,12);assert.deepEqual(aggregate,{...core,...adapters,...finance});
 });
 test('current subjects independently reject task escape and missing writer',async()=>{
  for(const mode of ['scope','writer']){

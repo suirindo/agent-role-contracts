@@ -1,5 +1,7 @@
 # General-purpose architecture and evolution
 
+G0 and G1 are merged. This local stacked candidate includes G2 filesystem-write and G3 lifecycle source candidates; neither G2 nor this stacked result is merged to remote main. G2 PR #17 remains Draft and unmerged. Sequencing, review and hosted acceptance remain pending; no release or adoption is claimed.
+
 Design revision: 2026-10-03. This source proposal restores the general-purpose product direction. Its implementation status is stated separately from future design below. Source acceptance, merge and registry publication are distinct milestones.
 
 ## 1. Product purpose
@@ -33,22 +35,22 @@ A declared read-only reviewer is not proof of real runtime independence. An evid
 
 | Entry or module | Role |
 | --- | --- |
-| `@netsujo/agent-role-contracts/core` / `src/core.mjs` | Domain-neutral public entry: `validateBundle`, `explainTask`, `validateHandoff`, version and input limit; integrated G1 adds async `describeTaskAction` and `validateTaskActionBinding` |
+| `@netsujo/agent-role-contracts/core` / `src/core.mjs` | Domain-neutral public entry: `validateBundle`, `explainTask`, `validateHandoff`, version and input limit; G1 provides async `describeTaskAction` and `validateTaskActionBinding`; G3 adds async `describeTaskLifecycle` and `validateTaskLifecycle` |
 | `src/validation.mjs` | Shared internal JSON/bundle/task validation; no optional profile imports |
-| `src/schemas.core.generated.mjs` | Existing generic schemas; integrated G1 adds task-action and task-action-binding |
+| `src/schemas.core.generated.mjs` | Seven generic schemas, including G1 action/binding and G3 lifecycle |
 | `@netsujo/agent-role-contracts/profiles/onchain-finance` / `src/finance-profile.mjs` | Explicit optional import of existing financial proposal/evidence/receipt checks |
 | `src/schemas.finance.generated.mjs` | The four existing finance/Safe schemas |
 | `@netsujo/agent-role-contracts/adapters/filesystem-write` / `src/filesystem-write-adapter.mjs` | G2 candidate: explicit `write_file` declaration mapping, separate from G1 review/approval binding |
 | `src/schemas.adapters.generated.mjs` | G2 candidate: disjoint filesystem-write mapping schema set |
 | `src/index.mjs` | Backward-compatible core+finance facade; adapter is explicit subpath only |
-| `src/schemas.generated.mjs` | Aggregate of 11 schemas: 6 core, 1 adapter and 4 finance/Safe |
+| `src/schemas.generated.mjs` | Aggregate of 12 schemas: 7 core, 1 adapter and 4 finance/Safe |
 | `bin/agent-role-contracts.mjs` | Generic commands load only core; adapter and finance commands lazily load their respective modules |
 
 Schema JSON files remain the only authored schema source. The existing generator builds and verifies every generated module. G1 adds action/binding declarations without replacing the existing role/task schemas or introducing an industry-specific core schema.
 
 **Optional imports are not separate npm packages.** This proposal still ships one package. The compatibility root necessarily imports the existing finance facade; consumers requiring a domain-isolated dependency graph should use `/core`. A future package split or root-export removal would require an explicit compatibility decision, not a silent refactor.
 
-Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. The unreleased development candidate is `0.4.0-alpha.1`; this source version does not imply registry publication.
+Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. The unreleased development candidate is `0.5.0-alpha.1`; this source version does not imply registry publication.
 
 ## 5. Concrete non-financial acceptance examples
 
@@ -90,7 +92,7 @@ Time and external state remain explicit inputs. Do not silently read a clock, fe
 
 ### First concrete adapter: filesystem-write
 
-G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. Existing portable relative file/subtree scope semantics already span software, data and support tasks, so this adapter needs no industry schema. G3 remains design-only.
+G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. Existing portable relative file/subtree scope semantics already span software, data and support tasks, so this adapter needs no industry schema. G3 lifecycle is also included in this stacked source candidate.
 
 The optional integration entrypoint `@netsujo/agent-role-contracts/adapters/filesystem-write` exports async `validateFilesystemWriteMapping(bundleJson, taskJson, actionJson, mappingJson)` from `src/filesystem-write-adapter.mjs`. Adapter profile `filesystem-write/0.1` uses mapping schema version `0.1`. A G1 schema-version `0.3` action must have kind `filesystem-write` and exactly two parameters, `path` and `content_sha256`. Its mapping declares the current G1 `subject_digest`, operation `write_file`, and exactly matching path and digest. Unknown operations, parameters and semantics are refused rather than inferred. Core denials cannot be overridden; the path must fit the task scope and eligible routed executor declarations. No arbitrary SaaS, database, API or other resource semantics are supported.
 
@@ -100,7 +102,7 @@ The optional integration entrypoint `@netsujo/agent-role-contracts/adapters/file
 
 ## G3 lifecycle declaration boundary
 
-G3 is an implemented candidate pending integration and independent review, not released or adopted. This base lacks its core APIs; the [executable lifecycle example](../examples/task-lifecycle/README.md) has an explicit integration dependency on `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` uses the current G1 subject, routed review and accountable approval declarations, optional routed execution declarations and artifact evidence. The three existing cross-domain scenarios demonstrate PASS, stale subjects and conflicting digests for one artifact ID. G2 remains design-only on this base; separate adapter work is not assumed merged or required by these examples.
+G3 is an implemented candidate pending independent review, not released or adopted. The [executable lifecycle example](../examples/task-lifecycle/README.md) uses the implemented generic APIs `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` uses the current G1 subject, routed review and accountable approval declarations, optional routed execution declarations and artifact evidence. The three existing cross-domain scenarios demonstrate PASS, stale subjects and conflicting digests for one artifact ID. G2 filesystem-write is included in this stacked candidate through its optional subpath; lifecycle does not require that adapter.
 
 Caller-supplied external `run_id` correlates declarations; it provides no replay protection. Event decisions are declarations, not authenticated events. No timestamps, clock reads or state-machine ordering are introduced. Artifact `sha256` is declared identity, not a byte-verification result; bytes are never read and locators remain inert.
 

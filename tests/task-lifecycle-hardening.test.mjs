@@ -25,7 +25,8 @@ function pass(r) {
   assert.equal(r.valid, true, json(r.errors));
   assert.deepEqual(r.errors, []);
   inert(r);
-  assert.equal(r.lifecycle_matches_subject, true);
+  assert.equal(typeof r.lifecycle_matches_subject, 'boolean');
+  if (r.kind === 'task-lifecycle-validation') assert.equal(r.lifecycle_matches_subject, true);
   assert.equal(r.artifact_identity_consistent, true);
 }
 function fail(r) {
@@ -110,7 +111,10 @@ const decisions = { review: ['pass', 'blocked'], approval: ['approved', 'denied'
 for (const phase of Object.keys(decisions)) {
   for (const decision of [...Object.values(decisions).flat().filter(x => !decisions[phase].includes(x)), 'unknown']) {
     test(`${phase} rejects decision ${decision}`, async () => {
-      const d = await fixture(); event(d, phase).decision = decision; await bothFail(d);
+      const d = await fixture(); event(d, phase).decision = decision;
+      if (decision === 'unknown') fail(await describe(d));
+      else { pass(await describe(d)); assert.equal((await describe(d)).lifecycle_matches_subject, false); }
+      fail(await validate(d));
     });
   }
   for (const actor of ['alternate-executor', 'alternate-reviewer', 'unknown-role']) {
@@ -142,10 +146,11 @@ for (const phase of ['review', 'approval']) test(`route requires ${phase} declar
   const d = await fixture(); d.lifecycle.events = d.lifecycle.events.filter(e => e.phase !== phase);
   pass(await describe(d)); fail(await validate(d));
 });
-test('no reviewers and no approval: no G1 evidence or review is synthesized', async () => {
-  const d = await fixture({ approval: false, reviewers: false });
-  d.lifecycle.events = [event(d, 'evidence')];
-  pass(await describe(d)); pass(await validate(d));
+test('empty reviewer route fails closed without synthesized G1 approval', async () => {
+  const d = await fixture({ approval: false });
+  d.bundle.routes[0].reviewers = [];
+  await bothFail(d);
+  assert.ok((await validate(d)).errors.some(e => e.code === 'SCHEMA_MINITEMS'));
 });
 test('unrequired approval is rejected even with accountable actor', async () => {
   const d = await fixture({ approval: false });

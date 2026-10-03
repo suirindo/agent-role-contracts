@@ -11,9 +11,6 @@ const definitions = [
 ];
 
 try {
-  for (const name of ['describeTaskAction', 'describeTaskLifecycle', 'validateTaskLifecycle']) {
-    if (typeof core[name] !== 'function') throw new Error('Integration dependency: /core must export ' + name + '; this base does not include G3 core.');
-  }
   const read = name => JSON.parse(readFileSync(new URL('../' + name + '.json', import.meta.url), 'utf8'));
   const templates = { bundle: read('team'), task: read('task'), handoff: read('handoff') };
   console.log('G3 lifecycle: fictional declarations; no actions executed or artifacts verified.');

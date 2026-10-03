@@ -51,7 +51,7 @@ async function inspect(bundleJson, taskJson, actionJson, lifecycleJson, full) {
   match(v.subject_digest,'lifecycle/subject_digest');
   for (const [i,e] of events.entries()) match(e?.subject_digest,`lifecycle/events/${i}/subject_digest`);
  }
- errors.push(...artifactErrors.filter(e => full || e.code === 'G3_ARTIFACT_DUPLICATE'));
+ errors.push(...artifactErrors);
  if (!parsed.errors.length) {
   const ids = new Set();
   for (const [i,e] of events.entries()) {
@@ -59,13 +59,14 @@ async function inspect(bundleJson, taskJson, actionJson, lifecycleJson, full) {
    ids.add(e.event_id);
   }
  }
- if (full && subject.valid && !parsed.errors.length) {
+ const semanticErrors = [];
+ if (subject.valid && !parsed.errors.length) {
   const b = checkBundle(bundleJson), t = checkTask(b,taskJson), route = t.route;
   const participants = new Set([route.accountable,...route.executors,...route.reviewers]);
   const actors = new Set();
   for (const [i,e] of events.entries()) {
    const path = `lifecycle/events/${i}`;
-   const add = (code,field,message) => errors.push(issue(code,path+'/'+field,message));
+   const add = (code,field,message) => semanticErrors.push(issue(code,path+'/'+field,message));
    const pair = e.actor_role_id + ':' + e.phase;
    if (actors.has(pair)) add('G3_ACTOR_PHASE_DUPLICATE','actor_role_id','Only one event per actor and phase is allowed');
    actors.add(pair);
@@ -73,12 +74,13 @@ async function inspect(bundleJson, taskJson, actionJson, lifecycleJson, full) {
    const allowed = e.phase === 'review' ? route.reviewers.includes(e.actor_role_id) : e.phase === 'execution' ? route.executors.includes(e.actor_role_id) : e.phase === 'approval' ? e.actor_role_id === route.accountable : participants.has(e.actor_role_id);
    if (!allowed) add('G3_PHASE_ACTOR','actor_role_id','Actor must be a current participant for this phase');
   }
-  if (route.reviewers.length && !events.some(e=>e.phase==='review')) errors.push(issue('G3_REVIEW_REQUIRED','lifecycle/events','The current route requires at least one review event'));
+  if (route.reviewers.length && !events.some(e=>e.phase==='review')) semanticErrors.push(issue('G3_REVIEW_REQUIRED','lifecycle/events','The current route requires at least one review event'));
   const approvals = events.filter(e=>e.phase==='approval').length;
-  if (route.require_human_approval && approvals !== 1) errors.push(issue('G3_APPROVAL_REQUIRED','lifecycle/events','The current route requires exactly one approval event'));
-  if (!route.require_human_approval && approvals) errors.push(issue('G3_APPROVAL_UNEXPECTED','lifecycle/events','The current route does not allow approval events'));
+  if (route.require_human_approval && approvals !== 1) semanticErrors.push(issue('G3_APPROVAL_REQUIRED','lifecycle/events','The current route requires exactly one approval event'));
+  if (!route.require_human_approval && approvals) semanticErrors.push(issue('G3_APPROVAL_UNEXPECTED','lifecycle/events','The current route does not allow approval events'));
  }
- if (full) details.lifecycle_matches_subject = errors.length === 0;
+ details.lifecycle_matches_subject = errors.length === 0 && semanticErrors.length === 0;
+ if (full) errors.push(...semanticErrors);
  return buildReport(VERSION, full ? 'task-lifecycle-validation' : 'task-lifecycle', errors, { ...details, ...LIMITATIONS });
 }
 export async function describeTaskLifecycle(bundleJson,taskJson,actionJson,lifecycleJson) {

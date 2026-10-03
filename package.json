@@ -1,6 +1,6 @@
 {
   "name": "@netsujo/agent-role-contracts",
-  "version": "0.4.0-alpha.1",
+  "version": "0.5.0-alpha.1",
   "license": "MIT",
   "type": "module",
   "description": "Offline, general-purpose AI-agent role, authority, task-scope, review and handoff declaration checks.",
@@ -41,7 +41,8 @@
     "demo:safe": "node examples/onchain-finance/safe-demo.mjs",
     "demo:binding": "node examples/action-binding/demo.mjs",
     "demo:general": "node examples/cross-domain/demo.mjs",
-    "demo:filesystem-adapter": "node examples/filesystem-write-adapter/demo.mjs"
+    "demo:filesystem-adapter": "node examples/filesystem-write-adapter/demo.mjs",
+    "demo:lifecycle": "node examples/task-lifecycle/demo.mjs"
   },
   "repository": {
     "type": "git",
@@ -68,5 +69,5 @@
     "treasury",
     "erc20"
   ],
-  "author": "Netsujo株式会社"
+  "author": "Netsujo\u682a\u5f0f\u4f1a\u793e"
 }

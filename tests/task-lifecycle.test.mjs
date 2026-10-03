@@ -47,7 +47,7 @@ const semanticMutations={
  'artifact conflict':l=>{l.events[0].artifacts=[artifact()];l.events[1].artifacts=[{...artifact(),sha256:'sha256:'+'1'.repeat(64)}];},
 };
 for(const [name,mutate] of Object.entries(semanticMutations))test('describe vs validate: '+name,async()=>{
- const s=fresh(),l=await lifecycle(s);mutate(l);assert.equal((await describe(s,l)).valid,!['duplicate event','artifact duplicate'].includes(name));fail(await validate(s,l));
+ const s=fresh(),l=await lifecycle(s);mutate(l);assert.equal((await describe(s,l)).valid,!['duplicate event','artifact duplicate','artifact conflict'].includes(name));fail(await validate(s,l));
 });
 for(const location of ['top','event'])test('stale '+location+' subject fails both reports',async()=>{
  const s=fresh(),l=await lifecycle(s);if(location==='top')l.subject_digest=digest;else l.events[0].subject_digest=digest;

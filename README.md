@@ -1,8 +1,10 @@
 # Agent Role Contracts
 
+G0 and G1 are merged. This local stacked candidate includes G2 filesystem-write and G3 lifecycle source candidates; neither G2 nor this stacked result is merged to remote main. G2 PR #17 remains Draft and unmerged. Sequencing, review and hosted acceptance remain pending; no release or adoption is claimed.
+
 Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
-**Development preview: `0.4.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
+**Development preview: `0.5.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
 
 ## Quick Start — three minutes
 
@@ -82,7 +84,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter candidate
 
-G2 filesystem-write is an **implemented candidate awaiting independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 evidence/lifecycle interoperability remains design-only.
+G2 filesystem-write is an **implemented candidate awaiting independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also included in this stacked source candidate.
 
 The integration API is an optional import:
 
@@ -105,13 +107,13 @@ This unreleased candidate includes the optional adapter subpath; it is not a cla
 
 ## G3 lifecycle candidate
 
-G3 lifecycle is an **implemented candidate pending integration and independent review**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+G3 lifecycle is an **implemented candidate pending independent review**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
 
 ```sh
-node examples/task-lifecycle/demo.mjs
+npm run demo:lifecycle
 ```
 
-This base lacks lifecycle APIs; the demo requires integrated `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 remains design-only on this base, and separate G2 work is not assumed merged. Finance and Safe are optional.
+This stacked candidate provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
 External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
 

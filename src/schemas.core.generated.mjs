@@ -1395,7 +1395,7 @@ export default {
   },
   "task-lifecycle": {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/task-lifecycle.schema.json",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/v0.5.0-alpha.1/schemas/task-lifecycle.schema.json",
     "title": "Agent Role Contracts task-lifecycle",
     "type": "object",
     "additionalProperties": false,
