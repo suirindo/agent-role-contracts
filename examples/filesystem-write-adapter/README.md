@@ -1,6 +1,8 @@
 # Filesystem-write mapping example
 
-G0 and G1 are merged and implemented. G2 filesystem-write is an implemented candidate awaiting independent review, not released or adopted. G3 remains design-only.
+G0, G1 and G2 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 builds on merged G2 and is the current unreleased candidate pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. Source merge does not imply npm publication, production adoption, runtime permission or deployment; G3 is not merged or published.
+
+G2 filesystem-write is merged and implemented in repository main; no npm publication or production adoption is claimed. G3 lifecycle builds on merged G2 and remains an unreleased candidate pending independent review and hosted acceptance.
 
 Run from the repository root with Node.js 22.5 or newer:
 

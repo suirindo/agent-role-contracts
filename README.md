@@ -1,8 +1,10 @@
 # Agent Role Contracts
 
+G0, G1 and G2 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 builds on merged G2 and is the current unreleased candidate pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. Source merge does not imply npm publication, production adoption, runtime permission or deployment; G3 is not merged or published.
+
 Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
-**Development preview: `0.4.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
+**Development preview: `0.5.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
 
 ## Quick Start — three minutes
 
@@ -78,11 +80,11 @@ The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, ac
 
 For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
 
-The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 supplies a narrow filesystem-write adapter candidate described below; parameter names alone do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 supplies a narrow filesystem-write adapter described below; parameter names alone do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
 
-## G2 filesystem-write adapter candidate
+## G2 filesystem-write adapter
 
-G2 filesystem-write is an **implemented candidate awaiting independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 evidence/lifecycle interoperability remains design-only.
+G2 filesystem-write is **merged and implemented in repository main**; no npm publication or production adoption is claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle builds on merged G2 and remains an unreleased candidate pending independent review and hosted acceptance.
 
 The integration API is an optional import:
 
@@ -102,6 +104,18 @@ node examples/filesystem-write-adapter/demo.mjs
 ```
 
 This unreleased candidate includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
+
+## G3 lifecycle candidate
+
+G3 lifecycle is an **implemented candidate pending independent review and hosted acceptance**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+
+```sh
+npm run demo:lifecycle
+```
+
+This unreleased G3 candidate provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
+
+External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
 
 ## Full three-role example
 
