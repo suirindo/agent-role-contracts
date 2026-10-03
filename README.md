@@ -1,23 +1,8 @@
 # Agent Role Contracts
 
-Catch tasks that exceed an AI agent's declared write scope, and conflicting implementer/reviewer roles, before you hand off work.
+Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
-**Development preview: `0.2.0-alpha.2`.** The published npm release remains `0.1.0`. The current repository includes the v0.2 finance preview while preserving the v0.1 role-contract profile and synchronous APIs.
-
-## Onchain finance preview
-
-Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. Alpha.2 can also check a post-execution receipt against that same subject, chain and nonce.
-
-```sh
-git clone https://github.com/suirindo/agent-role-contracts.git
-npm --prefix agent-role-contracts run demo:finance --silent
-```
-
-The English demo includes a normal payment, wrong-chain and over-limit proposals, an unlimited allowance, stale review binding, refreshed fictional declarations, a matching execution receipt and a mismatched execution nonce. No install, wallet, API key or provider account is needed after cloning. Requirements: Git and Node.js 22.5 or newer with npm.
-
-This is an offline declaration preflight for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals. Amounts use exact uint256 decimal strings. Execution receipts are supplied declarations, not authenticated chain data. A PASS does not verify chain state, prove simulation/approval/receipt authenticity, sign, broadcast, enforce limits or establish financial safety. [Use the financial profile and API](examples/onchain-finance/README.md).
-
-The v0.1 profile checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
+**Development preview: `0.2.0-alpha.2`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
 
 ## Quick Start — three minutes
 
@@ -67,6 +52,20 @@ A prompt can ask an agent to stay in `src/**`, while the next task requests a ch
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
 - [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
+## General-purpose core and optional profiles
+
+Agent Role Contracts has a general-purpose core for role, authority, task-scope, review and handoff declarations. Software development, data processing and support drafting use the same core; onchain finance is one optional profile.
+
+Run three non-financial examples using the existing contracts:
+
+```sh
+npm --prefix agent-role-contracts run demo:general --silent
+```
+
+This unreleased source candidate adds `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+
+The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
+
 ## Full three-role example
 
 After the starter, the fuller example adds a coordinator, conditional inputs and a handoff:
@@ -86,6 +85,21 @@ node bin/agent-role-contracts.mjs validate --bundle examples/invalid-self-review
 Use `examples/another-team.json` to see different canonical IDs and `examples/code-task.json` for conditional required inputs on a second explicit route.
 
 The hosted CI matrix covers Ubuntu / Node.js 22.5.0, Ubuntu / Node.js 24, macOS / Node.js 22 and Windows / Node.js 22. Every candidate must pass on its own exact HEAD and still requires independent acceptance; a version range or an older candidate's result is not proof for current bytes. Node 22.5.0 is a minimum-compatibility fixture, not a deployment recommendation.
+
+## Optional profile — onchain finance
+
+Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. Alpha.2 can also check a post-execution receipt against that same subject, chain and nonce.
+
+```sh
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo:finance --silent
+```
+
+The English demo includes a normal payment, wrong-chain and over-limit proposals, an unlimited allowance, stale review binding, refreshed fictional declarations, a matching execution receipt and a mismatched execution nonce. No install, wallet, API key or provider account is needed after cloning. Requirements: Git and Node.js 22.5 or newer with npm.
+
+This is an offline declaration preflight for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals. Amounts use exact uint256 decimal strings. Execution receipts are supplied declarations, not authenticated chain data. A PASS does not verify chain state, prove simulation/approval/receipt authenticity, sign, broadcast, enforce limits or establish financial safety. [Use the financial profile and API](examples/onchain-finance/README.md).
+
+The v0.1 profile checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
 
 ## Boundaries
 

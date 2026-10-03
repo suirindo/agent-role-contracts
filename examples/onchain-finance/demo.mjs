@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
-import { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution } from '../../src/index.mjs';
+import { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution } from '../../src/finance-profile.mjs';
 
 const read = name => readFileSync(new URL(name + '.json', import.meta.url), 'utf8');
 const json = JSON.stringify;

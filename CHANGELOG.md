@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — general-purpose architecture
+
+- Restore a generic-first product direction and order future work around task/action binding, adapters and evidence interoperability rather than finance-specific features.
+- Add an isolated `/core` entrypoint and an explicit optional `/profiles/onchain-finance` entrypoint, retaining existing root API compatibility.
+- Split generated core/profile schemas and load the finance CLI module only for financial commands; keep the existing schema versions and validation behavior.
+- Add three non-financial examples and regressions proving that generic API/CLI/quickstart work without any finance module present.
+- No registry publication, new execution authority, new runtime or new role/task schema.
+
 ## 0.2.0-alpha.2 — development preview, not published
 
 - Add a strict financial-execution receipt schema plus asynchronous `validateFinancialExecution` API and `finance-execution` CLI command.

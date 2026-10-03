@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { openSync, fstatSync, lstatSync, readSync, closeSync, constants } from 'node:fs';
-import { validateBundle, explainTask, validateHandoff, describeFinancialIntent, validateFinancialIntent, validateFinancialExecution, MAX_INPUT_BYTES } from '../src/index.mjs';
+import { validateBundle, explainTask, validateHandoff, MAX_INPUT_BYTES } from '../src/core.mjs';
 const HELP=`Agent Role Contracts — offline declaration checks only
 Usage:
   node bin/agent-role-contracts.mjs validate --bundle examples/team.json [--format json|text]
@@ -43,6 +43,7 @@ try {
   }
   for(const key of permitted.filter(k=>!['--format','--at'].includes(k)))if(!args.has(key))throw new Error(`Missing ${key}`);
   const format=args.get('--format')||'json';if(!['json','text'].includes(format))throw new Error('Invalid format');
+  const { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution } = cmd.startsWith('finance') ? await import('../src/finance-profile.mjs') : {};
   const b=read(args.get('--bundle'));
   const r=cmd==='validate'?validateBundle(b):cmd==='explain'?explainTask(b,read(args.get('--task'))):cmd==='handoff'?validateHandoff(b,read(args.get('--task')),read(args.get('--handoff'))):cmd==='finance-subject'?await describeFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--transaction'))):cmd==='finance'?await validateFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),args.get('--at')||new Date().toISOString()):await validateFinancialExecution(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--receipt')),args.get('--at')||new Date().toISOString());
   if(format==='json')console.log(safeJson(r,2));
