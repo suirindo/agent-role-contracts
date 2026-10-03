@@ -3,13 +3,15 @@
   "version": "0.2.0-alpha.4",
   "license": "MIT",
   "type": "module",
-  "description": "Offline AI-agent role and onchain-finance proposal declaration checks.",
+  "description": "Offline, general-purpose AI-agent role, authority, task-scope, review and handoff declaration checks.",
   "engines": {
     "node": ">=22.5"
   },
   "exports": {
     ".": "./src/index.mjs",
-    "./schemas/*": "./schemas/*"
+    "./schemas/*": "./schemas/*",
+    "./core": "./src/core.mjs",
+    "./profiles/onchain-finance": "./src/finance-profile.mjs"
   },
   "bin": {
     "agent-role-contracts": "./bin/agent-role-contracts.mjs"
@@ -32,9 +34,11 @@
     "schemas:check": "node scripts/build-schemas.mjs --check",
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "demo": "node examples/quickstart.mjs",
     "demo:finance": "node examples/onchain-finance/demo.mjs",
-    "demo:safe": "node examples/onchain-finance/safe-demo.mjs"
+    "demo:safe": "node examples/onchain-finance/safe-demo.mjs",
+    "demo:general": "node examples/cross-domain/demo.mjs"
   },
   "repository": {
     "type": "git",

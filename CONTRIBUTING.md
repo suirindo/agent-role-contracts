@@ -1,8 +1,10 @@
 # Contributing
 
-Agent Role Contracts is intentionally small. Contributions should preserve the v0.1 boundary: declaration validation without becoming an agent runtime or authorization system.
+Agent Role Contracts is general-purpose and intentionally small. Contributions should preserve the v0.1 boundary: declaration validation without becoming an agent runtime or authorization system.
 
-The v0.2 finance preview extends declaration validation to bounded onchain-finance proposals. Preserve the v0.1 APIs and schemas. Financial changes need exact base-unit, subject-binding, ambiguous-policy and negative approval/simulation regressions. Examples must use fictional assets, actors and evidence, with no signing or broadcasting. Per-proposal limits must not be described as aggregate budgets or runtime enforcement.
+Keep the core independent of application-specific rules. Read [the architecture and evolution design](docs/ARCHITECTURE.md). A reusable core change needs a cross-domain rationale, negative tests, and compatibility coverage; a domain-only change belongs in an explicit optional profile. Do not introduce a new runtime, implicit plugin loader or duplicate role/task schema.
+
+The optional v0.2 finance profile extends declaration validation to bounded onchain-finance proposals. Preserve the v0.1 APIs and schemas. Financial changes need exact base-unit, subject-binding, ambiguous-policy and negative approval/simulation regressions. Examples must use fictional assets, actors and evidence, with no signing or broadcasting. Per-proposal limits must not be described as aggregate budgets or runtime enforcement.
 
 Before opening a pull request:
 

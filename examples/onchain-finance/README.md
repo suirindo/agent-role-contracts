@@ -63,7 +63,7 @@ import {
   describeFinancialIntent,
   validateFinancialIntent,
   validateFinancialExecution,
-} from '@netsujo/agent-role-contracts'; // local v0.2 preview package
+} from '@netsujo/agent-role-contracts/profiles/onchain-finance'; // this unreleased source candidate
 
 // JSON strings supplied by your application, from separately trusted inputs.
 const subject = await describeFinancialIntent(
@@ -130,7 +130,7 @@ The financial policy and finite preview rules are Netsujo's application profile,
 
 ## Safe wallet-proposal boundary
 
-`validateSafeProposal(...)` takes an already-valid financial intent and a strict Safe proposal declaration. For the supported single-call profile it checks the exact `to`, `value`, `data`, and `operation` fields, including deterministic ERC-20 `transfer(address,uint256)` and `approve(address,uint256)` calldata.
+Import `validateSafeProposal` from `@netsujo/agent-role-contracts/profiles/onchain-finance` (also re-exported by the compatibility root). `validateSafeProposal(...)` takes an already-valid financial intent and a strict Safe proposal declaration. For the supported single-call profile it checks the exact `to`, `value`, `data`, and `operation` fields, including deterministic ERC-20 `transfer(address,uint256)` and `approve(address,uint256)` calldata.
 
 ```sh
 npm run demo:safe --silent

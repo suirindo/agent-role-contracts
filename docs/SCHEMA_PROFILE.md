@@ -10,4 +10,4 @@ Deep uniqueness and enum/const equality are independent of object-member order. 
 
 `output_schema` inside a role contract is inert instance data. Its content is not evaluated, and results explicitly report `output_schema_validated=false`. Evidence command strings, extensions and role body text are also inert declarations.
 
-The four bundled schemas are definition-checked and their generated module is byte-identity checked. Repository tests exercise supported assertions and fail-closed cases. These checks do not claim complete Draft-07 conformance or exhaustive instance coverage.
+The eight bundled schemas (four generic core schemas and four optional onchain-finance schemas, including `safe-proposal`) are definition-checked and their generated module is byte-identity checked. Repository tests exercise supported assertions and fail-closed cases. These checks do not claim complete Draft-07 conformance or exhaustive instance coverage.

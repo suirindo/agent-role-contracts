@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describeFinancialIntent, validateSafeProposal } from '../src/index.mjs';
+import { describeFinancialIntent, validateSafeProposal } from '../src/finance-profile.mjs';
 
 const json=JSON.stringify;
 const fixture=name=>JSON.parse(readFileSync(new URL('../examples/onchain-finance/'+name+'.json',import.meta.url),'utf8'));
