@@ -1,6 +1,6 @@
 # Compatibility and extraction boundary
 
-G0, G1 and G2 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 builds on merged G2 and is the current unreleased candidate pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. Source merge does not imply npm publication, production adoption, runtime permission or deployment; G3 is not merged or published.
+G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source remains the unreleased development preview `0.5.0-alpha.1`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Source merge and implementation do not imply npm publication, production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
 Agent Role Contracts v0.1.0 is a bounded extraction and generalization of declaration-checking ideas used in Netsujo's internal AI-agent development operations. It is not a byte-compatible or runtime-compatible replacement for Netsujo's internal Agent OS or Orchestrator.
 
@@ -41,7 +41,7 @@ v0.1.0 is the first public compatibility baseline. Future incompatible public co
 
 ## Additive core/profile source split (unreleased)
 
-The current architecture candidate preserves the existing root exports, synchronous generic APIs, asynchronous finance APIs, schemas and diagnostics. It adds `/core` and `/profiles/onchain-finance` import subpaths. The core entrypoint and generic CLI commands do not load the optional finance modules or schemas. The root remains a compatibility facade and still imports finance; optional entrypoints do not mean separate npm packages. See [the design](ARCHITECTURE.md) for implemented versus planned boundaries.
+The merged repository source preserves the existing root exports, synchronous generic APIs, asynchronous finance APIs, schemas and diagnostics. It adds `/core` and `/profiles/onchain-finance` import subpaths. The core entrypoint and generic CLI commands do not load the optional finance modules or schemas. The root remains a compatibility facade and still imports finance; optional entrypoints do not mean separate npm packages. See [the design](ARCHITECTURE.md) for implemented versus planned boundaries.
 
 ## Required candidate compatibility matrix
 
@@ -56,10 +56,10 @@ The current architecture candidate preserves the existing root exports, synchron
 
 Draft pull requests skip hosted CI unless the workflow is manually dispatched. Local checks do not establish four-platform acceptance: all four jobs must pass on the candidate's exact HEAD, followed by independent review. This matrix describes required coverage, not a claim that a particular candidate has passed.
 
-## G1/G2 APIs in the unreleased G3 candidate
+## G1/G2 APIs in the unreleased repository source
 
 The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. 12 schemas ship as three disjoint groups: 7 core, 1 adapter and 4 unchanged finance/Safe. The explicit `/adapters/filesystem-write` subpath validates only mapping declaration consistency; it is absent from root and `/core` exports. Generic CLI commands load neither adapter nor finance, and each optional command loads only its own module. Mapping PASS does not supply G1 review/approval PASS or permission. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.
 
-## G3 source candidate (0.5.0-alpha.1, unreleased)
+## G3 lifecycle declarations (0.5.0-alpha.1, unreleased)
 
-Root and `/core` export async `describeTaskLifecycle` and `validateTaskLifecycle`. Seven core schemas, one adapter schema and four unchanged finance/Safe schemas form the twelve-schema aggregate. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` binds the current G1 subject. Describe checks structure and subject/artifact identity; validate additionally checks routed actors, phase decisions and required review/approval declarations. `lifecycle_matches_subject` always reflects full validation; artifact identity consistency is independent. Negative decisions remain valid declarations. Run IDs are correlation only; locators are inert and artifact bytes are never read. No runtime, authenticity, replay or state-machine enforcement is provided. G3 builds on merged G2 and remains pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. No npm publication is claimed.
+Root and `/core` export async `describeTaskLifecycle` and `validateTaskLifecycle`. Seven core schemas, one adapter schema and four unchanged finance/Safe schemas form the twelve-schema aggregate. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` binds the current G1 subject. Describe checks structure and subject/artifact identity; validate additionally checks routed actors, phase decisions and required review/approval declarations. `lifecycle_matches_subject` always reflects full validation; artifact identity consistency is independent. Negative decisions remain valid declarations. Run IDs are correlation only; locators are inert and artifact bytes are never read. No runtime, authenticity, replay or state-machine enforcement is provided. G3 is merged and implemented in repository main; publication and adoption remain separate. No npm publication is claimed.
