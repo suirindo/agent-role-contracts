@@ -1267,5 +1267,128 @@ export default {
         "properties": {}
       }
     }
+  },
+  "task-action": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Agent Role Contracts task-action",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schema_version",
+      "id",
+      "kind",
+      "parameters"
+    ],
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "0.3"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "minLength": 1,
+        "maxLength": 96
+      },
+      "kind": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "minLength": 1,
+        "maxLength": 96
+      },
+      "parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "properties": {}
+      }
+    }
+  },
+  "task-action-binding": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Agent Role Contracts task-action-binding",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schema_version",
+      "subject_digest",
+      "reviews"
+    ],
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "0.3"
+      },
+      "subject_digest": {
+        "type": "string",
+        "pattern": "^sha256:[a-f0-9]{64}$"
+      },
+      "reviews": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "subject_digest",
+            "role_id",
+            "decision"
+          ],
+          "properties": {
+            "subject_digest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "role_id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "pass",
+                "blocked"
+              ]
+            }
+          }
+        }
+      },
+      "human_approval": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subject_digest",
+          "role_id",
+          "decision"
+        ],
+        "properties": {
+          "subject_digest": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "role_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "minLength": 1,
+            "maxLength": 96
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "denied"
+            ]
+          }
+        }
+      }
+    }
   }
 };
