@@ -128,4 +128,4 @@ function checkTask(b,taskJson) {
  return {task,route,details,errors};
 }
 
-export { read, checkBundle, checkTask };
+export { read, checkBundle, checkTask, scopeContains };
