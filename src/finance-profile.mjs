@@ -4,6 +4,7 @@ import { read, checkBundle, checkTask } from './validation.mjs';
 import { buildReport } from './report.mjs';
 import { VERSION } from './version.mjs';
 import { FINANCIAL_PROFILE, FINANCIAL_LIMITATIONS, financialProposalErrors, financialSubjectDigest, financialEvidenceErrors, financialExecutionErrors } from './finance.mjs';
+import { SAFE_LIMITATIONS, safeProposalErrors } from './safe.mjs';
 const issue=(code,path,message)=>({code,path,message});
 const report=(kind,errors,details={})=>buildReport(VERSION,kind,errors,details);
 function financialContext(bundleJson, taskJson, policyJson, transactionJson, transactionPath) {
@@ -57,4 +58,20 @@ export async function validateFinancialExecution(bundleJson, taskJson, policyJso
  if(result.errors.length)return report('financial-execution',result.errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details});
  const errors=financialExecutionErrors(intent.value,execution.value,result.details.subject_digest,evaluatedAt);
  return report('financial-execution',errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,execution:execution.value});
+}
+
+/** Bind an already-approved financial intent to the supported fields of one supplied Safe CALL envelope. */
+export async function validateSafeProposal(bundleJson, taskJson, policyJson, intentJson, safeProposalJson, evaluatedAt) {
+ const intentResult=await validateFinancialIntent(bundleJson,taskJson,policyJson,intentJson,evaluatedAt);
+ if(!intentResult.valid)return report('safe-proposal',intentResult.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
+ const intent=read(intentJson,schemas['financial-intent'],'financial_intent');
+ const proposal=read(safeProposalJson,schemas['safe-proposal'],'safe_proposal');
+ if(proposal.errors.length)return report('safe-proposal',proposal.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
+ const context=financialContext(bundleJson,taskJson,policyJson,JSON.stringify(intent.value.transaction),'financial_intent/transaction');
+ if(context.errors.length)return report('safe-proposal',context.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
+ const result=await financialDetails(context);
+ if(result.errors.length)return report('safe-proposal',result.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
+ const errors=safeProposalErrors(intent.value,proposal.value,result.details.subject_digest);
+ const matchesIntent=errors.length===0;
+ return report('safe-proposal',errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:matchesIntent,safe_proposal:proposal.value});
 }

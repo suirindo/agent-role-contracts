@@ -33,17 +33,22 @@ try {
     const f = name => read('examples/onchain-finance/' + name + '.json');
     const result = await finance.validateFinancialExecution(f('bundle'), f('task'), f('policy'), f('intent'), f('execution'), '2030-01-01T00:00:05Z');
     assert.equal(result.valid, true, JSON.stringify(result.errors));
-    for (const name of ['role-contract', 'bundle', 'task', 'handoff', 'financial-policy', 'financial-intent', 'financial-execution']) {
+    const safe = await finance.validateSafeProposal(f('bundle'), f('task'), f('policy'), f('intent'), f('safe-proposal'), '2030-01-01T00:00:05Z');
+    assert.equal(safe.valid, true, JSON.stringify(safe.errors));
+    assert.equal(safe.safe_call_envelope_matches_intent, true);
+    assert.equal(safe.transaction_serialization_verified, false);
+    assert.equal(safe.transaction_hash_verified, false);
+    for (const name of ['role-contract', 'bundle', 'task', 'handoff', 'financial-policy', 'financial-intent', 'financial-execution', 'safe-proposal']) {
       const schema = JSON.parse(readFileSync(new URL(import.meta.resolve('@netsujo/agent-role-contracts/schemas/' + name + '.schema.json')), 'utf8'));
       assert.equal(schema.type, 'object');
     }
   `], consumer);
   const installed = join(consumer, 'node_modules', '@netsujo', 'agent-role-contracts');
   run([join(installed, 'bin/agent-role-contracts.mjs'), 'validate', '--bundle', join(installed, 'examples/team.json')], consumer);
-  for (const demo of ['quickstart.mjs', 'cross-domain/demo.mjs', 'onchain-finance/demo.mjs']) {
+  for (const demo of ['quickstart.mjs', 'cross-domain/demo.mjs', 'onchain-finance/demo.mjs', 'onchain-finance/safe-demo.mjs']) {
     run([join(installed, 'examples', demo)], consumer);
   }
-  console.log('Packed consumer: root/core/finance exports, 7 schema exports, CLI and 3 demos PASS');
+  console.log('Packed consumer: root/core/finance exports, 8 schema exports, CLI and 4 demos PASS');
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }

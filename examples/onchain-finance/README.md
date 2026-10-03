@@ -1,6 +1,6 @@
 # Onchain finance intent checks — v0.2 preview
 
-Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The preview package version is `0.2.0-alpha.2`; this feature is not in the published npm `0.1.0` release.
+Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The preview package version is `0.2.0-alpha.4`; this feature is not in the published npm `0.1.0` release.
 
 ## Try the demo
 
@@ -116,7 +116,7 @@ Exit codes stay 0 consistent declarations, 1 invalid declarations, 2 CLI/file er
 
 ## Execution boundary
 
-PASS establishes only consistency of the supplied declarations. An execution receipt PASS says that the supplied receipt names the approved subject, chain and nonce with internally consistent status/timing; it does not prove that the transaction hash, block or receipt came from a real chain. The package does not authenticate humans/reviewers, verify evidence or blockchain state, inspect calldata, implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. It has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
+PASS establishes only consistency of the supplied declarations. An execution receipt PASS says that the supplied receipt names the approved subject, chain and nonce with internally consistent status/timing; it does not prove that the transaction hash, block or receipt came from a real chain. The package does not authenticate humans/reviewers, verify evidence or blockchain state, inspect arbitrary calldata (the optional Safe profile only matches supported CALL calldata), implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. It has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
 
 An execution system remains responsible for trusted policy and time, authenticated decisions, live state, exact serialized transaction correspondence, current nonce/fee checks, aggregate budgets, replay prevention, stopping conditions, simulation and actual custody permissions. Bind its immediate pre-execution checks to the same subject and enforce its own controls. Never treat this preview's PASS as permission to move funds.
 
@@ -126,3 +126,14 @@ An execution system remains responsible for trusted policy and time, authenticat
 - [EIP-155](https://eips.ethereum.org/EIPS/eip-155): chain identity in signed transactions. This checker compares declared chain IDs; it does not implement signing or replay protection.
 
 The financial policy and finite preview rules are Netsujo's application profile, not Ethereum protocol requirements. Free MIT OSS, with no account, wallet or telemetry requirement. Built by [Netsujo](https://netsujo.jp/en), a Web3 startup.
+
+
+## Safe wallet-proposal boundary
+
+Import `validateSafeProposal` from `@netsujo/agent-role-contracts/profiles/onchain-finance` (also re-exported by the compatibility root). `validateSafeProposal(...)` takes an already-valid financial intent and a strict Safe proposal declaration. For the supported single-call profile it checks the exact `to`, `value`, `data`, and `operation` fields, including deterministic ERC-20 `transfer(address,uint256)` and `approve(address,uint256)` calldata.
+
+```sh
+npm run demo:safe --silent
+```
+
+`safe_call_envelope_matches_intent=true` means the supplied subject digest, chain ID, Safe address, nonce, and CALL `to`, `value`, `data`, `operation` match the approved intent under this bounded profile. Addresses compare case-insensitively; decimal strings and lowercase calldata compare exactly. It covers native transfers, ERC-20 transfers and bounded approvals only. `transaction_serialization_verified` remains always false: it is a limitation, not an alias. The draft `safe_transaction_fields_verified` flag is removed. A PASS does not prove canonical Safe serialization. It does **not** authenticate a Safe account, owners, threshold, signatures, chain state, transaction hash, broadcast, custody, or execution authority. Batch transactions, delegatecall and extra envelope/transaction fields (including gas, refund, signature and hash fields) are rejected. No Safe transaction hash is computed.

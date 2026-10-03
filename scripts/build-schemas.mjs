@@ -3,14 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { assertSupportedSchema, canonical } from '../src/schema.mjs';
 import { parseCanonicalSchemaSource, serializeCanonicalSchemaSource } from './schema-source.mjs';
 const root = new URL('../', import.meta.url);
-const names = ['role-contract','bundle','task','handoff','financial-policy','financial-intent','financial-execution'];
+const names = ['role-contract','bundle','task','handoff','financial-policy','financial-intent','financial-execution','safe-proposal'];
 const schemas = Object.fromEntries(names.map(name => [name, parseCanonicalSchemaSource(readFileSync(new URL(`schemas/${name}.schema.json`, root)))]));
 for (const schema of Object.values(schemas)) assertSupportedSchema(schema);
 const role = {...schemas['role-contract']};delete role.$schema;delete role.$id;delete role.title;
 if(canonical(role)!==canonical(schemas.bundle.properties.roles.items.properties.contract)) throw new Error('SCHEMA_ROLE_COPY_DRIFT');
 const header = '// Generated from schemas/*.schema.json; do not edit.\n';
 const coreNames = ['role-contract', 'bundle', 'task', 'handoff'];
-const financeNames = ['financial-policy', 'financial-intent', 'financial-execution'];
+const financeNames = ['financial-policy', 'financial-intent', 'financial-execution', 'safe-proposal'];
 const moduleFor = keys => header + 'export default ' + serializeCanonicalSchemaSource(Object.fromEntries(keys.map(name => [name, schemas[name]])), 2) + ';\n';
 const outputs = {
  'src/schemas.core.generated.mjs': moduleFor(coreNames),

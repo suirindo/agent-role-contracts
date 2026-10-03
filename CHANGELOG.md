@@ -8,6 +8,14 @@
 - Add three non-financial examples and regressions proving that generic API/CLI/quickstart work without any finance module present.
 - No registry publication, new execution authority, new runtime or new role/task schema.
 
+## 0.2.0-alpha.4 — development preview, not published
+
+- Add a strict Safe transaction proposal boundary for already-approved financial intents.
+- Match the supported fields of one supplied Safe CALL envelope for native transfers, ERC-20 transfers, and bounded ERC-20 approvals, including standard `transfer(address,uint256)` and `approve(address,uint256)` calldata.
+- Report `safe_call_envelope_matches_intent=true` only when the subject, chain, Safe address, nonce, target, value, calldata, and CALL operation all match the approved intent.
+- Replace the draft `safe_transaction_fields_verified` result with `safe_call_envelope_matches_intent`; retain `transaction_serialization_verified=false` as a limitation, never an alias.
+- Keep canonical Safe serialization, transaction hashes, Safe account authentication, owner/threshold/signature verification, live chain state, broadcast, custody, and execution authorization outside the package.
+
 ## 0.2.0-alpha.2 — development preview, not published
 
 - Add a strict financial-execution receipt schema plus asynchronous `validateFinancialExecution` API and `finance-execution` CLI command.

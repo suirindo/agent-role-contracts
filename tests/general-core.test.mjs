@@ -29,13 +29,13 @@ for (const scenario of scenarios) {
 
 test('core and optional profile entrypoints preserve existing root function identities', () => {
   assert.deepEqual(Object.keys(core).sort(), ['MAX_INPUT_BYTES','VERSION','explainTask','validateBundle','validateHandoff'].sort());
-  assert.deepEqual(Object.keys(finance).sort(), ['describeFinancialIntent','validateFinancialIntent','validateFinancialExecution'].sort());
+  assert.deepEqual(Object.keys(finance).sort(), ['describeFinancialIntent','validateFinancialIntent','validateFinancialExecution','validateSafeProposal'].sort());
   assert.deepEqual(Object.keys(legacy).sort(), [...Object.keys(core), ...Object.keys(finance)].sort());
   for (const [key, value] of Object.entries({ ...core, ...finance })) assert.equal(legacy[key], value);
 });
 test('schema sets are disjoint and the compatibility aggregate loses no schemas', () => {
   assert.deepEqual(Object.keys(coreSchemas).sort(), ['role-contract','bundle','task','handoff'].sort());
-  assert.deepEqual(Object.keys(financeSchemas).sort(), ['financial-policy','financial-intent','financial-execution'].sort());
+  assert.deepEqual(Object.keys(financeSchemas).sort(), ['financial-policy','financial-intent','financial-execution','safe-proposal'].sort());
   assert.deepEqual(allSchemas, { ...coreSchemas, ...financeSchemas });
 });
 
@@ -44,12 +44,13 @@ test('core, CLI and quickstart work when every finance module is physically abse
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir, 'src')); mkdirSync(join(dir, 'bin')); mkdirSync(join(dir, 'examples'));
   for (const name of readdirSync(join(root, 'src'))) {
-    if (!name.endsWith('.mjs') || name.includes('finance') || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
+    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
     cpSync(join(root, 'src', name), join(dir, 'src', name));
   }
   cpSync(join(root, 'bin/agent-role-contracts.mjs'), join(dir, 'bin/agent-role-contracts.mjs'));
   for (const name of ['team.json','task.json','handoff.json','starter-bundle.json','starter-task.json','starter-task-outside-scope.json','quickstart.mjs']) cpSync(join(root,'examples',name),join(dir,'examples',name));
   const runs = [
+    ['--input-type=module', '-e', `import { readFileSync } from 'node:fs'; import { validateBundle } from './src/core.mjs'; if (!validateBundle(readFileSync('examples/team.json','utf8')).valid) process.exit(1);`],
     ['bin/agent-role-contracts.mjs','--help'],
     ['bin/agent-role-contracts.mjs','validate','--bundle','examples/team.json'],
     ['bin/agent-role-contracts.mjs','explain','--bundle','examples/team.json','--task','examples/task.json'],
@@ -67,7 +68,7 @@ test('optional profile failure is explicit when its files are unavailable', t =>
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   mkdirSync(join(dir,'src')); mkdirSync(join(dir,'bin'));
   for (const name of readdirSync(join(root, 'src'))) {
-    if (!name.endsWith('.mjs') || name.includes('finance') || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
+    if (!name.endsWith('.mjs') || (name.includes('finance') || name.includes('safe')) || name === 'schemas.generated.mjs' || name === 'index.mjs') continue;
     cpSync(join(root,'src',name),join(dir,'src',name));
   }
   cpSync(join(root,'bin/agent-role-contracts.mjs'),join(dir,'bin/agent-role-contracts.mjs'));
@@ -89,4 +90,15 @@ test('existing finance APIs still work from the explicit optional entrypoint', a
   const result = await finance.validateFinancialIntent(...args,'2030-01-01T00:00:03Z');
   assert.equal(result.valid,true,JSON.stringify(result.errors));
   assert.deepEqual(result, await legacy.validateFinancialIntent(...args,'2030-01-01T00:00:03Z'));
+});
+
+test('Safe API works through the optional profile and compatibility root', async () => {
+  const f = name => readFileSync(join(root,'examples/onchain-finance',name+'.json'),'utf8');
+  const args = ['bundle','task','policy','intent','safe-proposal'].map(f);
+  const result = await finance.validateSafeProposal(...args,'2030-01-01T00:00:03Z');
+  assert.equal(result.valid,true,JSON.stringify(result.errors));
+  assert.equal(result.safe_call_envelope_matches_intent,true);
+  assert.equal(result.transaction_serialization_verified,false);
+  assert.equal(result.transaction_hash_verified,false);
+  assert.deepEqual(result,await legacy.validateSafeProposal(...args,'2030-01-01T00:00:03Z'));
 });
