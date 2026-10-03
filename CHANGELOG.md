@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased — general-purpose architecture
+## 0.3.0-alpha.1 — unreleased development candidate
 
 - Restore a generic-first product direction and order future work around task/action binding, adapters and evidence interoperability rather than finance-specific features.
 - Add an isolated `/core` entrypoint and an explicit optional `/profiles/onchain-finance` entrypoint, retaining existing root API compatibility.
 - Split generated core/profile schemas and load the finance CLI module only for financial commands; keep the existing schema versions and validation behavior.
 - Add three non-financial examples and regressions proving that generic API/CLI/quickstart work without any finance module present.
+- Add async `describeTaskAction` and `validateTaskActionBinding`, generic task-action/binding schemas and CLI commands for complete declaration-subject consistency. Routed review and required accountable approval remain unauthenticated declarations; action execution and replay enforcement remain external.
+- Add `demo:binding` and packed-consumer coverage for binding PASS and stale failure.
 - No registry publication, new execution authority, new runtime or new role/task schema.
 
 ## 0.2.0-alpha.4 — development preview, not published

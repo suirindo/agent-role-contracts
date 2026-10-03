@@ -1270,6 +1270,7 @@ export default {
   },
   "task-action": {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/v0.3.0-alpha.1/schemas/task-action.schema.json",
     "title": "Agent Role Contracts task-action",
     "type": "object",
     "additionalProperties": false,
@@ -1312,6 +1313,7 @@ export default {
   },
   "task-action-binding": {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/v0.3.0-alpha.1/schemas/task-action-binding.schema.json",
     "title": "Agent Role Contracts task-action-binding",
     "type": "object",
     "additionalProperties": false,

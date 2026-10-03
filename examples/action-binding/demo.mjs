@@ -19,9 +19,6 @@ function checkLimitations(result) {
 try {
   console.log('G1 task/action binding: three non-financial declaration examples.');
   console.log('This demo executes no action and authenticates no reviewer or approver.');
-  if (typeof core.describeTaskAction !== 'function' || typeof core.validateTaskActionBinding !== 'function') {
-    throw new Error('Integration dependency: async describeTaskAction and validateTaskActionBinding must be exported from src/core.mjs (task-action/0.3). The base revision lacks these APIs.');
-  }
   const read = name => JSON.parse(readFileSync(new URL('../' + name + '.json', import.meta.url), 'utf8'));
   const templates = { bundle: read('team'), task: read('task'), handoff: read('handoff') };
   for (const [index, scenario] of scenarios.entries()) {

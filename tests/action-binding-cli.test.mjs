@@ -22,14 +22,14 @@ function sandbox(t,patched=false) {
  writeFileSync(join(dir,'src/finance-profile.mjs'),"throw new Error('FINANCE_IMPORT_TRIGGERED');\n");
  if(patched) {
   // Only this disposable copy is patched; it tests CLI dispatch, not core validation.
-  const source=readFileSync(join(dir,'src/core.mjs'),'utf8');
+  const source=readFileSync(join(dir,'src/core.mjs'),'utf8').replace(/^export \{ describeTaskAction, validateTaskActionBinding \} from .*;$/m, '');
   writeFileSync(join(dir,'src/core.mjs'),source+`
 export async function describeTaskAction(...args) { return actionReport('action-subject',args,3); }
 export async function validateTaskActionBinding(...args) { return actionReport('action-binding',args,4); }
 function actionReport(kind,args,count) {
  if(args.length!==count||args.some((s,i)=>JSON.parse(s).slot!==i))throw Error('ARGUMENT_ORDER');
  const valid=!JSON.parse(args[2]).invalid;
- return {valid,kind,execution_authorized:false,task_id:'task-1',action_id:'action-1',subject_digest:'sha256:abc',binding_matches:valid,reviews:[{role_id:'reviewer-1',decision:'approved'},{role_id:'reviewer-2',decision:'rejected'}],human_approval:JSON.parse(args[2]).noApproval?null:{role_id:'human-1',decision:'approved'},errors:valid?[]:[{code:'ACTION_INVALID',path:'action',message:'Invalid declaration'}]};
+ return {valid,kind,execution_authorized:false,task_id:'task-1',action_id:'action-1',subject_digest:'sha256:abc',binding_matches_subject:valid,reviews:[{role_id:'reviewer-1',decision:'approved'},{role_id:'reviewer-2',decision:'rejected'}],human_approval:JSON.parse(args[2]).noApproval?null:{role_id:'human-1',decision:'approved'},errors:valid?[]:[{code:'ACTION_INVALID',path:'action',message:'Invalid declaration'}]};
 }
 `);
  }
@@ -85,4 +85,24 @@ test('static CLI boundary imports core and keeps finance lazy',()=>{
  assert.match(source,/cmd\.startsWith\('finance'\) \? await import\('\.\.\/src\/finance-profile\.mjs'\)/);
  assert.match(source,/await core\.describeTaskAction\(/);assert.match(source,/await core\.validateTaskActionBinding\(/);
  const help=run(cli,['--help']);assert.equal(help.status,0);assert.match(help.stdout,/action-subject --bundle B --task T --action A/);assert.match(help.stdout,/action-bind --bundle B --task T --action A --binding X/);
+});
+
+test('real core binding text prints current subject and unauthenticated declarations',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'arc-real-binding-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const bundle=readFileSync(example('starter-bundle'),'utf8'),task=readFileSync(example('starter-task'),'utf8');
+ const action={schema_version:'0.3',id:'cli-action',kind:'propose-change',parameters:{revision:1}};
+ const subject=await core.describeTaskAction(bundle,task,JSON.stringify(action));
+ const route=JSON.parse(bundle).routes[0];
+ const binding={schema_version:'0.3',subject_digest:subject.subject_digest,reviews:[{role_id:route.reviewers[0],decision:'pass',subject_digest:subject.subject_digest}]};
+ if(route.require_human_approval)binding.human_approval={role_id:route.accountable,decision:'approved',subject_digest:subject.subject_digest};
+ const paths=[bundle,task,JSON.stringify(action),JSON.stringify(binding)].map((text,i)=>{const path=join(dir,i+'.json');writeFileSync(path,text);return path;});
+ const result=run(cli,[...actionArgs('action-bind',paths),'--format','text']);
+ assert.equal(result.status,0,result.stderr);
+ for(const value of ['Task: '+JSON.parse(task).id,'Action: cli-action','Subject: '+subject.subject_digest,'Binding match: true','Reviewer '+route.reviewers[0]+': pass'])assert.ok(result.stdout.includes(value),result.stdout);
+ if(binding.human_approval)assert.match(result.stdout,/Approval declaration:/);
+ assert.doesNotMatch(result.stdout,/authenticated|verified/i);
+ action.parameters.revision=2;writeFileSync(paths[2],JSON.stringify(action));
+ const stale=run(cli,[...actionArgs('action-bind',paths),'--format','text']);
+ assert.equal(stale.status,1,stale.stderr);assert.match(stale.stdout,/Binding match: false/);assert.match(stale.stdout,/G1_SUBJECT_MISMATCH/);
 });

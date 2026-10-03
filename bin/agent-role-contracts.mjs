@@ -57,7 +57,7 @@ try {
     for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Subject','subject_digest']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));
     console.log('Digest is integrity-only; execution NOT authorized.');
     if(cmd==='action-bind') {
-     if(r.binding_matches!==undefined)console.log(safeText(`Binding match: ${r.binding_matches}`));
+     if(r.binding_matches_subject!==undefined)console.log(safeText(`Binding match: ${r.binding_matches_subject}`));
      for(const review of r.reviews||[])console.log(safeText(`Reviewer ${review.role_id}: ${review.decision}`));
      if(r.human_approval!=null)console.log(safeText(`Approval declaration: ${safeJson(r.human_approval)}`));
     }

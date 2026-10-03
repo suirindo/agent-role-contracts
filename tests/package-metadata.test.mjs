@@ -10,3 +10,7 @@ test('API package and lockfile share one version',()=>{
 test('both README files identify the current public version',()=>{
  for(const file of ['README.md','README.ja.md']){const text=read(file);assert.ok(text.includes(VERSION));assert.equal(text.includes('0.1.0-'+'preparation.'),false);}
 });
+
+test('binding demo is part of the development package commands',()=>{
+ assert.equal(JSON.parse(read('package.json')).scripts['demo:binding'],'node examples/action-binding/demo.mjs');
+});

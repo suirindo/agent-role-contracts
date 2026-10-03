@@ -28,13 +28,13 @@ for (const scenario of scenarios) {
 }
 
 test('core and optional profile entrypoints preserve existing root function identities', () => {
-  assert.deepEqual(Object.keys(core).sort(), ['MAX_INPUT_BYTES','VERSION','explainTask','validateBundle','validateHandoff'].sort());
+  assert.deepEqual(Object.keys(core).sort(), ['MAX_INPUT_BYTES','VERSION','explainTask','validateBundle','validateHandoff','describeTaskAction','validateTaskActionBinding'].sort());
   assert.deepEqual(Object.keys(finance).sort(), ['describeFinancialIntent','validateFinancialIntent','validateFinancialExecution','validateSafeProposal'].sort());
   assert.deepEqual(Object.keys(legacy).sort(), [...Object.keys(core), ...Object.keys(finance)].sort());
   for (const [key, value] of Object.entries({ ...core, ...finance })) assert.equal(legacy[key], value);
 });
 test('schema sets are disjoint and the compatibility aggregate loses no schemas', () => {
-  assert.deepEqual(Object.keys(coreSchemas).sort(), ['role-contract','bundle','task','handoff'].sort());
+  assert.deepEqual(Object.keys(coreSchemas).sort(), ['role-contract','bundle','task','handoff','task-action','task-action-binding'].sort());
   assert.deepEqual(Object.keys(financeSchemas).sort(), ['financial-policy','financial-intent','financial-execution','safe-proposal'].sort());
   assert.deepEqual(allSchemas, { ...coreSchemas, ...financeSchemas });
 });
@@ -49,7 +49,10 @@ test('core, CLI and quickstart work when every finance module is physically abse
   }
   cpSync(join(root, 'bin/agent-role-contracts.mjs'), join(dir, 'bin/agent-role-contracts.mjs'));
   for (const name of ['team.json','task.json','handoff.json','starter-bundle.json','starter-task.json','starter-task-outside-scope.json','quickstart.mjs']) cpSync(join(root,'examples',name),join(dir,'examples',name));
+  cpSync(join(root, 'examples/cross-domain'), join(dir, 'examples/cross-domain'), { recursive: true });
+  cpSync(join(root, 'examples/action-binding'), join(dir, 'examples/action-binding'), { recursive: true });
   const runs = [
+    ['examples/action-binding/demo.mjs'],
     ['--input-type=module', '-e', `import { readFileSync } from 'node:fs'; import { validateBundle } from './src/core.mjs'; if (!validateBundle(readFileSync('examples/team.json','utf8')).valid) process.exit(1);`],
     ['bin/agent-role-contracts.mjs','--help'],
     ['bin/agent-role-contracts.mjs','validate','--bundle','examples/team.json'],

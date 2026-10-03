@@ -37,7 +37,7 @@ A declared read-only reviewer is not proof of real runtime independence. An evid
 | `src/validation.mjs` | Shared internal JSON/bundle/task validation; no optional profile imports |
 | `src/schemas.core.generated.mjs` | Existing generic schemas; integrated G1 adds task-action and task-action-binding |
 | `@netsujo/agent-role-contracts/profiles/onchain-finance` / `src/finance-profile.mjs` | Explicit optional import of existing financial proposal/evidence/receipt checks |
-| `src/schemas.finance.generated.mjs` | Only the three existing finance schemas |
+| `src/schemas.finance.generated.mjs` | The four existing finance/Safe schemas |
 | `src/index.mjs` | Backward-compatible facade retaining every existing public export |
 | `src/schemas.generated.mjs` | Compatibility aggregate of the two generated schema sets |
 | `bin/agent-role-contracts.mjs` | Generic commands load the core; finance commands load their profile explicitly |
@@ -46,7 +46,7 @@ Schema JSON files remain the only authored schema source. The existing generator
 
 **Optional imports are not separate npm packages.** This proposal still ships one package. The compatibility root necessarily imports the existing finance facade; consumers requiring a domain-isolated dependency graph should use `/core`. A future package split or root-export removal would require an explicit compatibility decision, not a silent refactor.
 
-Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. Package version selection belongs to the eventual release cut; this proposal does not publish or reuse an unaccepted version as a released artifact.
+Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. The unreleased development candidate is `0.3.0-alpha.1`; this source version does not imply registry publication.
 
 ## 5. Concrete non-financial acceptance examples
 
@@ -64,11 +64,11 @@ Each checks the assigned task, rejects out-of-scope work, rejects self-review, r
 
 | Phase | Work | Acceptance boundary | Status in this proposal |
 | --- | --- | --- | --- |
-| G0: core isolation | Separate entrypoints and schemas, preserve compatibility, generic-first documentation, non-financial examples | Core/CLI/quickstart work with finance files absent; existing behavior remains covered | Implemented candidate; review/merge/release separate |
+| G0: core isolation | Separate entrypoints and schemas, preserve compatibility, generic-first documentation, non-financial examples | Core/CLI/quickstart work with finance files absent; existing behavior remains covered | Merged and implemented; publication separate |
 | G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Implemented candidate; integration and independent acceptance pending, not released/adopted |
 | G2: external adapter contract | Versioned mapping from a generic task/action to supported external tool semantics | Changed target/action/resource is rejected; unknown operations stay unsupported; core denials cannot be overridden | Design only; select a concrete integration before adding fields |
 | G3: evidence and lifecycle interoperability | Represent declared review/approval/execution/evidence subjects without pretending they are authenticated | Missing or stale evidence cannot be called verified; outputs separate declaration consistency, artifact integrity and runtime acceptance | Design only; no controller or execution-state engine shipped here |
-| Optional profiles | Domain-specific rules, including onchain finance and later evidenced use cases | Extra restrictions compose with the core; unrelated users do not load the profile | Existing finance retained; Safe draft deferred |
+| Optional profiles | Domain-specific rules, including onchain finance and later evidenced use cases | Extra restrictions compose with the core; unrelated users do not load the profile | Finance and Safe merged as optional profile |
 
 Every new feature must explain a cross-domain coordination problem, identify reusable concepts, include negative tests and distinguish core behavior from adapter/runtime responsibilities. Do not invent several industry-specific schemas simply to appear general. Do not let one integration determine the whole roadmap.
 
@@ -78,7 +78,7 @@ G1 identifies the complete canonical subject `canonical({profile: 'task-action/0
 
 The executable `examples/action-binding/demo.mjs` reuses the cross-domain builders and generic team/task/handoff fixtures. Software change and data cleaning mutate action parameters; support drafting mutates a task input. Each obtains the digest with async `describeTaskAction(bundleJson, taskJson, actionJson)`, declares routed passing review and required approval from `route.accountable`, validates PASS with async `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`, and requires `G1_SUBJECT_MISMATCH` for the unchanged binding after mutation. It executes no action and authenticates no reviewer or approver.
 
-Run `node examples/action-binding/demo.mjs` after integrating the G1 `/core` exports and schemas. This documentation/examples branch starts from a base without those APIs; until integration, the demo reports that dependency and exits 2. Static syntax checks are possible on this branch, but the six expected binding outcomes require the integrated candidate. Implemented candidate status is not release, publication or adoption evidence.
+Run `npm run demo:binding` on the integrated candidate for six expected binding outcomes. Implemented candidate status is not release, publication or adoption evidence.
 
 Referenced output artifacts need their own exact-byte digest supplied or computed by a trusted adapter; a path or URL alone is not immutable evidence or an immutable artifact identity. G1 binds the reference declaration, not the retrieved artifact bytes.
 
@@ -86,9 +86,9 @@ All consumers must distinguish consistency, integrity and authenticity. A conten
 
 Time and external state remain explicit inputs. Do not silently read a clock, fetch referenced URLs, execute evidence commands or load executable configuration inside the core. Unknown adapter/profile versions cannot silently become a generic PASS. Profile-specific PASS must never imply a broader set of checks than actually performed.
 
-## 8. Treatment of the existing Safe draft
+## 8. Merged optional Safe profile
 
-Safe proposal work remains a recoverable optional integration candidate in PR #12, not the next mandatory core milestone. It is not merged by this proposal and is not copied into `/core`. Its broad serialization flag needs review: checking selected `to/value/data/operation` fields must not be described as authenticating the full signed Safe transaction, gas/refund fields, wallet payload, owners, signatures or execution. Any future acceptance must enumerate the precise fields/bytes checked and retain false or unverified for all other claims.
+Safe proposal support from PR #12 is merged in the optional finance profile and remains outside `/core`. `safe_call_envelope_matches_intent` covers the declared subject, chain, Safe address, nonce and supported CALL envelope fields. Canonical transaction serialization and transaction hashes remain unverified; the checker authenticates no Safe account, owners, signatures or execution.
 
 The prior finance implementations are retained, not discarded. Their reusable lessons about subject changes and evidence freshness inform G1, while asset amounts, spender limits and chain-specific formats remain in optional profiles. Financial profiles do not authorize real fund movement.
 

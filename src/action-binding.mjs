@@ -27,7 +27,7 @@ async function subject(bundleJson, taskJson, actionJson) {
   const bytes = new TextEncoder().encode(canonical({ profile: PROFILE, bundle: b.bundle, task: t.task, action: a.value }));
   const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   const digest = 'sha256:' + Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('');
-  return { errors: [], route: t.route, details: { subject_digest: digest, binding_profile: PROFILE, task_id: t.task.id, action: a.value } };
+  return { errors: [], route: t.route, details: { subject_digest: digest, binding_profile: PROFILE, task_id: t.task.id, action_id: a.value.id, action: a.value } };
  } catch {
   return { errors: [issue('G1_DIGEST_UNAVAILABLE', 'subject_digest', 'Web Crypto SHA-256 is unavailable')] };
  }
@@ -40,10 +40,12 @@ export async function describeTaskAction(bundleJson, taskJson, actionJson) {
 
 export async function validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson) {
  const s = await subject(bundleJson, taskJson, actionJson);
- const finish = errors => report('task-action-binding', errors, { ...s.details, binding_matches_subject: errors.length === 0 });
+ let declarations = {};
+ const finish = errors => report('task-action-binding', errors, { ...s.details, ...declarations, binding_matches_subject: errors.length === 0 });
  if (s.errors.length) return finish(s.errors);
  const parsed = read(bindingJson, schemas['task-action-binding'], 'binding');
  if (parsed.errors.length) return finish(parsed.errors);
+ declarations = { reviews: parsed.value.reviews, ...(parsed.value.human_approval ? { human_approval: parsed.value.human_approval } : {}) };
  const v = parsed.value, errors = [], seen = new Set();
  const add = (code, path, message) => errors.push(issue(code, path, message));
  const match = (value, path) => {

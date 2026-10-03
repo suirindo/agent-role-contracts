@@ -21,6 +21,6 @@ for (const [name, content] of Object.entries(outputs)) {
  const dest = new URL(name, root);
  if (process.argv.includes('--check')) {
   if (readFileSync(dest, 'utf8') !== content) throw new Error('SCHEMA_GENERATED_DRIFT: ' + name);
- } else if (readFileSync(dest, 'utf8') !== content) { writeFileSync(dest, content); console.log(fileURLToPath(dest)); }
+ } else { writeFileSync(dest, content); console.log(fileURLToPath(dest)); }
 }
 if (process.argv.includes('--check')) console.log(`${names.length} bundled schemas: supported-keyword check and generated identity PASS`);
