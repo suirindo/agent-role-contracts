@@ -2,20 +2,20 @@
 
 Catch tasks that exceed an AI agent's declared write scope, and conflicting implementer/reviewer roles, before you hand off work.
 
-**Development preview: `0.2.0-alpha.1`.** The published npm release remains `0.1.0`; the finance preview is available from the branch below. The existing v0.1 role-contract profile and synchronous APIs remain supported.
+**Development preview: `0.2.0-alpha.2`.** The published npm release remains `0.1.0`. The current repository includes the v0.2 finance preview while preserving the v0.1 role-contract profile and synchronous APIs.
 
 ## Onchain finance preview
 
-Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Bind simulation, independent-role review and human-approval declarations to a SHA-256 subject covering the complete bundle, task, financial policy and proposal.
+Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. Alpha.2 can also check a post-execution receipt against that same subject, chain and nonce.
 
 ```sh
-git clone --branch feat/onchain-finance-v02 https://github.com/suirindo/agent-role-contracts.git agent-role-contracts-v02
-npm --prefix agent-role-contracts-v02 run demo:finance --silent
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo:finance --silent
 ```
 
-The English demo shows a normal payment, a wrong chain, a payment one base unit over its limit, an unlimited allowance, a changed proposal with old review, and newly bound fictional declarations. No install, wallet, API key or provider account is needed after cloning. Requirements: Git and Node.js 22.5 or newer with npm.
+The English demo includes a normal payment, wrong-chain and over-limit proposals, an unlimited allowance, stale review binding, refreshed fictional declarations, a matching execution receipt and a mismatched execution nonce. No install, wallet, API key or provider account is needed after cloning. Requirements: Git and Node.js 22.5 or newer with npm.
 
-This is an offline declaration preflight for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals. Amounts use exact uint256 decimal strings. A PASS does not verify chain state, prove simulation or approval, sign, broadcast, enforce limits or establish financial safety. [Use the financial profile and API](examples/onchain-finance/README.md).
+This is an offline declaration preflight for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals. Amounts use exact uint256 decimal strings. Execution receipts are supplied declarations, not authenticated chain data. A PASS does not verify chain state, prove simulation/approval/receipt authenticity, sign, broadcast, enforce limits or establish financial safety. [Use the financial profile and API](examples/onchain-finance/README.md).
 
 The v0.1 profile checks declared roles, authority, review separation, task scope and handoffs. It does not grant runtime authority, authenticate identity, execute agents or replace an existing company Agent OS.
 

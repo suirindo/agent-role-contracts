@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { openSync, fstatSync, lstatSync, readSync, closeSync, constants } from 'node:fs';
-import { validateBundle, explainTask, validateHandoff, describeFinancialIntent, validateFinancialIntent, MAX_INPUT_BYTES } from '../src/index.mjs';
+import { validateBundle, explainTask, validateHandoff, describeFinancialIntent, validateFinancialIntent, validateFinancialExecution, MAX_INPUT_BYTES } from '../src/index.mjs';
 const HELP=`Agent Role Contracts — offline declaration checks only
 Usage:
   node bin/agent-role-contracts.mjs validate --bundle examples/team.json [--format json|text]
@@ -8,6 +8,7 @@ Usage:
   node bin/agent-role-contracts.mjs handoff --bundle examples/team.json --task examples/task.json --handoff examples/handoff.json
   node bin/agent-role-contracts.mjs finance-subject --bundle B.json --task T.json --policy P.json --transaction TX.json
   node bin/agent-role-contracts.mjs finance --bundle B.json --task T.json --policy P.json --intent I.json [--at UTC_TIME] [--format json|text]
+  node bin/agent-role-contracts.mjs finance-execution --bundle B.json --task T.json --policy P.json --intent I.json --receipt R.json [--at UTC_TIME] [--format json|text]
 Finance is a v0.2 preview. The CLI defaults --at to its current UTC clock; the API requires an explicit time.
 Exit 0: declared contracts consistent. Exit 1: invalid declaration. Exit 2: CLI/file error.
 No command executes agents, evidence commands, network requests, or writes files.
@@ -33,8 +34,8 @@ try {
  const [cmd,...argv]=process.argv.slice(2);
  if(cmd==='--help'||cmd==='help')console.log(HELP);
  else {
-  if(!['validate','explain','handoff','finance-subject','finance'].includes(cmd))throw new Error('Unknown command; use --help');
-  const permitted=cmd==='validate'?['--bundle','--format']:cmd==='explain'?['--bundle','--task','--format']:cmd==='handoff'?['--bundle','--task','--handoff','--format']:cmd==='finance-subject'?['--bundle','--task','--policy','--transaction','--format']:['--bundle','--task','--policy','--intent','--at','--format'];
+  if(!['validate','explain','handoff','finance-subject','finance','finance-execution'].includes(cmd))throw new Error('Unknown command; use --help');
+  const permitted=cmd==='validate'?['--bundle','--format']:cmd==='explain'?['--bundle','--task','--format']:cmd==='handoff'?['--bundle','--task','--handoff','--format']:cmd==='finance-subject'?['--bundle','--task','--policy','--transaction','--format']:cmd==='finance'?['--bundle','--task','--policy','--intent','--at','--format']:['--bundle','--task','--policy','--intent','--receipt','--at','--format'];
   const args=new Map();
   for(let i=0;i<argv.length;i+=2) {
    if(!permitted.includes(argv[i])||args.has(argv[i])||!argv[i+1]||argv[i+1].startsWith('--'))throw new Error('Unknown, duplicate, or missing option');
@@ -43,12 +44,13 @@ try {
   for(const key of permitted.filter(k=>!['--format','--at'].includes(k)))if(!args.has(key))throw new Error(`Missing ${key}`);
   const format=args.get('--format')||'json';if(!['json','text'].includes(format))throw new Error('Invalid format');
   const b=read(args.get('--bundle'));
-  const r=cmd==='validate'?validateBundle(b):cmd==='explain'?explainTask(b,read(args.get('--task'))):cmd==='handoff'?validateHandoff(b,read(args.get('--task')),read(args.get('--handoff'))):cmd==='finance-subject'?await describeFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--transaction'))):await validateFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),args.get('--at')||new Date().toISOString());
+  const r=cmd==='validate'?validateBundle(b):cmd==='explain'?explainTask(b,read(args.get('--task'))):cmd==='handoff'?validateHandoff(b,read(args.get('--task')),read(args.get('--handoff'))):cmd==='finance-subject'?await describeFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--transaction'))):cmd==='finance'?await validateFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),args.get('--at')||new Date().toISOString()):await validateFinancialExecution(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--receipt')),args.get('--at')||new Date().toISOString());
   if(format==='json')console.log(safeJson(r,2));
   else {
    console.log(`${r.valid?'PASS':'FAIL'}: ${r.kind} (declarations only; execution NOT authorized)`);
    if(r.accountable)for(const line of [`Accountable: ${r.accountable}`,`Implementers: ${r.executors.join(', ')}`,`Reviewers: ${r.reviewers.join(', ')}`,`Human approval required: ${r.human_approval_required}`])console.log(safeText(line));
    if(r.transaction)for(const line of [`Operation: ${r.transaction.operation}`,`Chain: ${r.transaction.chain_id}`,`Asset: ${r.transaction.asset}`,`Amount (base units): ${r.transaction.amount_base_units}`,`Target: ${r.transaction.target}`,`Subject: ${r.subject_digest}`])console.log(safeText(line));
+   if(r.execution)for(const line of [`Execution status: ${r.execution.status}`,`Transaction hash: ${r.execution.transaction_hash}`,`Block: ${r.execution.block_number}`])console.log(safeText(line));
    for(const role of r.roles||[])console.log(safeText(`Role ${role.id}: ${role.authority_mode}; allowed=[${role.capabilities.join(', ')}]; prohibited=[${role.prohibited_capabilities.join(', ')}]`));
    for(const e of r.errors)console.log(safeText(`${e.code} ${e.path}: ${e.message}`));
   }

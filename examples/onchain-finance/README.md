@@ -1,6 +1,6 @@
 # Onchain finance intent checks — v0.2 preview
 
-Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The preview package version is `0.2.0-alpha.1`; this feature is not in the published npm `0.1.0` release.
+Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The preview package version is `0.2.0-alpha.2`; this feature is not in the published npm `0.1.0` release.
 
 ## Try the demo
 
@@ -12,7 +12,7 @@ npm run demo:finance --silent
 
 Git and Node.js 22.5 or newer with npm are the prerequisites. There are no dependencies or install steps. The demo reads only its named local fixtures, calls the actual checker, changes copies in memory and exits 0 only when every expected outcome occurs. Missing fixtures or unexpected results exit 2.
 
-All addresses, token and evidence are fictional. The demo uses the explicit fixture clock `2030-01-01T00:00:03Z`; this is not a live chain or current-time test. Updating fixture hashes in step 6 illustrates declaration binding. It does not create a real simulation, review or approval.
+All addresses, token and evidence are fictional. Intent checks use the explicit fixture clock `2030-01-01T00:00:03Z`; execution-receipt checks use `2030-01-01T00:00:05Z`. These are not live-chain or current-time tests. Updating fixture hashes in step 6 illustrates declaration binding; steps 7–8 show receipt binding. The demo does not create or authenticate a real simulation, review, approval or transaction receipt.
 
 Expected outcomes:
 
@@ -24,6 +24,8 @@ Expected outcomes:
 | Unlimited token allowance | `FINANCE_UNLIMITED_APPROVAL_REFUSED` |
 | Amount changes after review | `FINANCE_SUBJECT_MISMATCH` |
 | New fictional declarations cover the changed proposal | PASS |
+| Execution receipt matches the approved subject, chain and nonce | PASS |
+| Execution receipt uses a different nonce | `FINANCE_EXECUTION_NONCE_MISMATCH` |
 
 ## Concrete uses
 
@@ -42,6 +44,7 @@ These are integration examples, not verified deployments or adoption claims. Sup
 | `policy.json` | v0.2 chain/sender/target allowlists, chain-bound assets, per-proposal transfer/approval/fee limits and evidence age |
 | `transaction.json` | One declared native transfer, ERC-20 transfer or ERC-20 approval |
 | `intent.json` | Proposal plus simulation, review and human-approval declarations |
+| `execution.json` | Post-execution declaration: subject, chain, transaction hash, nonce, block, status and times |
 
 Amount, allowance, nonce, chain ID and block number are canonical decimal strings bounded to uint256. Numbers, signs, decimals, exponents, whitespace and leading zeroes are rejected. There is no floating-point arithmetic or implicit token-decimal conversion. Zero-value transfers and approval revocations are supported; zero-address endpoints are outside this profile.
 
@@ -59,6 +62,7 @@ The new APIs are asynchronous JSON-text APIs. Existing `validateBundle`, `explai
 import {
   describeFinancialIntent,
   validateFinancialIntent,
+  validateFinancialExecution,
 } from '@netsujo/agent-role-contracts'; // local v0.2 preview package
 
 // JSON strings supplied by your application, from separately trusted inputs.
@@ -72,9 +76,15 @@ const result = await validateFinancialIntent(
   bundleJson, taskJson, policyJson, intentJson,
   new Date().toISOString(),
 );
+
+// After a separately controlled execution workflow produces a receipt declaration:
+const executed = await validateFinancialExecution(
+  bundleJson, taskJson, policyJson, intentJson, executionJson,
+  new Date().toISOString(),
+);
 ```
 
-`describeFinancialIntent` checks the proposal and produces a `financial-subject` report. Its PASS describes a proposal without accepting any evidence. `validateFinancialIntent` requires all three evidence/decision declarations and produces a `financial-intent` report. Every report retains the original fail-closed claims and explicitly states the additional finance limitations.
+`describeFinancialIntent` checks the proposal and produces a `financial-subject` report. Its PASS describes a proposal without accepting any evidence. `validateFinancialIntent` requires all three evidence/decision declarations and produces a `financial-intent` report. `validateFinancialExecution` first requires a valid intent, then binds the supplied receipt declaration to the same subject, chain and nonce; it also rejects reverted status, placeholder zero hashes and invalid approval → execution → observation timing. Every report retains the original fail-closed claims and explicitly states the additional finance limitations.
 
 The subject digest is SHA-256 over canonical JSON containing the finance-profile identifier and complete parsed bundle, task, financial policy and transaction. Object-member order does not matter; array order and every declared value do. Changing an objective, acceptance criterion, role body, policy cap, scope, nonce, fee or transaction value invalidates old bindings. The digest uses local Web Crypto; no network or key is used. A hash is not a signature.
 
@@ -96,11 +106,17 @@ Check the fictional evidence with its fixture clock:
 node bin/agent-role-contracts.mjs finance --bundle examples/onchain-finance/bundle.json --task examples/onchain-finance/task.json --policy examples/onchain-finance/policy.json --intent examples/onchain-finance/intent.json --at 2030-01-01T00:00:03Z --format text
 ```
 
+Check the fictional execution receipt:
+
+```sh
+node bin/agent-role-contracts.mjs finance-execution --bundle examples/onchain-finance/bundle.json --task examples/onchain-finance/task.json --policy examples/onchain-finance/policy.json --intent examples/onchain-finance/intent.json --receipt examples/onchain-finance/execution.json --at 2030-01-01T00:00:05Z --format text
+```
+
 Exit codes stay 0 consistent declarations, 1 invalid declarations, 2 CLI/file error. JSON is the default format. Only explicitly supplied bounded regular files are read; symlink/UTF-8/size rules are unchanged.
 
 ## Execution boundary
 
-PASS establishes only consistency of the supplied declarations. It does not authenticate humans/reviewers, verify evidence or blockchain state, inspect calldata, implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. The package has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
+PASS establishes only consistency of the supplied declarations. An execution receipt PASS says that the supplied receipt names the approved subject, chain and nonce with internally consistent status/timing; it does not prove that the transaction hash, block or receipt came from a real chain. The package does not authenticate humans/reviewers, verify evidence or blockchain state, inspect calldata, implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. It has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
 
 An execution system remains responsible for trusted policy and time, authenticated decisions, live state, exact serialized transaction correspondence, current nonce/fee checks, aggregate budgets, replay prevention, stopping conditions, simulation and actual custody permissions. Bind its immediate pre-execution checks to the same subject and enforce its own controls. Never treat this preview's PASS as permission to move funds.
 

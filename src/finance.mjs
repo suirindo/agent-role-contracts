@@ -123,11 +123,40 @@ export function financialEvidenceErrors(route, policy, intent, digest, evaluated
   return errors;
 }
 
+export function financialExecutionErrors(intent, execution, digest, evaluatedAt) {
+  const errors = [];
+  const add = (code, path, message) => errors.push(error(code, path, message));
+  const at = timestamp(evaluatedAt);
+  if (at === null) return [error('FINANCE_EVALUATION_TIME_INVALID', 'evaluated_at', 'Pass an explicit canonical UTC evaluation time; the pure API does not read a clock')];
+
+  if (execution.subject_digest !== digest) add('FINANCE_EXECUTION_SUBJECT_MISMATCH', 'financial_execution/subject_digest', 'Execution receipt must bind the complete current financial subject');
+  if (execution.chain_id !== intent.transaction.chain_id) add('FINANCE_EXECUTION_CHAIN_MISMATCH', 'financial_execution/chain_id', 'Execution receipt belongs to a different chain');
+  if (execution.nonce !== intent.transaction.nonce) add('FINANCE_EXECUTION_NONCE_MISMATCH', 'financial_execution/nonce', 'Execution receipt belongs to a different transaction nonce');
+  if (/^0x0{64}$/i.test(execution.transaction_hash)) add('FINANCE_EXECUTION_TX_HASH_ZERO', 'financial_execution/transaction_hash', 'All-zero transaction hashes are refused as placeholder execution evidence');
+  errors.push(...uint256Errors(execution.chain_id, 'financial_execution/chain_id', true));
+  errors.push(...uint256Errors(execution.nonce, 'financial_execution/nonce'));
+  errors.push(...uint256Errors(execution.block_number, 'financial_execution/block_number'));
+  if (execution.status !== 'success') add('FINANCE_EXECUTION_REVERTED', 'financial_execution/status', 'A successful execution declaration is required');
+
+  const approved = timestamp(intent.human_approval.approved_at);
+  const executed = timestamp(execution.executed_at);
+  const observed = timestamp(execution.observed_at);
+  if (executed === null) add('FINANCE_EXECUTION_TIME_INVALID', 'financial_execution/executed_at', 'Expected a real execution calendar time in canonical UTC');
+  if (observed === null) add('FINANCE_EXECUTION_TIME_INVALID', 'financial_execution/observed_at', 'Expected a real observation calendar time in canonical UTC');
+  if (approved !== null && executed !== null && executed < approved) add('FINANCE_EXECUTION_BEFORE_APPROVAL', 'financial_execution/executed_at', 'Execution declaration cannot predate the bound human approval');
+  if (executed !== null && observed !== null && observed < executed) add('FINANCE_EXECUTION_TIME_ORDER', 'financial_execution/observed_at', 'Execution must be observed at or after its declared execution time');
+  if (executed !== null && executed > at) add('FINANCE_EXECUTION_FROM_FUTURE', 'financial_execution/executed_at', 'Execution declaration is later than the supplied evaluation time');
+  if (observed !== null && observed > at) add('FINANCE_EXECUTION_FROM_FUTURE', 'financial_execution/observed_at', 'Execution observation is later than the supplied evaluation time');
+  return errors;
+}
+
 export const FINANCIAL_LIMITATIONS = Object.freeze({
   chain_state_verified: false,
   simulation_executed: false,
   address_checksum_verified: false,
   transaction_serialization_verified: false,
+  execution_receipt_verified: false,
+  transaction_hash_verified: false,
   financial_safety_verified: false,
   replay_protection_enforced: false,
 });

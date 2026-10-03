@@ -6,8 +6,8 @@ import { validateSchema } from './schema.mjs';
 import { parseJsonRejectDuplicateKeys } from './strict-json.mjs';
 import { buildReport } from './report.mjs';
 import { conditionalInputErrors, requiredInputsForContract, authorityErrors, runtimeNeutralFindings } from './contract-checks.mjs';
-import { FINANCIAL_PROFILE, FINANCIAL_LIMITATIONS, financialProposalErrors, financialSubjectDigest, financialEvidenceErrors } from './finance.mjs';
-export const VERSION = '0.2.0-alpha.1';
+import { FINANCIAL_PROFILE, FINANCIAL_LIMITATIONS, financialProposalErrors, financialSubjectDigest, financialEvidenceErrors, financialExecutionErrors } from './finance.mjs';
+export const VERSION = '0.2.0-alpha.2';
 export const MAX_INPUT_BYTES = 1048576;
 const own=(v,k)=>Object.hasOwn(v,k);
 const order=(a,b)=>a<b?-1:a>b?1:0;
@@ -197,4 +197,19 @@ export async function validateFinancialIntent(bundleJson, taskJson, policyJson, 
  if(result.errors.length)return report('financial-intent',result.errors,{validation_stage:'intent',...result.details});
  const errors=financialEvidenceErrors(context.t.route,context.policy,intent.value,result.details.subject_digest,evaluatedAt);
  return report('financial-intent',errors,{validation_stage:'intent',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details});
+}
+
+/** Async declaration preflight for an execution receipt bound to an already valid financial intent. */
+export async function validateFinancialExecution(bundleJson, taskJson, policyJson, intentJson, executionJson, evaluatedAt) {
+ const intentResult=await validateFinancialIntent(bundleJson,taskJson,policyJson,intentJson,evaluatedAt);
+ if(!intentResult.valid)return report('financial-execution',intentResult.errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS});
+ const intent=read(intentJson,schemas['financial-intent'],'financial_intent');
+ const execution=read(executionJson,schemas['financial-execution'],'financial_execution');
+ if(execution.errors.length)return report('financial-execution',execution.errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS});
+ const context=financialContext(bundleJson,taskJson,policyJson,JSON.stringify(intent.value.transaction),'financial_intent/transaction');
+ if(context.errors.length)return report('financial-execution',context.errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS});
+ const result=await financialDetails(context);
+ if(result.errors.length)return report('financial-execution',result.errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details});
+ const errors=financialExecutionErrors(intent.value,execution.value,result.details.subject_digest,evaluatedAt);
+ return report('financial-execution',errors,{validation_stage:'execution',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,execution:execution.value});
 }

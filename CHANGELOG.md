@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0-alpha.2 — development preview, not published
+
+- Add a strict financial-execution receipt schema plus asynchronous `validateFinancialExecution` API and `finance-execution` CLI command.
+- Bind declared execution results to the approved financial subject, chain and nonce; reject reverted status, placeholder zero hashes, mismatched receipts and invalid approval → execution → observation timing.
+- Report execution receipt and transaction-hash verification as false: this remains an offline declaration checker with no RPC, receipt authentication, signing, broadcasting, serialization verification or replay enforcement.
+- Preserve v0.1 APIs and the alpha.1 financial-intent behavior.
+
 ## 0.2.0-alpha.1 — development preview, not published
 
 - Add offline onchain-finance proposal checks for native transfers, standard ERC-20 transfers and bounded ERC-20 approvals.
