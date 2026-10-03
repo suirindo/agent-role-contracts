@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.2.0-alpha.4`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
+**開発プレビュー：`0.3.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -44,6 +44,20 @@ npm --prefix agent-role-contracts run demo:general --silent
 この未公開のソース候補では、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
+
+## G1 タスク・アクションbinding候補
+
+G1は**実装済み候補**です。統合と独立した受入確認が必要であり、リリース済み・採用済みとは主張しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
+
+```sh
+node examples/action-binding/demo.mjs
+```
+
+候補版の`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
+
+各例でdigestを取得し、routeのreviewerによるpassと`route.accountable`による必須承認を宣言してPASSを確認します。その後、意味のあるtask入力またはaction parameterを変更し、元のbindingが`G1_SUBJECT_MISMATCH`で失敗することを確認します。完全なcanonical subjectはprofile、**policy・roles・routesを含むbundle全体、task全体、宣言action全体**を対象とし、レビュー・承認の宣言は現在のsubjectに結び付きます。
+
+digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2の外部adapter semanticsは未実装で、parameter名からtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
 
 ## 詳細な3-role例
 

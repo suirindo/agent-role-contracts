@@ -34,3 +34,5 @@ export function validateHandoff(bundleJson,taskJson,handoffJson) {
  if(v.current_status==='blocked' && !v.unresolved.length)errors.push(issue('HANDOFF_BLOCKER_MISSING','handoff/unresolved','Blocked requires a recorded unresolved item'));
  return report('handoff',errors,{task_id:t.task.id,from_agent:v.from_agent,next_agent:v.suggested_next_agent,declared_status:v.current_status});
 }
+
+export { describeTaskAction, validateTaskActionBinding } from './action-binding.mjs';
