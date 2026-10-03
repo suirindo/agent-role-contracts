@@ -1,8 +1,8 @@
 # Task lifecycle declaration demo
 
-G0, G1 and G2 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 builds on merged G2 and is the current unreleased candidate pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. Source merge does not imply npm publication, production adoption, runtime permission or deployment; G3 is not merged or published.
+G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source remains the unreleased development preview `0.5.0-alpha.1`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Source merge and implementation do not imply npm publication, production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
-G0, G1 and G2 are merged and implemented in repository main. G3 lifecycle is an implemented candidate pending independent review and hosted acceptance, not released or adopted. G2 filesystem-write is included through its optional subpath. Finance and Safe remain optional profiles; this demo uses only the generic core. No package publication is claimed.
+G3 lifecycle provides generic core declarations in the unreleased repository source, not a runtime, state machine or authenticator. G2 filesystem-write is included through its optional subpath. Finance and Safe remain optional profiles; this demo uses only the generic core. No package publication is claimed.
 
 Run from this unreleased source checkout:
 
