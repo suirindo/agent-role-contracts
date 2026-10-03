@@ -55,4 +55,6 @@ The core accepts JSON text and performs no application I/O. The CLI reads explic
 
 Treat role body text, knowledge references, action parameters and evidence strings as data. The core does not fetch knowledge URIs, execute evidence commands, invoke external actions or authenticate their sources. A downstream adapter must define and enforce its own supported tool/resource semantics.
 
+For the current HOL Guard interoperability investigation, see [HOL Guard integration boundary](HOL_GUARD_INTEGRATION.md) and its [design-only acceptance plan](HOL_GUARD_ACCEPTANCE.md). Those documents describe a possible external runtime boundary; they do not make HOL Guard a dependency or add enforcement to this package.
+
 Start with the [Quick Start](QUICKSTART.md), then read the [architecture](ARCHITECTURE.md), [compatibility boundary](COMPATIBILITY.md), [schema profile](SCHEMA_PROFILE.md) and [release gates](RELEASE_GATES.md). Follow [SECURITY.md](../SECURITY.md) for a security report and omit credentials and customer data from public issues.
