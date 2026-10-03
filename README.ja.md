@@ -45,19 +45,31 @@ npm --prefix agent-role-contracts run demo:general --silent
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
 
-## G1 タスク・アクションbinding候補
+## G1 タスク・アクションbinding
 
-G1は**実装済み候補**です。統合と独立した受入確認が必要であり、リリース済み・採用済みとは主張しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
+G0とG1は**merge済み・実装済み**です。mergeはpackage公開や採用を意味しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
 
 ```sh
 node examples/action-binding/demo.mjs
 ```
 
-候補版の`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
+merge済みG1の`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
 
 各例でdigestを取得し、routeのreviewerによるpassと`route.accountable`による必須承認を宣言してPASSを確認します。その後、意味のあるtask入力またはaction parameterを変更し、元のbindingが`G1_SUBJECT_MISMATCH`で失敗することを確認します。完全なcanonical subjectはprofile、**policy・roles・routesを含むbundle全体、task全体、宣言action全体**を対象とし、レビュー・承認の宣言は現在のsubjectに結び付きます。
 
 digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2の外部adapter semanticsは未実装で、parameter名からtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
+
+## G3 lifecycle候補
+
+G3 lifecycleは**実装済み候補で、統合・独立レビュー待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+
+```sh
+node examples/task-lifecycle/demo.mjs
+```
+
+このbaseにはlifecycle APIがないため、`/core`の`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`の統合が必要です。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G2はこのbaseでは設計のみです。G2の作業は別に保持し、merge済みと仮定しません。finance・Safeは任意profileです。
+
+外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
 
 ## 詳細な3-role例
 

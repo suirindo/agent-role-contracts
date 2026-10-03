@@ -66,19 +66,31 @@ This unreleased source candidate adds `@netsujo/agent-role-contracts/core` and t
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
-## G1 task/action binding candidate
+## G1 task/action binding
 
-G1 is an **implemented candidate**, pending integration and independent acceptance; it is not a released or adopted feature. The [non-financial binding demo](examples/action-binding/demo.mjs) reuses generic fixtures for software change, data cleaning and support drafting:
+G0 and G1 are **merged and implemented**. Merge does not establish package publication or adoption. The [non-financial binding demo](examples/action-binding/demo.mjs) reuses generic fixtures for software change, data cleaning and support drafting:
 
 ```sh
 node examples/action-binding/demo.mjs
 ```
 
-The candidate exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development version is unreleased. Action IDs do not establish task/run replay identity; replay policy remains external.
+The merged G1 implementation exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development version is unreleased. Action IDs do not establish task/run replay identity; replay policy remains external.
 
 For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
 
-The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 external adapter semantics remain unimplemented, so parameter names do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 external adapter semantics remain design-only on this base; any G2 work must stay separate and must not be assumed merged, so parameter names do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+
+## G3 lifecycle candidate
+
+G3 lifecycle is an **implemented candidate pending integration and independent review**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+
+```sh
+node examples/task-lifecycle/demo.mjs
+```
+
+This base lacks lifecycle APIs; the demo requires integrated `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 remains design-only on this base, and separate G2 work is not assumed merged. Finance and Safe are optional.
+
+External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
 
 ## Full three-role example
 

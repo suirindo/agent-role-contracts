@@ -65,26 +65,34 @@ Each checks the assigned task, rejects out-of-scope work, rejects self-review, r
 | Phase | Work | Acceptance boundary | Status in this proposal |
 | --- | --- | --- | --- |
 | G0: core isolation | Separate entrypoints and schemas, preserve compatibility, generic-first documentation, non-financial examples | Core/CLI/quickstart work with finance files absent; existing behavior remains covered | Merged and implemented; publication separate |
-| G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Implemented candidate; integration and independent acceptance pending, not released/adopted |
-| G2: external adapter contract | Versioned mapping from a generic task/action to supported external tool semantics | Changed target/action/resource is rejected; unknown operations stay unsupported; core denials cannot be overridden | Design only; select a concrete integration before adding fields |
-| G3: evidence and lifecycle interoperability | Represent declared review/approval/execution/evidence subjects without pretending they are authenticated | Missing or stale evidence cannot be called verified; outputs separate declaration consistency, artifact integrity and runtime acceptance | Design only; no controller or execution-state engine shipped here |
+| G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Merged and implemented; publication and adoption separate |
+| G2: external adapter contract | Versioned mapping from a generic task/action to supported external tool semantics | Changed target/action/resource is rejected; unknown operations stay unsupported; core denials cannot be overridden | Design only on this base; any G2 work stays separate and is not assumed merged |
+| G3: evidence and lifecycle interoperability | Represent declared review/approval/execution/evidence subjects without pretending they are authenticated | Missing or stale evidence cannot be called verified; outputs separate declaration consistency, artifact integrity and runtime acceptance | Implemented candidate pending integration/review; not released/adopted; no controller or execution-state engine |
 | Optional profiles | Domain-specific rules, including onchain finance and later evidenced use cases | Extra restrictions compose with the core; unrelated users do not load the profile | Finance and Safe merged as optional profile |
 
 Every new feature must explain a cross-domain coordination problem, identify reusable concepts, include negative tests and distinguish core behavior from adapter/runtime responsibilities. Do not invent several industry-specific schemas simply to appear general. Do not let one integration determine the whole roadmap.
 
-## 7. G1 binding candidate and integration boundary
+## 7. Merged G1 binding and integration boundary
 
 G1 identifies the complete canonical subject `canonical({profile: 'task-action/0.3', bundle, task, action})`: the full bundle including policy, role contracts/bodies, knowledge and routes, the full task including inputs/objective/acceptance, and the full declared action. Changes to these declarations invalidate prior bindings. Action and binding JSON use schema version `0.3`. Flat scalar action parameters are declarations only; G2 mapping to tool operations, resources and external permissions remains unimplemented.
 
 The executable `examples/action-binding/demo.mjs` reuses the cross-domain builders and generic team/task/handoff fixtures. Software change and data cleaning mutate action parameters; support drafting mutates a task input. Each obtains the digest with async `describeTaskAction(bundleJson, taskJson, actionJson)`, declares routed passing review and required approval from `route.accountable`, validates PASS with async `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`, and requires `G1_SUBJECT_MISMATCH` for the unchanged binding after mutation. It executes no action and authenticates no reviewer or approver.
 
-Run `npm run demo:binding` on the integrated candidate for six expected binding outcomes. Implemented candidate status is not release, publication or adoption evidence.
+Run `npm run demo:binding` on the integrated candidate for six expected binding outcomes. G1 is merged and implemented; merge is not release, publication or adoption evidence.
 
 Referenced output artifacts need their own exact-byte digest supplied or computed by a trusted adapter; a path or URL alone is not immutable evidence or an immutable artifact identity. G1 binds the reference declaration, not the retrieved artifact bytes.
 
 All consumers must distinguish consistency, integrity and authenticity. A content digest detects different declared bytes; it is not a signature, authorization, timestamp, actual execution proof or proof that a retrieved source is true. Repeated subjects also require an external task/run identity and replay policy where relevant. A changed subject must invalidate prior review/approval declarations; the core must not synthesize fresh approval automatically.
 
 Time and external state remain explicit inputs. Do not silently read a clock, fetch referenced URLs, execute evidence commands or load executable configuration inside the core. Unknown adapter/profile versions cannot silently become a generic PASS. Profile-specific PASS must never imply a broader set of checks than actually performed.
+
+## G3 lifecycle declaration boundary
+
+G3 is an implemented candidate pending integration and independent review, not released or adopted. This base lacks its core APIs; the [executable lifecycle example](../examples/task-lifecycle/README.md) has an explicit integration dependency on `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` uses the current G1 subject, routed review and accountable approval declarations, optional routed execution declarations and artifact evidence. The three existing cross-domain scenarios demonstrate PASS, stale subjects and conflicting digests for one artifact ID. G2 remains design-only on this base; separate adapter work is not assumed merged or required by these examples.
+
+Caller-supplied external `run_id` correlates declarations; it provides no replay protection. Event decisions are declarations, not authenticated events. No timestamps, clock reads or state-machine ordering are introduced. Artifact `sha256` is declared identity, not a byte-verification result; bytes are never read and locators remain inert.
+
+Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are distinct. A consistent declaration can still describe fictional evidence or an unauthenticated review, approval or execution. Runtime acceptance, identity verification, artifact-byte verification and replay enforcement belong to trusted external integrations. Finance and Safe remain optional; no package publication is claimed.
 
 ## 8. Merged optional Safe profile
 
