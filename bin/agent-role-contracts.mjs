@@ -9,6 +9,7 @@ Usage:
   node bin/agent-role-contracts.mjs handoff --bundle examples/team.json --task examples/task.json --handoff examples/handoff.json
   node bin/agent-role-contracts.mjs action-subject --bundle B --task T --action A [--format json|text]
   node bin/agent-role-contracts.mjs action-bind --bundle B --task T --action A --binding X [--format json|text]
+  node bin/agent-role-contracts.mjs adapter-filesystem-write --bundle B --task T --action A --mapping M [--format json|text]
   node bin/agent-role-contracts.mjs finance-subject --bundle B.json --task T.json --policy P.json --transaction TX.json
   node bin/agent-role-contracts.mjs finance --bundle B.json --task T.json --policy P.json --intent I.json [--at UTC_TIME] [--format json|text]
   node bin/agent-role-contracts.mjs finance-execution --bundle B.json --task T.json --policy P.json --intent I.json --receipt R.json [--at UTC_TIME] [--format json|text]
@@ -38,8 +39,8 @@ try {
  const [cmd,...argv]=process.argv.slice(2);
  if(cmd==='--help'||cmd==='help')console.log(HELP);
  else {
-  if(!['validate','explain','handoff','action-subject','action-bind','finance-subject','finance','finance-execution','finance-safe'].includes(cmd))throw new Error('Unknown command; use --help');
-  const permitted=cmd==='validate'?['--bundle','--format']:cmd==='explain'?['--bundle','--task','--format']:cmd==='handoff'?['--bundle','--task','--handoff','--format']:cmd==='action-subject'?['--bundle','--task','--action','--format']:cmd==='action-bind'?['--bundle','--task','--action','--binding','--format']:cmd==='finance-subject'?['--bundle','--task','--policy','--transaction','--format']:cmd==='finance'?['--bundle','--task','--policy','--intent','--at','--format']:cmd==='finance-execution'?['--bundle','--task','--policy','--intent','--receipt','--at','--format']:['--bundle','--task','--policy','--intent','--safe-proposal','--at','--format'];
+  if(!['validate','explain','handoff','action-subject','action-bind','adapter-filesystem-write','finance-subject','finance','finance-execution','finance-safe'].includes(cmd))throw new Error('Unknown command; use --help');
+  const permitted=cmd==='validate'?['--bundle','--format']:cmd==='explain'?['--bundle','--task','--format']:cmd==='handoff'?['--bundle','--task','--handoff','--format']:cmd==='action-subject'?['--bundle','--task','--action','--format']:cmd==='action-bind'?['--bundle','--task','--action','--binding','--format']:cmd==='adapter-filesystem-write'?['--bundle','--task','--action','--mapping','--format']:cmd==='finance-subject'?['--bundle','--task','--policy','--transaction','--format']:cmd==='finance'?['--bundle','--task','--policy','--intent','--at','--format']:cmd==='finance-execution'?['--bundle','--task','--policy','--intent','--receipt','--at','--format']:['--bundle','--task','--policy','--intent','--safe-proposal','--at','--format'];
   const args=new Map();
   for(let i=0;i<argv.length;i+=2) {
    if(!permitted.includes(argv[i])||args.has(argv[i])||!argv[i+1]||argv[i+1].startsWith('--'))throw new Error('Unknown, duplicate, or missing option');
@@ -48,11 +49,20 @@ try {
   for(const key of permitted.filter(k=>!['--format','--at'].includes(k)))if(!args.has(key))throw new Error(`Missing ${key}`);
   const format=args.get('--format')||'json';if(!['json','text'].includes(format))throw new Error('Invalid format');
   const { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution, validateSafeProposal } = cmd.startsWith('finance') ? await import('../src/finance-profile.mjs') : {};
+  const { validateFilesystemWriteMapping } = cmd==='adapter-filesystem-write' ? await import('../src/filesystem-write-adapter.mjs') : {};
   const b=read(args.get('--bundle'));
-  const r=cmd==='validate'?validateBundle(b):cmd==='explain'?explainTask(b,read(args.get('--task'))):cmd==='handoff'?validateHandoff(b,read(args.get('--task')),read(args.get('--handoff'))):cmd==='action-subject'?await core.describeTaskAction(b,read(args.get('--task')),read(args.get('--action'))):cmd==='action-bind'?await core.validateTaskActionBinding(b,read(args.get('--task')),read(args.get('--action')),read(args.get('--binding'))):cmd==='finance-subject'?await describeFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--transaction'))):cmd==='finance'?await validateFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),args.get('--at')||new Date().toISOString()):cmd==='finance-execution'?await validateFinancialExecution(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--receipt')),args.get('--at')||new Date().toISOString()):await validateSafeProposal(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--safe-proposal')),args.get('--at')||new Date().toISOString());
+  const r=cmd==='validate'?validateBundle(b):cmd==='explain'?explainTask(b,read(args.get('--task'))):cmd==='handoff'?validateHandoff(b,read(args.get('--task')),read(args.get('--handoff'))):cmd==='action-subject'?await core.describeTaskAction(b,read(args.get('--task')),read(args.get('--action'))):cmd==='action-bind'?await core.validateTaskActionBinding(b,read(args.get('--task')),read(args.get('--action')),read(args.get('--binding'))):cmd==='adapter-filesystem-write'?await validateFilesystemWriteMapping(b,read(args.get('--task')),read(args.get('--action')),read(args.get('--mapping'))):cmd==='finance-subject'?await describeFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--transaction'))):cmd==='finance'?await validateFinancialIntent(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),args.get('--at')||new Date().toISOString()):cmd==='finance-execution'?await validateFinancialExecution(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--receipt')),args.get('--at')||new Date().toISOString()):await validateSafeProposal(b,read(args.get('--task')),read(args.get('--policy')),read(args.get('--intent')),read(args.get('--safe-proposal')),args.get('--at')||new Date().toISOString());
   if(format==='json')console.log(safeJson(r,2));
   else {
    console.log(`${r.valid?'PASS':'FAIL'}: ${r.kind} (declarations only; execution NOT authorized)`);
+   if(cmd==='adapter-filesystem-write') {
+    for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Subject','subject_digest'],['Adapter profile','adapter_profile']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));
+    if(r.mapping)for(const [label,key] of [['Operation','operation'],['Path','path'],['Content digest','content_sha256']])if(r.mapping[key]!==undefined)console.log(safeText(`${label}: ${r.mapping[key]}`));
+    console.log(safeText(`Eligible declared executor IDs: ${(r.eligible_executors||[]).join(', ')}`));
+    if(r.mapping_matches_action!==undefined)console.log(safeText(`Mapping match: ${r.mapping_matches_action}`));
+    console.log('Declaration consistency only; content, filesystem, permission, and execution are NOT verified/enforced.');
+    console.log('Identity is not authenticated. G1 review/approval binding is separate; mapping PASS supplies no review or approval.');
+   }
    if(cmd==='action-subject'||cmd==='action-bind') {
     for(const [label,key] of [['Task','task_id'],['Action','action_id'],['Subject','subject_digest']])if(r[key]!==undefined)console.log(safeText(`${label}: ${r[key]}`));
     console.log('Digest is integrity-only; execution NOT authorized.');

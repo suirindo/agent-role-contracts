@@ -24,6 +24,7 @@ try {
     import assert from 'node:assert/strict';
     import { readFileSync } from 'node:fs';
     import * as core from '@netsujo/agent-role-contracts/core';
+    import { validateFilesystemWriteMapping } from '@netsujo/agent-role-contracts/adapters/filesystem-write';
     import * as finance from '@netsujo/agent-role-contracts/profiles/onchain-finance';
     import * as legacy from '@netsujo/agent-role-contracts';
     const base = new URL('./node_modules/@netsujo/agent-role-contracts/', import.meta.url);
@@ -45,6 +46,19 @@ try {
     assert.equal(stale.valid,false);
     assert.equal(stale.binding_matches_subject,false);
     assert.ok(stale.errors.some(e => e.code === 'G1_SUBJECT_MISMATCH'));
+    const writeAction = {schema_version:'0.3',id:'packed-write',kind:'filesystem-write',parameters:{path:JSON.parse(task).inputs.scope,content_sha256:'sha256:'+'a'.repeat(64)}};
+    const writeSubject = await core.describeTaskAction(bundle,task,JSON.stringify(writeAction));
+    const mapping = {schema_version:'0.1',subject_digest:writeSubject.subject_digest,operation:'write_file',...writeAction.parameters};
+    const check = m => validateFilesystemWriteMapping(bundle,task,JSON.stringify(writeAction),JSON.stringify(m));
+    const mapped = await check(mapping);
+    assert.equal(mapped.valid,true,JSON.stringify(mapped.errors));
+    assert.equal(mapped.mapping_matches_action,true);
+    assert.ok(mapped.eligible_executors.length);
+    for(const key of ['adapter_authenticated','subject_authenticated','review_authenticated','human_approval_authenticated','write_permission_enforced','action_executed']) assert.equal(mapped[key],false);
+    for(const [key,value,code] of [['subject_digest','sha256:'+'0'.repeat(64),'G2_SUBJECT_MISMATCH'],['path','outside/file.txt','G2_PATH_MISMATCH']]) {
+      const bad = await check({...mapping,[key]:value});
+      assert.equal(bad.valid,false);assert.ok(bad.errors.some(e=>e.code===code));
+    }
     const f = name => read('examples/onchain-finance/' + name + '.json');
     const result = await finance.validateFinancialExecution(f('bundle'), f('task'), f('policy'), f('intent'), f('execution'), '2030-01-01T00:00:05Z');
     assert.equal(result.valid, true, JSON.stringify(result.errors));
@@ -53,17 +67,17 @@ try {
     assert.equal(safe.safe_call_envelope_matches_intent, true);
     assert.equal(safe.transaction_serialization_verified, false);
     assert.equal(safe.transaction_hash_verified, false);
-    for (const name of ['role-contract', 'bundle', 'task', 'handoff', 'task-action', 'task-action-binding', 'financial-policy', 'financial-intent', 'financial-execution', 'safe-proposal']) {
+    for (const name of ['role-contract', 'bundle', 'task', 'handoff', 'task-action', 'task-action-binding', 'filesystem-write-mapping', 'financial-policy', 'financial-intent', 'financial-execution', 'safe-proposal']) {
       const schema = JSON.parse(readFileSync(new URL(import.meta.resolve('@netsujo/agent-role-contracts/schemas/' + name + '.schema.json')), 'utf8'));
       assert.equal(schema.type, 'object');
     }
   `], consumer);
   const installed = join(consumer, 'node_modules', '@netsujo', 'agent-role-contracts');
   run([join(installed, 'bin/agent-role-contracts.mjs'), 'validate', '--bundle', join(installed, 'examples/team.json')], consumer);
-  for (const demo of ['action-binding/demo.mjs', 'quickstart.mjs', 'cross-domain/demo.mjs', 'onchain-finance/demo.mjs', 'onchain-finance/safe-demo.mjs']) {
+  for (const demo of ['filesystem-write-adapter/demo.mjs', 'action-binding/demo.mjs', 'quickstart.mjs', 'cross-domain/demo.mjs', 'onchain-finance/demo.mjs', 'onchain-finance/safe-demo.mjs']) {
     run([join(installed, 'examples', demo)], consumer);
   }
-  console.log('Packed consumer: root/core/finance exports, 10 schema exports, binding PASS/stale failure, CLI and 5 demos PASS');
+  console.log('Packed consumer: root/core/adapter/finance exports, 11 schema exports, binding and mapping PASS/stale/path failures, CLI and 6 demos PASS');
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }

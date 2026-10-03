@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0-alpha.1 — unreleased development candidate
+
+- Integrate the explicit filesystem-write adapter subpath, declaration-only CLI, one mapping schema and sixth demo; preserve core and finance/Safe behavior.
+
 ## 0.3.0-alpha.1 — unreleased development candidate
 
 - Restore a generic-first product direction and order future work around task/action binding, adapters and evidence interoperability rather than finance-specific features.
