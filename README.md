@@ -103,6 +103,18 @@ node examples/filesystem-write-adapter/demo.mjs
 
 This unreleased candidate includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
 
+## G3 lifecycle candidate
+
+G3 lifecycle is an **implemented candidate pending integration and independent review**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+
+```sh
+node examples/task-lifecycle/demo.mjs
+```
+
+This base lacks lifecycle APIs; the demo requires integrated `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 remains design-only on this base, and separate G2 work is not assumed merged. Finance and Safe are optional.
+
+External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
+
 ## Full three-role example
 
 After the starter, the fuller example adds a coordinator, conditional inputs and a handoff:

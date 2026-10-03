@@ -82,6 +82,18 @@ node examples/filesystem-write-adapter/demo.mjs
 
 この未公開候補にはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
+## G3 lifecycle候補
+
+G3 lifecycleは**実装済み候補で、統合・独立レビュー待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+
+```sh
+node examples/task-lifecycle/demo.mjs
+```
+
+このbaseにはlifecycle APIがないため、`/core`の`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`の統合が必要です。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G2はこのbaseでは設計のみです。G2の作業は別に保持し、merge済みと仮定しません。finance・Safeは任意profileです。
+
+外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
+
 ## 詳細な3-role例
 
 starterの後は、coordinator、条件付きinput、handoffを含む詳細例を使えます。
