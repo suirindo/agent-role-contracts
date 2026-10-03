@@ -66,19 +66,42 @@ This unreleased source candidate adds `@netsujo/agent-role-contracts/core` and t
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
-## G1 task/action binding candidate
+## G1 task/action binding
 
-G1 is an **implemented candidate**, pending integration and independent acceptance; it is not a released or adopted feature. The [non-financial binding demo](examples/action-binding/demo.mjs) reuses generic fixtures for software change, data cleaning and support drafting:
+G0 core isolation and G1 task/action binding are **merged and implemented**; source merge does not imply registry release or adoption. The [non-financial binding demo](examples/action-binding/demo.mjs) reuses generic fixtures for software change, data cleaning and support drafting:
 
 ```sh
 node examples/action-binding/demo.mjs
 ```
 
-The candidate exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development version is unreleased. Action IDs do not establish task/run replay identity; replay policy remains external.
+The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development version is unreleased. Action IDs do not establish task/run replay identity; replay policy remains external.
 
 For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
 
-The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 external adapter semantics remain unimplemented, so parameter names do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 supplies a narrow filesystem-write adapter candidate described below; parameter names alone do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+
+## G2 filesystem-write adapter candidate
+
+G2 filesystem-write is an **implemented candidate pending integration and independent review**, not released or adopted. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 evidence/lifecycle interoperability remains design-only.
+
+The integration API is an optional import:
+
+```js
+import { validateFilesystemWriteMapping } from '@netsujo/agent-role-contracts/adapters/filesystem-write';
+const result = await validateFilesystemWriteMapping(bundleJson, taskJson, actionJson, mappingJson);
+```
+
+Profile `filesystem-write/0.1` uses mapping `schema_version: "0.1"`. The G1 action uses `schema_version: "0.3"`, kind `filesystem-write` and exactly `{path, content_sha256}` parameters. The mapping declares `subject_digest`, operation `write_file`, and the same `path` and `content_sha256`. The adapter supports exactly this one operation, rejects unknown parameters or semantics, and checks declared task scope and eligible executor authority. It does not support arbitrary SaaS, database, API or other resource semantics.
+
+`content_sha256` is a caller-supplied declared integrity identity. No output bytes are read or verified, and no filesystem state or path existence is checked. Mapping PASS means declaration consistency; it grants no permission, performs no execution and implies no review approval. Executor identity and permissions remain unauthenticated and unenforced. G1 review/approval binding remains a separate check against the complete current subject; the adapter does not synthesize it. Finance and Safe remain optional profiles.
+
+The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the generic scenario builder and fixtures for `src/example.mjs`, `reports/cleaned.csv` and `drafts/reply.md`. Each accepts a matching mapping and requires a specific failure after changing its path or content digest. The digests are fictional and the target files are never opened or written:
+
+```sh
+node examples/filesystem-write-adapter/demo.mjs
+```
+
+This command requires the adapter source to be integrated; the optional package subpath is an integration target, not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## Full three-role example
 

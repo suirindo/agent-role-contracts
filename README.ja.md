@@ -45,19 +45,42 @@ npm --prefix agent-role-contracts run demo:general --silent
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
 
-## G1 タスク・アクションbinding候補
+## G1 タスク・アクションbinding
 
-G1は**実装済み候補**です。統合と独立した受入確認が必要であり、リリース済み・採用済みとは主張しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
+G0のcore分離とG1のタスク・アクションbindingは**merge・実装済み**です。sourceのmergeはnpm公開や利用者による採用を意味しません。[非金融bindingデモ](examples/action-binding/demo.mjs)は汎用fixtureを再利用し、ソフトウェア変更・データクリーニング・問い合わせ返信の下書きを扱います。
 
 ```sh
 node examples/action-binding/demo.mjs
 ```
 
-候補版の`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
+`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
 
 各例でdigestを取得し、routeのreviewerによるpassと`route.accountable`による必須承認を宣言してPASSを確認します。その後、意味のあるtask入力またはaction parameterを変更し、元のbindingが`G1_SUBJECT_MISMATCH`で失敗することを確認します。完全なcanonical subjectはprofile、**policy・roles・routesを含むbundle全体、task全体、宣言action全体**を対象とし、レビュー・承認の宣言は現在のsubjectに結び付きます。
 
-digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2の外部adapter semanticsは未実装で、parameter名からtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
+digestが示すのは整合対象の完全性であり、真正性や実行許可ではありません。デモはactionを実行せず、reviewer・approverの本人確認もしません。flat scalarのaction parametersは宣言データのみです。G2は以下の限定的なfilesystem-write adapter候補を提供しますが、parameter名だけからtool動作やresource権限を推定しません。成果物のpath・URLは不変の証拠ではなく、正確な成果物bytesの完全性は信頼できる統合側で別途扱う必要があります。G1は汎用機能であり、金融は引き続き任意profileです。
+
+## G2 filesystem-write adapter候補
+
+G2 filesystem-writeは**実装済み候補で、統合・独立レビュー待ち**です。リリース済み・採用済みではありません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3の証拠・lifecycle相互運用は設計のみです。
+
+統合先のoptional APIは次のとおりです。
+
+```js
+import { validateFilesystemWriteMapping } from '@netsujo/agent-role-contracts/adapters/filesystem-write';
+const result = await validateFilesystemWriteMapping(bundleJson, taskJson, actionJson, mappingJson);
+```
+
+profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。G1 actionは`schema_version: "0.3"`、kindは`filesystem-write`、parametersは厳密に`{path, content_sha256}`です。mappingは`subject_digest`、operation `write_file`、同じ`path`と`content_sha256`を宣言します。対応するoperationはこの1種類だけで、未知のparameter・semanticsを拒否し、task scopeと実行役の宣言権限を検査します。任意のSaaS・database・API・その他resourceの意味には対応しません。
+
+`content_sha256`は呼出元が供給する、宣言上の完全性識別子です。成果物bytesの読込・検証、filesystem状態・pathの存在確認は行いません。mappingのPASSは宣言の整合だけを示し、権限付与・実行・レビュー承認を意味しません。executorの本人確認も、アクセス権の強制も行いません。G1のレビュー・承認bindingは現在の完全なsubjectに対する別の検査であり、adapterは承認を生成しません。金融・Safeは引き続き任意profileです。
+
+[filesystemデモ](examples/filesystem-write-adapter/demo.mjs)は汎用scenario builderとfixtureを再利用し、`src/example.mjs`、`reports/cleaned.csv`、`drafts/reply.md`への書込宣言を扱います。各例で一致するmappingのPASSを確認後、pathまたはcontent digestを変更し、特定の診断で失敗することを要求します。digestは架空で、対象ファイルは開かず書き込みません。
+
+```sh
+node examples/filesystem-write-adapter/demo.mjs
+```
+
+実行にはadapter sourceの統合が必要です。optional package subpathは統合先のAPIであり、公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
 ## 詳細な3-role例
 
