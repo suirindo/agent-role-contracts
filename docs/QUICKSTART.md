@@ -60,5 +60,7 @@ The demo uses only portable Node.js file reads and JSON checks. No Bash, Docker,
 
 - [Full three-role example](../README.md#full-three-role-example): coordination, conditional inputs and handoffs.
 - [Architecture and extraction boundary](COMPATIBILITY.md): which concepts the public package retains.
+- [Integration guide](INTEGRATION.md): preserve trusted policy, identity, review, approval, evidence and runtime-enforcement boundaries.
+- [What PASS means in Agent Role Contracts](https://netsujo.jp/en/blog/what-pass-means-agent-role-contracts): the extraction background and declaration-check boundary.
 - [Contributing](../CONTRIBUTING.md): submit a focused contract or diagnostic improvement.
 - [Issues](https://github.com/suirindo/agent-role-contracts/issues): report a reproducible problem, including Node.js version and the diagnostic; omit credentials and customer data.
