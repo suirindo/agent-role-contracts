@@ -1,6 +1,6 @@
 {
   "name": "@netsujo/agent-role-contracts",
-  "version": "0.2.0-alpha.2",
+  "version": "0.2.0-alpha.3",
   "license": "MIT",
   "type": "module",
   "description": "Offline AI-agent role and onchain-finance proposal declaration checks.",
@@ -33,7 +33,8 @@
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
     "demo": "node examples/quickstart.mjs",
-    "demo:finance": "node examples/onchain-finance/demo.mjs"
+    "demo:finance": "node examples/onchain-finance/demo.mjs",
+    "demo:safe": "node examples/onchain-finance/safe-demo.mjs"
   },
   "repository": {
     "type": "git",
@@ -60,5 +61,5 @@
     "treasury",
     "erc20"
   ],
-  "author": "Netsujo\u682a\u5f0f\u4f1a\u793e"
+  "author": "Netsujo株式会社"
 }

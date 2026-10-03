@@ -126,3 +126,14 @@ An execution system remains responsible for trusted policy and time, authenticat
 - [EIP-155](https://eips.ethereum.org/EIPS/eip-155): chain identity in signed transactions. This checker compares declared chain IDs; it does not implement signing or replay protection.
 
 The financial policy and finite preview rules are Netsujo's application profile, not Ethereum protocol requirements. Free MIT OSS, with no account, wallet or telemetry requirement. Built by [Netsujo](https://netsujo.jp/en), a Web3 startup.
+
+
+## Safe wallet-proposal boundary
+
+`validateSafeProposal(...)` takes an already-valid financial intent and a strict Safe proposal declaration. For the supported single-call profile it checks the exact `to`, `value`, `data`, and `operation` fields, including deterministic ERC-20 `transfer(address,uint256)` and `approve(address,uint256)` calldata.
+
+```sh
+npm run demo:safe --silent
+```
+
+A PASS means the supported Safe transaction fields serialize exactly to the approved intent. It does **not** authenticate a Safe account, owners, threshold, signatures, chain state, transaction hash, broadcast, custody, or execution authority. Batch transactions and delegatecall are outside this first profile.

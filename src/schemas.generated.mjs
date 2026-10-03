@@ -1657,5 +1657,74 @@ export default {
         "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$"
       }
     }
+  },
+  "safe-proposal": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/safe-proposal.schema.json",
+    "title": "Agent Role Contracts Safe transaction proposal preview",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schema_version",
+      "subject_digest",
+      "chain_id",
+      "safe_address",
+      "safe_nonce",
+      "transaction"
+    ],
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "0.2"
+      },
+      "subject_digest": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      },
+      "chain_id": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$",
+        "maxLength": 78
+      },
+      "safe_address": {
+        "type": "string",
+        "pattern": "^0x[0-9a-fA-F]{40}$"
+      },
+      "safe_nonce": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]*)$",
+        "maxLength": 78
+      },
+      "transaction": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "to",
+          "value",
+          "data",
+          "operation"
+        ],
+        "properties": {
+          "to": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "value": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          },
+          "data": {
+            "type": "string",
+            "pattern": "^0x([0-9a-f]{2})*$",
+            "maxLength": 131074
+          },
+          "operation": {
+            "type": "integer",
+            "const": 0
+          }
+        }
+      }
+    }
   }
 };

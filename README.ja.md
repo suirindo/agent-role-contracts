@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.2.0-alpha.2`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
+**開発プレビュー：`0.2.0-alpha.3`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
 
 ## オンチェーン金融のプレビュー
 
@@ -11,6 +11,7 @@
 ```sh
 git clone https://github.com/suirindo/agent-role-contracts.git
 npm --prefix agent-role-contracts run demo:finance --silent
+npm --prefix agent-role-contracts run demo:safe --silent
 ```
 
 英語デモでは、正常な支払い、チェーン違い、上限超過、無制限approval、レビュー後の提案変更、更新後の架空宣言、整合するexecution receipt、nonce不一致のreceiptまで検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
