@@ -40,3 +40,16 @@ v0.1.0 is the first public compatibility baseline. Future incompatible public co
 ## Additive core/profile source split (unreleased)
 
 The current architecture candidate preserves the existing root exports, synchronous generic APIs, asynchronous finance APIs, schemas and diagnostics. It adds `/core` and `/profiles/onchain-finance` import subpaths. The core entrypoint and generic CLI commands do not load the optional finance modules or schemas. The root remains a compatibility facade and still imports finance; optional entrypoints do not mean separate npm packages. See [the design](ARCHITECTURE.md) for implemented versus planned boundaries.
+
+## Required candidate compatibility matrix
+
+| Runner | Node.js | Purpose |
+| --- | --- | --- |
+| `ubuntu-latest` | `22.5.0` | Minimum supported version |
+| `ubuntu-latest` | `24` | Newer Node line |
+| `macos-latest` | `22` | macOS compatibility |
+| `windows-latest` | `22` | Windows compatibility |
+
+`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/finance imports, all seven schema exports, the CLI and all three demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
+
+Draft pull requests skip hosted CI unless the workflow is manually dispatched. Local checks do not establish four-platform acceptance: all four jobs must pass on the candidate's exact HEAD, followed by independent review. This matrix describes required coverage, not a claim that a particular candidate has passed.

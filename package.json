@@ -34,6 +34,7 @@
     "schemas:check": "node scripts/build-schemas.mjs --check",
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "demo": "node examples/quickstart.mjs",
     "demo:finance": "node examples/onchain-finance/demo.mjs",
     "demo:general": "node examples/cross-domain/demo.mjs"
