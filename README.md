@@ -66,6 +66,20 @@ This unreleased source candidate adds `@netsujo/agent-role-contracts/core` and t
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
+## G1 task/action binding candidate
+
+G1 is an **implemented candidate**, pending integration and independent acceptance; it is not a released or adopted feature. The [non-financial binding demo](examples/action-binding/demo.mjs) reuses generic fixtures for software change, data cleaning and support drafting:
+
+```sh
+node examples/action-binding/demo.mjs
+```
+
+It requires the integrated async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. The base revision lacks these exports, so the demo exits 2 with an integration dependency diagnostic until they are integrated. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. No package version or publication is implied.
+
+For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
+
+The digest provides integrity, not authenticity or authorization. The demo executes no action and authenticates no reviewer or approver. Flat scalar action parameters are declarations only: G2 external adapter semantics remain unimplemented, so parameter names do not establish tool behavior or resource permissions. Artifact paths and URLs are not immutable evidence; exact artifact bytes need separate integrity handling by a trusted integration. G1 remains general-purpose, with finance an optional profile.
+
 ## Full three-role example
 
 After the starter, the fuller example adds a coordinator, conditional inputs and a handoff:
