@@ -63,7 +63,7 @@ digestが示すのは整合対象の完全性であり、真正性や実行許�
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleはmerge済みG2を基盤とする未公開候補で、独立レビュー・hosted acceptance待ちです。
+G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleも現在のmainにmerge済み・実装済みですが、sourceは未公開です。
 
 optional APIは次のとおりです。
 
@@ -84,17 +84,17 @@ node examples/filesystem-write-adapter/demo.mjs
 
 この未公開候補にはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
-## G3 lifecycle候補
+## G3 lifecycle宣言
 
-G3 lifecycleは**実装済み候補で、独立レビュー・hosted acceptance待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+G3 lifecycleは**repository mainにmerge済み・実装済み**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
 
 ```sh
 npm run demo:lifecycle
 ```
 
-この未公開candidateでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`で、このbranchのmerge baseです。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3はmerge済みG2を基盤とする現在の未公開候補で、独立レビュー・hosted acceptance待ちです。G2のsequencingはblockerではありません。mergeはnpm公開・本番採用・runtime権限・deploymentを意味しません。G3は未merge・未公開です。finance・Safeは任意profileです。
+現在の未公開sourceでは、rootと汎用`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 filesystem-writeは明示的なoptional subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。mergeはnpm公開・本番採用・runtime権限・deploymentを意味しません。finance・Safeは任意profileです。
 
-外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
+lifecycle PASSは宣言の整合だけを示し、eventの真実性・認証・artifact bytesの検証・runtime受入を意味しません。外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
 
 ## 詳細な3-role例
 
