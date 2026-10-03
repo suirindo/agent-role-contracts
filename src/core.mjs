@@ -36,3 +36,5 @@ export function validateHandoff(bundleJson,taskJson,handoffJson) {
 }
 
 export { describeTaskAction, validateTaskActionBinding } from './action-binding.mjs';
+
+export { describeTaskLifecycle, validateTaskLifecycle } from './task-lifecycle.mjs';

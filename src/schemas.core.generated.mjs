@@ -1392,5 +1392,119 @@ export default {
         }
       }
     }
+  },
+  "task-lifecycle": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/task-lifecycle.schema.json",
+    "title": "Agent Role Contracts task-lifecycle",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "schema_version",
+      "run_id",
+      "subject_digest",
+      "events"
+    ],
+    "properties": {
+      "schema_version": {
+        "type": "string",
+        "const": "0.4"
+      },
+      "run_id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$",
+        "minLength": 1,
+        "maxLength": 96
+      },
+      "subject_digest": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      },
+      "events": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 256,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "event_id",
+            "phase",
+            "subject_digest",
+            "actor_role_id",
+            "decision"
+          ],
+          "properties": {
+            "event_id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "phase": {
+              "type": "string",
+              "enum": [
+                "review",
+                "approval",
+                "execution",
+                "evidence"
+              ]
+            },
+            "subject_digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "actor_role_id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "minLength": 1,
+              "maxLength": 96
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "pass",
+                "blocked",
+                "approved",
+                "denied",
+                "declared_success",
+                "declared_failure",
+                "present",
+                "missing"
+              ]
+            },
+            "artifacts": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "artifact_id",
+                  "sha256"
+                ],
+                "properties": {
+                  "artifact_id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9._-]*$",
+                    "minLength": 1,
+                    "maxLength": 96
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                  },
+                  "locator": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 };
