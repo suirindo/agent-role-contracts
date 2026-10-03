@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/feat/onchain-finance-v02/schemas/financial-intent.schema.json",
+  "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/financial-intent.schema.json",
   "title": "Agent Role Contracts financial-intent preview",
   "type": "object",
   "additionalProperties": false,
