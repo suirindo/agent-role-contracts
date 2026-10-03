@@ -2,20 +2,20 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.2.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。金融用途のプレビューは以下のbranchから試せます。既存のv0.1 role-contract profileと同期APIを維持しています。
+**開発プレビュー：`0.2.0-alpha.2`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
 
 ## オンチェーン金融のプレビュー
 
-資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認の宣言を結び付けます。
+資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
 
 ```sh
-git clone --branch feat/onchain-finance-v02 https://github.com/suirindo/agent-role-contracts.git agent-role-contracts-v02
-npm --prefix agent-role-contracts-v02 run demo:finance --silent
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo:finance --silent
 ```
 
-英語デモでは、正常な支払い、チェーン違い、上限を最小単位1つ超えた支払い、無制限approval、レビュー後に変更された提案、更新後の架空宣言を検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
+英語デモでは、正常な支払い、チェーン違い、上限超過、無制限approval、レビュー後の提案変更、更新後の架空宣言、整合するexecution receipt、nonce不一致のreceiptまで検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
 
-対象はnative送金、標準ERC-20送金、上限付きERC-20承認の宣言です。金額はuint256の整数文字列で比較します。PASSは宣言の整合を示します。チェーン状態、simulationや承認の真正性、署名・送信、実際の上限強制、金融取引の安全性は証明しません。[仕様・API・利用例](examples/onchain-finance/README.md)を参照してください。
+対象はnative送金、標準ERC-20送金、上限付きERC-20承認の宣言です。金額はuint256の整数文字列で比較します。execution receiptも呼出元が供給する宣言であり、実チェーン上の真正性を認証しません。PASSは宣言の整合を示すだけで、チェーン状態、simulation・承認・receiptの真正性、署名・送信、実際の上限強制、金融取引の安全性は証明しません。[仕様・API・利用例](examples/onchain-finance/README.md)を参照してください。
 
 v0.1 profileは、宣言された役割・権限・レビュー分離・作業範囲・引き継ぎを検査します。runtime権限の付与、本人確認、エージェント実行、OSやGitHubの権限制御は行いません。
 

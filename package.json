@@ -1,6 +1,6 @@
 {
   "name": "@netsujo/agent-role-contracts",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "license": "MIT",
   "type": "module",
   "description": "Offline AI-agent role and onchain-finance proposal declaration checks.",

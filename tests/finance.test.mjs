@@ -1,15 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describeFinancialIntent, validateFinancialIntent } from '../src/index.mjs';
+import { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution } from '../src/index.mjs';
 
 const json = JSON.stringify;
 const at = '2030-01-01T00:00:03Z';
+const executionAt = '2030-01-01T00:00:05Z';
 const max = ((1n << 256n) - 1n).toString();
 const fixture = name => JSON.parse(readFileSync(new URL('../examples/onchain-finance/' + name + '.json', import.meta.url), 'utf8'));
 const data = () => ({ bundle: fixture('bundle'), task: fixture('task'), policy: fixture('policy'), intent: fixture('intent') });
 const check = (d, time = at) => validateFinancialIntent(json(d.bundle), json(d.task), json(d.policy), json(d.intent), time);
 const describe = d => describeFinancialIntent(json(d.bundle), json(d.task), json(d.policy), json(d.intent.transaction));
+const checkExecution = (d, receipt = fixture('execution'), time = executionAt) => validateFinancialExecution(json(d.bundle), json(d.task), json(d.policy), json(d.intent), json(receipt), time);
 async function rebind(d) {
   const subject = await describe(d);
   assert.equal(subject.valid, true, json(subject.errors));
@@ -26,6 +28,45 @@ function invalid(name, change, code) {
     assert.equal(r.financial_safety_verified, false);
   });
 }
+
+test('financial execution receipt binds to the approved subject without claiming chain verification', async () => {
+  const d = data(); const result = await checkExecution(d);
+  assert.equal(result.valid, true, json(result.errors));
+  assert.equal(result.kind, 'financial-execution');
+  assert.equal(result.validation_stage, 'execution');
+  assert.equal(result.execution.transaction_hash, '0x' + 'a'.repeat(64));
+  for (const key of ['execution_authorized', 'execution_receipt_verified', 'transaction_hash_verified', 'transaction_serialization_verified', 'chain_state_verified', 'replay_protection_enforced']) {
+    assert.equal(result[key], false, key);
+  }
+});
+
+function invalidExecution(name, change, code) {
+  test(name, async () => {
+    const d = data(), receipt = fixture('execution'); change(d, receipt);
+    const r = await checkExecution(d, receipt);
+    assert.equal(r.valid, false);
+    assert.ok(r.errors.some(error => error.code === code), json(r.errors));
+    assert.equal(r.execution_authorized, false);
+    assert.equal(r.execution_receipt_verified, false);
+  });
+}
+
+invalidExecution('execution receipt from a different subject is refused', (d, r) => r.subject_digest = 'sha256:' + '0'.repeat(64), 'FINANCE_EXECUTION_SUBJECT_MISMATCH');
+invalidExecution('execution receipt from a different chain is refused', (d, r) => r.chain_id = '1', 'FINANCE_EXECUTION_CHAIN_MISMATCH');
+invalidExecution('execution receipt from a different nonce is refused', (d, r) => r.nonce = '8', 'FINANCE_EXECUTION_NONCE_MISMATCH');
+invalidExecution('reverted execution receipt is refused', (d, r) => r.status = 'reverted', 'FINANCE_EXECUTION_REVERTED');
+invalidExecution('all-zero transaction hash is refused as placeholder evidence', (d, r) => r.transaction_hash = '0x' + '0'.repeat(64), 'FINANCE_EXECUTION_TX_HASH_ZERO');
+invalidExecution('execution cannot predate the bound human approval', (d, r) => r.executed_at = '2030-01-01T00:00:01Z', 'FINANCE_EXECUTION_BEFORE_APPROVAL');
+invalidExecution('execution observation cannot predate execution', (d, r) => r.observed_at = '2030-01-01T00:00:02Z', 'FINANCE_EXECUTION_TIME_ORDER');
+invalidExecution('future execution observation is refused', (d, r) => r.observed_at = '2030-01-01T00:00:06Z', 'FINANCE_EXECUTION_FROM_FUTURE');
+invalidExecution('execution receipt schema fails closed on extra fields', (d, r) => r.rpc_url = 'https://example.invalid', 'SCHEMA_ADDITIONALPROPERTIES');
+
+test('fresh intent evidence cannot be paired with an old execution receipt after proposal mutation', async () => {
+  const d = data(); d.intent.transaction.amount_base_units = '249999999'; await rebind(d);
+  const r = await checkExecution(d, fixture('execution'));
+  assert.equal(r.valid, false);
+  assert.ok(r.errors.some(error => error.code === 'FINANCE_EXECUTION_SUBJECT_MISMATCH'), json(r.errors));
+});
 
 test('financial fixture has a reproducible complete subject and passes', async () => {
   const d = data(), subject = await describe(d), result = await check(d);

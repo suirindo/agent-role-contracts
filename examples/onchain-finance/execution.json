@@ -1,0 +1,11 @@
+{
+  "schema_version": "0.2",
+  "subject_digest": "sha256:7158f9b926ed4005bbae6566bef7f5d0d1d98e3e00857aabd8f6709cab685aa1",
+  "chain_id": "11155111",
+  "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "nonce": "7",
+  "block_number": "1235",
+  "status": "success",
+  "executed_at": "2030-01-01T00:00:03Z",
+  "observed_at": "2030-01-01T00:00:04Z"
+}

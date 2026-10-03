@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { assertSupportedSchema, canonical } from '../src/schema.mjs';
 import { parseCanonicalSchemaSource, serializeCanonicalSchemaSource } from './schema-source.mjs';
 const root = new URL('../', import.meta.url);
-const names = ['role-contract','bundle','task','handoff','financial-policy','financial-intent'];
+const names = ['role-contract','bundle','task','handoff','financial-policy','financial-intent','financial-execution'];
 const schemas = Object.fromEntries(names.map(name => [name, parseCanonicalSchemaSource(readFileSync(new URL(`schemas/${name}.schema.json`, root)))]));
 for (const schema of Object.values(schemas)) assertSupportedSchema(schema);
 const role = {...schemas['role-contract']};delete role.$schema;delete role.$id;delete role.title;

@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
-import { describeFinancialIntent, validateFinancialIntent } from '../../src/index.mjs';
+import { describeFinancialIntent, validateFinancialIntent, validateFinancialExecution } from '../../src/index.mjs';
 
 const read = name => readFileSync(new URL(name + '.json', import.meta.url), 'utf8');
 const json = JSON.stringify;
 const at = '2030-01-01T00:00:03Z';
+const executionAt = '2030-01-01T00:00:05Z';
 
 try {
   const bundle = read('bundle'), task = read('task'), policy = read('policy');
@@ -38,8 +39,18 @@ try {
   // new external simulation, independent review and human approval first.
   for (const key of ['simulation', 'review', 'human_approval']) changed[key].subject_digest = subject.subject_digest;
   await show('6. New fictional declarations bind the changed proposal', changed);
+
+  const receipt = JSON.parse(read('execution'));
+  const execution = await validateFinancialExecution(bundle, task, policy, read('intent'), json(receipt), executionAt);
+  if (!execution.valid) throw new Error('Unexpected demo result: execution receipt');
+  console.log('7. Execution receipt matches the approved subject, chain and nonce: PASS');
+  const wrongNonceReceipt = structuredClone(receipt); wrongNonceReceipt.nonce = '8';
+  const wrongNonce = await validateFinancialExecution(bundle, task, policy, read('intent'), json(wrongNonceReceipt), executionAt);
+  if (wrongNonce.valid || !wrongNonce.errors.some(error => error.code === 'FINANCE_EXECUTION_NONCE_MISMATCH')) throw new Error('Unexpected demo result: execution nonce');
+  console.log('8. Execution receipt uses a different nonce: FAIL (expected): FINANCE_EXECUTION_NONCE_MISMATCH');
+
   console.log('\nDemo complete. PASS checks declarations only; execution is NOT authorized.');
-  console.log('A matching hash is not a signature or proof of real simulation/approval.');
+  console.log('Matching hashes and receipts are not signatures or proof of real chain execution.');
   console.log('Next: examples/onchain-finance/README.md');
 } catch {
   console.error('FINANCE_DEMO_ERROR: missing/invalid fixtures or unexpected checker behavior; use this exact candidate and npm run check.');
