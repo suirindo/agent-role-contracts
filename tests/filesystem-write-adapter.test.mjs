@@ -90,6 +90,7 @@ test('existing core schemas and finance bytes are unchanged and schema groups di
  assert.equal(lifecycle.properties.schema_version.const,'0.4');
  assert.equal(Object.keys(core).length,7);assert.equal(Object.keys(finance).length,4);assert.equal(Object.keys(adapters).length,1);
  const keys=[...Object.keys(core),...Object.keys(adapters),...Object.keys(finance)];assert.equal(new Set(keys).size,12);assert.deepEqual(aggregate,{...core,...adapters,...finance});
+
 });
 test('current subjects independently reject task escape and missing writer',async()=>{
  for(const mode of ['scope','writer']){
