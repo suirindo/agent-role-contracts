@@ -43,6 +43,31 @@ Next: docs/QUICKSTART.md (change the scope and rerun the checker).
 
 The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
 
+### Try the published package instead (no clone)
+
+To run the exact public `0.1.0` package without cloning the repository, start in an empty directory:
+
+```sh
+mkdir agent-role-contracts-first-check
+cd agent-role-contracts-first-check
+npm init --yes
+npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+npx --no-install agent-role-contracts explain \
+  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
+  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
+  --format text
+```
+
+The last command prints `PASS: explain`. It checks the bundled two-role declaration; it does not authorize either role to run. To see the intended fail-closed result, replace `starter-task.json` with `starter-task-outside-scope.json`: the command reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` and exits **1**.
+
+If `npm install` reports `EPERM` about root-owned files in a shared npm cache, do not use `sudo`. Retry with a cache local to this directory:
+
+```sh
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+```
+
+The repository source is currently newer than the published package. These commands deliberately pin the public `0.1.0` release and use only fixtures shipped in that package.
+
 ### Why it matters
 
 A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
@@ -52,6 +77,7 @@ A prompt can ask an agent to stay in `src/**`, while the next task requests a ch
 - [Change a task scope and check it yourself](docs/QUICKSTART.md).
 - [Explore coordination and handoffs](#full-three-role-example).
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
+- [Integrate the checker without treating PASS as execution permission](docs/INTEGRATION.md).
 - [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
 ## General-purpose core and optional profiles

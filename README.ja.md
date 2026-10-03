@@ -25,11 +25,13 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
+公開済みnpm `0.1.0`をcloneせず試す手順は、英語正本の[Try the published package instead](README.md#try-the-published-package-instead-no-clone)にあります。現在のrepository sourceはnpm公開版より新しいため、両者を同一の機能集合として扱わないでください。
+
 ### 何が変わるか
 
 プロンプトで`src/**`への限定を指示していても、次のタスクが別の場所を要求することがあります。役割とタスクの宣言を検査器へ渡すと、その不整合を具体的な診断コードで確認できます。実装役とレビュー役の兼務宣言も検知します。PASSは宣言の整合を示し、実際の権限制御やレビュー担当者の独立性確認は実行側で行う必要があります。
 
-次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
+次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)、[実サービス統合時の責任境界](docs/INTEGRATION.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
 ## 汎用コアと用途別拡張
 

@@ -15,6 +15,8 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
+For an exact published `0.1.0` first run without cloning, use [the no-clone instructions](../README.md#try-the-published-package-instead-no-clone), including recovery from an `EPERM` npm cache error. The repository source is `0.5.0-alpha.1`; its G1/G2/G3 APIs and commands are not available in that public release.
+
 ## Check your own edit
 
 From the repository root, copy `examples/starter-task.json` to `task.demo.json` using your editor or file manager. Keep the bundle unchanged so the declared write authority remains `src/**`.
@@ -39,7 +41,7 @@ You do not need to create `src/another.mjs`: checking a declaration does not che
 
 ## Understand a result
 
-The starter's [`allowed_write_scopes`](../examples/starter-bundle.json) declares `src/**`. The [task](../examples/starter-task.json) supplies `inputs.scope`. `explainTask` checks containment and the declared role relationships. The [public API](../src/index.mjs) and [schema profile](SCHEMA_PROFILE.md) explain those checks in more detail.
+The starter's [`allowed_write_scopes`](../examples/starter-bundle.json) declares `src/**`. The [task](../examples/starter-task.json) supplies `inputs.scope`. `explainTask` checks containment and the declared role relationships. The [generic core API](../src/core.mjs) and [schema profile](SCHEMA_PROFILE.md) explain those checks in more detail.
 
 Prompt instructions alone do not provide a diagnostic when a task and its role's declared scope disagree. These JSON declarations let you make that disagreement a deterministic preflight check. The runtime handling the actual task must still enforce the declared boundaries, authenticate identities and obtain required approval.
 
@@ -56,9 +58,23 @@ Prompt instructions alone do not provide a diagnostic when a task and its role's
 
 The demo uses only portable Node.js file reads and JSON checks. No Bash, Docker, provider credentials, account login, network calls or installation scripts are required for the demo itself.
 
+## Source-only integration demos
+
+From this source checkout, run these declaration-only demos (not commands for npm `0.1.0`):
+
+```sh
+npm run demo:binding
+npm run demo:filesystem-adapter
+npm run demo:lifecycle
+```
+
+See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 review binding, the explicit optional G2 adapter and G3 lifecycle declarations. These demos neither execute actions nor verify artifact bytes.
+
 ## Next
 
 - [Full three-role example](../README.md#full-three-role-example): coordination, conditional inputs and handoffs.
 - [Architecture and extraction boundary](COMPATIBILITY.md): which concepts the public package retains.
+- [Integration guide](INTEGRATION.md): preserve trusted policy, identity, review, approval, evidence and runtime-enforcement boundaries.
+- [What PASS means in Agent Role Contracts](https://netsujo.jp/en/blog/what-pass-means-agent-role-contracts): the extraction background and declaration-check boundary.
 - [Contributing](../CONTRIBUTING.md): submit a focused contract or diagnostic improvement.
 - [Issues](https://github.com/suirindo/agent-role-contracts/issues): report a reproducible problem, including Node.js version and the diagnostic; omit credentials and customer data.
