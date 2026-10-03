@@ -16,7 +16,7 @@ Generality means reusing these concepts across tasks, **not** turning the packag
 | --- | --- | --- |
 | Generic core | Strict JSON input, roles, capability declarations, routes, required inputs, portable write-scope containment, reviewer separation, handoff consistency, deterministic diagnostics | Industry rules, providers, credentials, filesystem enforcement, execution or live state |
 | Optional application profiles | Additional explicit domain rules after core consistency; their own schemas and diagnostics | Relaxing core restrictions or silently authorizing execution |
-| Integration adapters (future work) | Bind a declared task/action to a concrete external tool or runtime, expose supported/unsupported semantics | Changing role authority, inventing approval, treating an unverified PASS as permission |
+| Integration adapters (G2 candidate) | Bind a declared task/action to a concrete external tool or runtime, expose supported/unsupported semantics | Changing role authority, inventing approval, treating an unverified PASS as permission |
 | Consumer runtime | Trusted policy supply, real identity, time, permissions, actual execution, independent review, approvals and evidence collection | Claiming that the declaration checker alone performed these responsibilities |
 
 Dependency direction is profiles/adapters to the generic core or its shared validation primitives. The generic core must not import optional domain schemas, wallet formats or provider clients. No layer gains authority because another layer returned PASS.
@@ -38,8 +38,10 @@ A declared read-only reviewer is not proof of real runtime independence. An evid
 | `src/schemas.core.generated.mjs` | Existing generic schemas; integrated G1 adds task-action and task-action-binding |
 | `@netsujo/agent-role-contracts/profiles/onchain-finance` / `src/finance-profile.mjs` | Explicit optional import of existing financial proposal/evidence/receipt checks |
 | `src/schemas.finance.generated.mjs` | The four existing finance/Safe schemas |
+| `@netsujo/agent-role-contracts/adapters/filesystem-write` / `src/filesystem-write-adapter.mjs` | G2 candidate: explicit `write_file` declaration mapping, separate from G1 review/approval binding |
+| `src/schemas.adapters.generated.mjs` | G2 candidate: disjoint filesystem-write mapping schema set |
 | `src/index.mjs` | Backward-compatible facade retaining every existing public export |
-| `src/schemas.generated.mjs` | Compatibility aggregate of the two generated schema sets |
+| `src/schemas.generated.mjs` | Compatibility aggregate of core and finance schemas; G2 integration adds the disjoint adapter schema set |
 | `bin/agent-role-contracts.mjs` | Generic commands load the core; finance commands load their profile explicitly |
 
 Schema JSON files remain the only authored schema source. The existing generator builds and verifies every generated module. G1 adds action/binding declarations without replacing the existing role/task schemas or introducing an industry-specific core schema.
@@ -65,26 +67,36 @@ Each checks the assigned task, rejects out-of-scope work, rejects self-review, r
 | Phase | Work | Acceptance boundary | Status in this proposal |
 | --- | --- | --- | --- |
 | G0: core isolation | Separate entrypoints and schemas, preserve compatibility, generic-first documentation, non-financial examples | Core/CLI/quickstart work with finance files absent; existing behavior remains covered | Merged and implemented; publication separate |
-| G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Implemented candidate; integration and independent acceptance pending, not released/adopted |
-| G2: external adapter contract | Versioned mapping from a generic task/action to supported external tool semantics | Changed target/action/resource is rejected; unknown operations stay unsupported; core denials cannot be overridden | Design only; select a concrete integration before adding fields |
+| G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Merged and implemented; publication and adoption separate |
+| G2: external adapter contract | Versioned mapping from a generic task/action to supported external tool semantics | Changed target/action/resource is rejected; unknown operations stay unsupported; core denials cannot be overridden | Filesystem-write implemented candidate; integration/review pending, not released/adopted |
 | G3: evidence and lifecycle interoperability | Represent declared review/approval/execution/evidence subjects without pretending they are authenticated | Missing or stale evidence cannot be called verified; outputs separate declaration consistency, artifact integrity and runtime acceptance | Design only; no controller or execution-state engine shipped here |
 | Optional profiles | Domain-specific rules, including onchain finance and later evidenced use cases | Extra restrictions compose with the core; unrelated users do not load the profile | Finance and Safe merged as optional profile |
 
 Every new feature must explain a cross-domain coordination problem, identify reusable concepts, include negative tests and distinguish core behavior from adapter/runtime responsibilities. Do not invent several industry-specific schemas simply to appear general. Do not let one integration determine the whole roadmap.
 
-## 7. G1 binding candidate and integration boundary
+## 7. G1 binding and G2 integration boundary
 
-G1 identifies the complete canonical subject `canonical({profile: 'task-action/0.3', bundle, task, action})`: the full bundle including policy, role contracts/bodies, knowledge and routes, the full task including inputs/objective/acceptance, and the full declared action. Changes to these declarations invalidate prior bindings. Action and binding JSON use schema version `0.3`. Flat scalar action parameters are declarations only; G2 mapping to tool operations, resources and external permissions remains unimplemented.
+G1 identifies the complete canonical subject `canonical({profile: 'task-action/0.3', bundle, task, action})`: the full bundle including policy, role contracts/bodies, knowledge and routes, the full task including inputs/objective/acceptance, and the full declared action. Changes to these declarations invalidate prior bindings. Action and binding JSON use schema version `0.3`. Flat scalar action parameters are declarations only; the G2 candidate gives only the explicit filesystem-write mapping below; external permissions remain the runtime’s responsibility.
 
 The executable `examples/action-binding/demo.mjs` reuses the cross-domain builders and generic team/task/handoff fixtures. Software change and data cleaning mutate action parameters; support drafting mutates a task input. Each obtains the digest with async `describeTaskAction(bundleJson, taskJson, actionJson)`, declares routed passing review and required approval from `route.accountable`, validates PASS with async `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`, and requires `G1_SUBJECT_MISMATCH` for the unchanged binding after mutation. It executes no action and authenticates no reviewer or approver.
 
-Run `npm run demo:binding` on the integrated candidate for six expected binding outcomes. Implemented candidate status is not release, publication or adoption evidence.
+Run `npm run demo:binding` on the integrated candidate for six expected binding outcomes. G0 and G1 are merged and implemented; merge is not release, publication or adoption evidence.
 
 Referenced output artifacts need their own exact-byte digest supplied or computed by a trusted adapter; a path or URL alone is not immutable evidence or an immutable artifact identity. G1 binds the reference declaration, not the retrieved artifact bytes.
 
 All consumers must distinguish consistency, integrity and authenticity. A content digest detects different declared bytes; it is not a signature, authorization, timestamp, actual execution proof or proof that a retrieved source is true. Repeated subjects also require an external task/run identity and replay policy where relevant. A changed subject must invalidate prior review/approval declarations; the core must not synthesize fresh approval automatically.
 
 Time and external state remain explicit inputs. Do not silently read a clock, fetch referenced URLs, execute evidence commands or load executable configuration inside the core. Unknown adapter/profile versions cannot silently become a generic PASS. Profile-specific PASS must never imply a broader set of checks than actually performed.
+
+### First concrete adapter: filesystem-write
+
+G2 filesystem-write is an implemented candidate pending integration and independent review, not released or adopted. Existing portable relative file/subtree scope semantics already span software, data and support tasks, so this adapter needs no industry schema. G3 remains design-only.
+
+The optional integration entrypoint `@netsujo/agent-role-contracts/adapters/filesystem-write` exports async `validateFilesystemWriteMapping(bundleJson, taskJson, actionJson, mappingJson)` from `src/filesystem-write-adapter.mjs`. Adapter profile `filesystem-write/0.1` uses mapping schema version `0.1`. A G1 schema-version `0.3` action must have kind `filesystem-write` and exactly two parameters, `path` and `content_sha256`. Its mapping declares the current G1 `subject_digest`, operation `write_file`, and exactly matching path and digest. Unknown operations, parameters and semantics are refused rather than inferred. Core denials cannot be overridden; the path must fit the task scope and eligible routed executor declarations. No arbitrary SaaS, database, API or other resource semantics are supported.
+
+`content_sha256` is a caller-supplied declared integrity identity, not a measurement by this checker. No target bytes are read or verified; filesystem state and path existence are not checked. A mapping PASS grants no permission, executes nothing and implies no review approval. Executor identity is not authenticated and permissions are not enforced. G1 review/approval binding is separate and must refer to the complete current subject; the adapter neither validates nor synthesizes that binding.
+
+`examples/filesystem-write-adapter/demo.mjs` reuses the generic builder and fixtures for `src/example.mjs`, `reports/cleaned.csv` and `drafts/reply.md`. It obtains each subject with `describeTaskAction`, accepts the matching mapping, then requires a specific failure after a mapping path or digest mutation. Fictional digests keep the example offline without opening or writing target files. Run `node examples/filesystem-write-adapter/demo.mjs` after adapter integration; this docs lane alone depends on that implementation. The package subpath is an integration target, not a published-release claim.
 
 ## 8. Merged optional Safe profile
 
