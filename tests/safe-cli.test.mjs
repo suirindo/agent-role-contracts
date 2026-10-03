@@ -9,6 +9,13 @@ test('finance-safe CLI validates the exact fixture without claiming wallet authe
   assert.equal(r.status,0,r.stderr);
   const out=JSON.parse(r.stdout);
   assert.equal(out.valid,true);
-  assert.equal(out.transaction_serialization_verified,true);
+  assert.equal(out.safe_call_envelope_matches_intent,true);
+  assert.equal(out.transaction_hash_verified,false);
+  assert.equal(Object.hasOwn(out,'safe_transaction_fields_verified'),false);
+  assert.equal(out.transaction_serialization_verified,false);
   assert.equal(out.safe_proposal_authenticated,false);
+  const text=spawnSync(process.execPath,[...args,'--format','text'],{cwd:root,encoding:'utf8'});
+  assert.equal(text.status,0,text.stderr);
+  assert.match(text.stdout,/Safe CALL envelope matches intent: true/);
+  assert.doesNotMatch(text.stdout,/Serialization checked/);
 });

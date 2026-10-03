@@ -2,11 +2,11 @@
 
 Catch tasks that exceed an AI agent's declared write scope, and conflicting implementer/reviewer roles, before you hand off work.
 
-**Development preview: `0.2.0-alpha.3`.** The published npm release remains `0.1.0`. The current repository includes the v0.2 finance preview while preserving the v0.1 role-contract profile and synchronous APIs.
+**Development preview: `0.2.0-alpha.4`.** The published npm release remains `0.1.0`. The current repository includes the v0.2 finance preview while preserving the v0.1 role-contract profile and synchronous APIs.
 
-## Onchain finance preview
+## Optional onchain finance preview
 
-Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. Alpha.2 adds post-execution receipt binding; alpha.3 also verifies that an approved intent serializes exactly to one supported Safe CALL envelope.
+Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. The optional Safe profile matches the supported fields of a supplied single CALL envelope to an approved intent; it does not verify canonical Safe serialization or a Safe transaction hash.
 
 ```sh
 git clone https://github.com/suirindo/agent-role-contracts.git

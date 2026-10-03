@@ -1,11 +1,12 @@
 # Changelog
 
-## 0.2.0-alpha.3 — development preview, not published
+## 0.2.0-alpha.4 — development preview, not published
 
 - Add a strict Safe transaction proposal boundary for already-approved financial intents.
-- Deterministically verify one Safe CALL envelope for native transfers, ERC-20 transfers, and bounded ERC-20 approvals, including standard `transfer(address,uint256)` and `approve(address,uint256)` calldata.
-- Report `transaction_serialization_verified=true` only when the subject, chain, Safe address, nonce, target, value, calldata, and CALL operation all match the approved intent.
-- Keep Safe account authentication, owner/threshold/signature verification, live chain state, broadcast, custody, and execution authorization outside the package.
+- Match the supported fields of one supplied Safe CALL envelope for native transfers, ERC-20 transfers, and bounded ERC-20 approvals, including standard `transfer(address,uint256)` and `approve(address,uint256)` calldata.
+- Report `safe_call_envelope_matches_intent=true` only when the subject, chain, Safe address, nonce, target, value, calldata, and CALL operation all match the approved intent.
+- Replace the draft `safe_transaction_fields_verified` result with `safe_call_envelope_matches_intent`; retain `transaction_serialization_verified=false` as a limitation, never an alias.
+- Keep canonical Safe serialization, transaction hashes, Safe account authentication, owner/threshold/signature verification, live chain state, broadcast, custody, and execution authorization outside the package.
 
 ## 0.2.0-alpha.2 — development preview, not published
 

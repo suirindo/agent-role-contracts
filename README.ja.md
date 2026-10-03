@@ -2,9 +2,9 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.2.0-alpha.3`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
+**開発プレビュー：`0.2.0-alpha.4`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
 
-## オンチェーン金融のプレビュー
+## 任意のオンチェーン金融プレビュー
 
 資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
 
@@ -15,6 +15,8 @@ npm --prefix agent-role-contracts run demo:safe --silent
 ```
 
 英語デモでは、正常な支払い、チェーン違い、上限超過、無制限approval、レビュー後の提案変更、更新後の架空宣言、整合するexecution receipt、nonce不一致のreceiptまで検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
+
+任意のSafe profileは、供給された単一CALL envelopeの対応フィールドをintentと照合し、`safe_call_envelope_matches_intent`で結果を返します。Safeの正規serialization・transaction hash・owner・threshold・署名・custody・実行権限は検証しません。`transaction_serialization_verified`は常にfalseです。
 
 対象はnative送金、標準ERC-20送金、上限付きERC-20承認の宣言です。金額はuint256の整数文字列で比較します。execution receiptも呼出元が供給する宣言であり、実チェーン上の真正性を認証しません。PASSは宣言の整合を示すだけで、チェーン状態、simulation・承認・receiptの真正性、署名・送信、実際の上限強制、金融取引の安全性は証明しません。[仕様・API・利用例](examples/onchain-finance/README.md)を参照してください。
 

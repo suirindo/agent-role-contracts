@@ -1661,7 +1661,8 @@ export default {
   "safe-proposal": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://raw.githubusercontent.com/suirindo/agent-role-contracts/main/schemas/safe-proposal.schema.json",
-    "title": "Agent Role Contracts Safe transaction proposal preview",
+    "title": "Agent Role Contracts Safe single CALL envelope declaration preview",
+    "description": "Offline matching of subject, chain, Safe address, nonce and supported CALL fields only; no canonical Safe serialization, transaction hash or authentication assurance.",
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -1717,7 +1718,7 @@ export default {
           "data": {
             "type": "string",
             "pattern": "^0x([0-9a-f]{2})*$",
-            "maxLength": 131074
+            "maxLength": 138
           },
           "operation": {
             "type": "integer",

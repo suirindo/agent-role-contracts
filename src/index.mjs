@@ -8,7 +8,7 @@ import { buildReport } from './report.mjs';
 import { conditionalInputErrors, requiredInputsForContract, authorityErrors, runtimeNeutralFindings } from './contract-checks.mjs';
 import { FINANCIAL_PROFILE, FINANCIAL_LIMITATIONS, financialProposalErrors, financialSubjectDigest, financialEvidenceErrors, financialExecutionErrors } from './finance.mjs';
 import { SAFE_LIMITATIONS, safeProposalErrors } from './safe.mjs';
-export const VERSION = '0.2.0-alpha.3';
+export const VERSION = '0.2.0-alpha.4';
 export const MAX_INPUT_BYTES = 1048576;
 const own=(v,k)=>Object.hasOwn(v,k);
 const order=(a,b)=>a<b?-1:a>b?1:0;
@@ -216,18 +216,18 @@ export async function validateFinancialExecution(bundleJson, taskJson, policyJso
 }
 
 
-/** Bind an already-approved financial intent to one deterministic Safe CALL envelope. */
+/** Bind an already-approved financial intent to the supported fields of one supplied Safe CALL envelope. */
 export async function validateSafeProposal(bundleJson, taskJson, policyJson, intentJson, safeProposalJson, evaluatedAt) {
  const intentResult=await validateFinancialIntent(bundleJson,taskJson,policyJson,intentJson,evaluatedAt);
- if(!intentResult.valid)return report('safe-proposal',intentResult.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_transaction_fields_verified:false});
+ if(!intentResult.valid)return report('safe-proposal',intentResult.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
  const intent=read(intentJson,schemas['financial-intent'],'financial_intent');
  const proposal=read(safeProposalJson,schemas['safe-proposal'],'safe_proposal');
- if(proposal.errors.length)return report('safe-proposal',proposal.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_transaction_fields_verified:false});
+ if(proposal.errors.length)return report('safe-proposal',proposal.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
  const context=financialContext(bundleJson,taskJson,policyJson,JSON.stringify(intent.value.transaction),'financial_intent/transaction');
- if(context.errors.length)return report('safe-proposal',context.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_transaction_fields_verified:false});
+ if(context.errors.length)return report('safe-proposal',context.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...FINANCIAL_LIMITATIONS,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
  const result=await financialDetails(context);
- if(result.errors.length)return report('safe-proposal',result.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,safe_transaction_fields_verified:false});
+ if(result.errors.length)return report('safe-proposal',result.errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:false});
  const errors=safeProposalErrors(intent.value,proposal.value,result.details.subject_digest);
- const serialized=errors.length===0;
- return report('safe-proposal',errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,transaction_serialization_verified:serialized,safe_transaction_fields_verified:serialized,safe_proposal:proposal.value});
+ const matchesIntent=errors.length===0;
+ return report('safe-proposal',errors,{validation_stage:'wallet-proposal',evaluated_at:typeof evaluatedAt==='string'?evaluatedAt:null,...result.details,...SAFE_LIMITATIONS,safe_call_envelope_matches_intent:matchesIntent,safe_proposal:proposal.value});
 }

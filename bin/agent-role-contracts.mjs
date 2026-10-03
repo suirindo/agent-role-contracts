@@ -52,7 +52,7 @@ try {
    if(r.accountable)for(const line of [`Accountable: ${r.accountable}`,`Implementers: ${r.executors.join(', ')}`,`Reviewers: ${r.reviewers.join(', ')}`,`Human approval required: ${r.human_approval_required}`])console.log(safeText(line));
    if(r.transaction)for(const line of [`Operation: ${r.transaction.operation}`,`Chain: ${r.transaction.chain_id}`,`Asset: ${r.transaction.asset}`,`Amount (base units): ${r.transaction.amount_base_units}`,`Target: ${r.transaction.target}`,`Subject: ${r.subject_digest}`])console.log(safeText(line));
    if(r.execution)for(const line of [`Execution status: ${r.execution.status}`,`Transaction hash: ${r.execution.transaction_hash}`,`Block: ${r.execution.block_number}`])console.log(safeText(line));
-   if(r.safe_proposal)for(const line of [`Safe: ${r.safe_proposal.safe_address}`,`Safe nonce: ${r.safe_proposal.safe_nonce}`,`Safe to: ${r.safe_proposal.transaction.to}`,`Serialization checked: ${r.transaction_serialization_verified}`])console.log(safeText(line));
+   if(r.safe_proposal)for(const line of [`Safe: ${r.safe_proposal.safe_address}`,`Safe nonce: ${r.safe_proposal.safe_nonce}`,`Safe to: ${r.safe_proposal.transaction.to}`,`Safe CALL envelope matches intent: ${r.safe_call_envelope_matches_intent}`])console.log(safeText(line));
    for(const role of r.roles||[])console.log(safeText(`Role ${role.id}: ${role.authority_mode}; allowed=[${role.capabilities.join(', ')}]; prohibited=[${role.prohibited_capabilities.join(', ')}]`));
    for(const e of r.errors)console.log(safeText(`${e.code} ${e.path}: ${e.message}`));
   }
