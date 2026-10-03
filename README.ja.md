@@ -2,22 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.2.0-alpha.2`。** npmの公開版は引き続き`0.1.0`です。現在のrepositoryにはv0.2金融プレビューを含み、既存のv0.1 role-contract profileと同期APIは維持しています。
-
-## オンチェーン金融のプレビュー
-
-資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
-
-```sh
-git clone https://github.com/suirindo/agent-role-contracts.git
-npm --prefix agent-role-contracts run demo:finance --silent
-```
-
-英語デモでは、正常な支払い、チェーン違い、上限超過、無制限approval、レビュー後の提案変更、更新後の架空宣言、整合するexecution receipt、nonce不一致のreceiptまで検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
-
-対象はnative送金、標準ERC-20送金、上限付きERC-20承認の宣言です。金額はuint256の整数文字列で比較します。execution receiptも呼出元が供給する宣言であり、実チェーン上の真正性を認証しません。PASSは宣言の整合を示すだけで、チェーン状態、simulation・承認・receiptの真正性、署名・送信、実際の上限強制、金融取引の安全性は証明しません。[仕様・API・利用例](examples/onchain-finance/README.md)を参照してください。
-
-v0.1 profileは、宣言された役割・権限・レビュー分離・作業範囲・引き継ぎを検査します。runtime権限の付与、本人確認、エージェント実行、OSやGitHubの権限制御は行いません。
+**開発プレビュー：`0.2.0-alpha.2`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -46,6 +31,20 @@ npm --prefix agent-role-contracts run demo --silent
 
 次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
+## 汎用コアと用途別拡張
+
+Agent Role Contractsは、AIの役割・権限・作業範囲・レビュー・引き継ぎの宣言を検査する汎用OSSです。ソフトウェア開発・データ処理・問い合わせ返信の下書きは同じコアを利用し、オンチェーン金融は用途別拡張の一つに位置付けます。
+
+同じ契約を使う3つの非金融デモを実行できます。
+
+```sh
+npm --prefix agent-role-contracts run demo:general --silent
+```
+
+この未公開のソース候補では、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
+
+デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
+
 ## 詳細な3-role例
 
 starterの後は、coordinator、条件付きinput、handoffを含む詳細例を使えます。
@@ -65,6 +64,21 @@ node bin/agent-role-contracts.mjs validate --bundle examples/invalid-self-review
 `SELF_REVIEW_DECLARED`が表示され、終了コード1になります。`another-team.json`では別のrole ID・repository参照、`code-task.json`では別routeの条件付き必須inputを確認できます。
 
 CIマトリクスは Ubuntu / Node.js 22.5.0、Ubuntu / Node.js 24、macOS / Node.js 22、Windows / Node.js 22 を対象にします。各候補は必ずそのexact HEADで通過する必要があり、過去候補の成功は現在のbytesへ流用しません。22.5.0は最小互換性確認用で、実運用への導入推奨ではありません。独立した受入は別途必要です。
+
+## 用途別拡張：オンチェーン金融
+
+資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
+
+```sh
+git clone https://github.com/suirindo/agent-role-contracts.git
+npm --prefix agent-role-contracts run demo:finance --silent
+```
+
+英語デモでは、正常な支払い、チェーン違い、上限超過、無制限approval、レビュー後の提案変更、更新後の架空宣言、整合するexecution receipt、nonce不一致のreceiptまで検査します。GitとNode.js 22.5以上（npm同梱）が必要です。clone後はオフラインで動き、install・ウォレット・APIキー・providerアカウントを要求しません。
+
+対象はnative送金、標準ERC-20送金、上限付きERC-20承認の宣言です。金額はuint256の整数文字列で比較します。execution receiptも呼出元が供給する宣言であり、実チェーン上の真正性を認証しません。PASSは宣言の整合を示すだけで、チェーン状態、simulation・承認・receiptの真正性、署名・送信、実際の上限強制、金融取引の安全性は証明しません。[仕様・API・利用例](examples/onchain-finance/README.md)を参照してください。
+
+v0.1 profileは、宣言された役割・権限・レビュー分離・作業範囲・引き継ぎを検査します。runtime権限の付与、本人確認、エージェント実行、OSやGitHubの権限制御は行いません。
 
 ## 何を検査するか
 

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { validateBundle, explainTask } from '../src/index.mjs';
+import { validateBundle, explainTask } from '../src/core.mjs';
 
 // Use the shipped fixtures and the real checker. Only the repaired task's JSON
 // changes in memory; no task scope is opened and no agent is started.

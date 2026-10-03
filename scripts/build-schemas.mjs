@@ -8,9 +8,19 @@ const schemas = Object.fromEntries(names.map(name => [name, parseCanonicalSchema
 for (const schema of Object.values(schemas)) assertSupportedSchema(schema);
 const role = {...schemas['role-contract']};delete role.$schema;delete role.$id;delete role.title;
 if(canonical(role)!==canonical(schemas.bundle.properties.roles.items.properties.contract)) throw new Error('SCHEMA_ROLE_COPY_DRIFT');
-const content = '// Generated from schemas/*.schema.json; do not edit.\nexport default ' + serializeCanonicalSchemaSource(schemas, 2) + ';\n';
-const dest = new URL('src/schemas.generated.mjs',root);
-if (process.argv.includes('--check')) {
- if (readFileSync(dest,'utf8') !== content) throw new Error('SCHEMA_GENERATED_DRIFT');
- console.log(`${names.length} bundled schemas: supported-keyword check and generated identity PASS`);
-} else {writeFileSync(dest,content);console.log(fileURLToPath(dest));}
+const header = '// Generated from schemas/*.schema.json; do not edit.\n';
+const coreNames = ['role-contract', 'bundle', 'task', 'handoff'];
+const financeNames = ['financial-policy', 'financial-intent', 'financial-execution'];
+const moduleFor = keys => header + 'export default ' + serializeCanonicalSchemaSource(Object.fromEntries(keys.map(name => [name, schemas[name]])), 2) + ';\n';
+const outputs = {
+ 'src/schemas.core.generated.mjs': moduleFor(coreNames),
+ 'src/schemas.finance.generated.mjs': moduleFor(financeNames),
+ 'src/schemas.generated.mjs': header + "import core from './schemas.core.generated.mjs';\nimport finance from './schemas.finance.generated.mjs';\nexport default {...core,...finance};\n",
+};
+for (const [name, content] of Object.entries(outputs)) {
+ const dest = new URL(name, root);
+ if (process.argv.includes('--check')) {
+  if (readFileSync(dest, 'utf8') !== content) throw new Error('SCHEMA_GENERATED_DRIFT: ' + name);
+ } else { writeFileSync(dest, content); console.log(fileURLToPath(dest)); }
+}
+if (process.argv.includes('--check')) console.log(`${names.length} bundled schemas: supported-keyword check and generated identity PASS`);

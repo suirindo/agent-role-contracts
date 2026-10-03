@@ -3,13 +3,15 @@
   "version": "0.2.0-alpha.2",
   "license": "MIT",
   "type": "module",
-  "description": "Offline AI-agent role and onchain-finance proposal declaration checks.",
+  "description": "Offline, general-purpose AI-agent role, authority, task-scope, review and handoff declaration checks.",
   "engines": {
     "node": ">=22.5"
   },
   "exports": {
     ".": "./src/index.mjs",
-    "./schemas/*": "./schemas/*"
+    "./schemas/*": "./schemas/*",
+    "./core": "./src/core.mjs",
+    "./profiles/onchain-finance": "./src/finance-profile.mjs"
   },
   "bin": {
     "agent-role-contracts": "./bin/agent-role-contracts.mjs"
@@ -33,7 +35,8 @@
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",
     "demo": "node examples/quickstart.mjs",
-    "demo:finance": "node examples/onchain-finance/demo.mjs"
+    "demo:finance": "node examples/onchain-finance/demo.mjs",
+    "demo:general": "node examples/cross-domain/demo.mjs"
   },
   "repository": {
     "type": "git",
@@ -60,5 +63,5 @@
     "treasury",
     "erc20"
   ],
-  "author": "Netsujo\u682a\u5f0f\u4f1a\u793e"
+  "author": "Netsujo株式会社"
 }

@@ -36,3 +36,7 @@ A successful validation means only that the supplied declarations are internally
 It does not authenticate identity, verify evidence, grant filesystem or repository permissions, authorize merge/deploy, or prove that a runtime can enforce the declared controls.
 
 v0.1.0 is the first public compatibility baseline. Future incompatible public contract changes require an explicit schema/package version change.
+
+## Additive core/profile source split (unreleased)
+
+The current architecture candidate preserves the existing root exports, synchronous generic APIs, asynchronous finance APIs, schemas and diagnostics. It adds `/core` and `/profiles/onchain-finance` import subpaths. The core entrypoint and generic CLI commands do not load the optional finance modules or schemas. The root remains a compatibility facade and still imports finance; optional entrypoints do not mean separate npm packages. See [the design](ARCHITECTURE.md) for implemented versus planned boundaries.
