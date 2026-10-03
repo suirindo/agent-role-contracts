@@ -41,7 +41,7 @@ Agent Role Contractsは、AIの役割・権限・作業範囲・レビュー・�
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-この未公開のソース候補では、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
+この未公開のrepository sourceでは、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
 
@@ -61,7 +61,7 @@ digestが示すのは整合対象の完全性であり、真正性や実行許�
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleはmerge済みG2を基盤とする未公開候補で、独立レビュー・hosted acceptance待ちです。
+G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleもrepository mainにmerge済み・実装済みです。公開・採用は別の状態として扱います。
 
 optional APIは次のとおりです。
 
@@ -80,17 +80,17 @@ profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-この未公開候補にはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
+この未公開のrepository sourceにはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
-## G3 lifecycle候補
+## G3 lifecycle宣言
 
-G3 lifecycleは**実装済み候補で、独立レビュー・hosted acceptance待ち**です。リリース済み・採用済みではありません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+G3 lifecycleは**repository mainにmerge済み・実装済み**の未公開開発プレビューです。npm公開・本番採用は主張しません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
 
 ```sh
 npm run demo:lifecycle
 ```
 
-この未公開candidateでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`で、このbranchのmerge baseです。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3はmerge済みG2を基盤とする現在の未公開候補で、独立レビュー・hosted acceptance待ちです。G2のsequencingはblockerではありません。mergeはnpm公開・本番採用・runtime権限・deploymentを意味しません。G3は未merge・未公開です。finance・Safeは任意profileです。
+この未公開のrepository sourceでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`、G3 PR #19は`d18f867d91ec8abb4038af85f17c7b3d4954b869`です。repository sourceは未公開開発プレビュー`0.5.0-alpha.1`のままです。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3は汎用coreのlifecycle宣言であり、runtime・state machine・authenticatorではありません。merge・実装はnpm公開・本番採用・runtime権限・deployment・認証済み証拠・実行権限を意味しません。finance・Safeは任意profileです。
 
 外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
 

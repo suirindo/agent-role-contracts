@@ -1,6 +1,6 @@
 # Agent Role Contracts
 
-G0, G1 and G2 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`, this branch’s merge base. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 builds on merged G2 and is the current unreleased candidate pending independent review and hosted acceptance; G2 sequencing is no longer a blocker. Source merge does not imply npm publication, production adoption, runtime permission or deployment; G3 is not merged or published.
+G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source remains the unreleased development preview `0.5.0-alpha.1`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Source merge and implementation do not imply npm publication, production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
 Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
@@ -64,7 +64,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-This unreleased source candidate adds `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+This unreleased repository source provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -84,7 +84,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-write is **merged and implemented in repository main**; no npm publication or production adoption is claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle builds on merged G2 and remains an unreleased candidate pending independent review and hosted acceptance.
+G2 filesystem-write is **merged and implemented in repository main**; no npm publication or production adoption is claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main; publication and adoption remain separate.
 
 The integration API is an optional import:
 
@@ -103,17 +103,17 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-This unreleased candidate includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
+This unreleased repository source includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
 
-## G3 lifecycle candidate
+## G3 lifecycle declarations
 
-G3 lifecycle is an **implemented candidate pending independent review and hosted acceptance**, not released or adopted. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+G3 lifecycle is **merged and implemented in repository main** in the unreleased development preview; no npm publication or production adoption is claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
 
 ```sh
 npm run demo:lifecycle
 ```
 
-This unreleased G3 candidate provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
+This unreleased repository source provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
 External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
 
