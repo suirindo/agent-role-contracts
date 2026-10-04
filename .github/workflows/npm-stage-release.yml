@@ -52,6 +52,8 @@ jobs:
         run: |
           npm install --global npm@11.20.0 --ignore-scripts
           test "$(npm --version)" = '11.20.0'
+      - name: Audit dependency metadata before staging
+        run: npm audit --audit-level=high --omit=dev --ignore-scripts
       - name: Verify source and release checks without OIDC permission
         run: |
           npm run check
