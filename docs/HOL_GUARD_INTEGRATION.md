@@ -3,11 +3,13 @@
 Status: design record for Issue #7. This document does not add runtime enforcement, execution authority, authentication, replay protection or production adoption to Agent Role Contracts.
 
 Audit baseline:
-- Agent Role Contracts: `c42000412f2663f893ba7382d12a3e027de061a1`
-- HOL Guard: `9260647758487a12381fbec31d53b65dd8106340` (3.18.1 line)
+- Agent Role Contracts: `9f0cc27becc6e06bcae6140e13bb56d2168e89be`
+- HOL Guard: `2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190` (3.20.0 line)
 - prior local Phase-2 prototype record: `b6803eba0757cafb5a7a7be611bdd1f4daa1ee73`
 
 The prior prototype result is historical evidence only. Its source object was not recovered in the current workspace and its 70/70 Rust result has not been rerun against the HOL Guard baseline above.
+
+The 3.20.0 refresh is a read-only source audit, not a rerun of HOL Guard Rust tests. Compared with the prior 3.18.1 audit, the authority-critical snapshot, request-validation, approval-fence, command-authority/floor, receipt, edge and action-lattice sources remain byte-identical. The only change among the audited enforcement anchors is in `apply_post_tool_policy`, where bounded agent task metadata is classified as a harness action; the PreTool restriction seam and action lattice are unchanged. An independent read-only review of exact HOL Guard HEAD `2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190` found no new generic external restriction/admission seam and confirmed that `command_extensions` remains grant-bearing.
 
 ## 1. Integration invariant
 

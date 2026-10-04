@@ -1,8 +1,8 @@
 {
   "schema": "arc-hol-guard-conformance-vectors.v1",
   "status": "test-only-reference-model",
-  "hol_guard_head": "9260647758487a12381fbec31d53b65dd8106340",
-  "arc_main": "a8ee53e6ac9cdbbf83e79316cdcbbe60fc0aae82",
+  "hol_guard_head": "2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190",
+  "arc_main": "9f0cc27becc6e06bcae6140e13bb56d2168e89be",
   "production_acceptance": "NOT_RUN",
   "vectors": [
     {

@@ -274,7 +274,7 @@ test('conformance vectors mirror the merged acceptance IDs without changing prod
   assert.equal(vectors.schema, 'arc-hol-guard-conformance-vectors.v1');
   assert.equal(vectors.status, 'test-only-reference-model');
   assert.equal(vectors.hol_guard_head, guardBaseline.hol_guard_head);
-  assert.equal(vectors.arc_main, 'a8ee53e6ac9cdbbf83e79316cdcbbe60fc0aae82');
+  assert.equal(vectors.arc_main, '9f0cc27becc6e06bcae6140e13bb56d2168e89be');
   assert.equal(vectors.production_acceptance, 'NOT_RUN');
 
   const canonicalIds = canonicalContract.acceptance_cases.map(row => row.id);
@@ -286,7 +286,7 @@ test('conformance vectors mirror the merged acceptance IDs without changing prod
 test('Guard action order is pinned to the exact audited source record', () => {
   assert.deepEqual(guardBaseline, {
     schema: 'hol-guard-audit-baseline.v1',
-    hol_guard_head: '9260647758487a12381fbec31d53b65dd8106340',
+    hol_guard_head: '2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190',
     source_path: 'rust/crates/guard-runtime/src/policy_enforcement_matrix.rs',
     source_sha256: 'd0733befc410c9f173a50b003346f71d52a65e64ae5a7465e4ae834bc5093a20',
     action_floor_order: [
