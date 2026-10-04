@@ -1,8 +1,8 @@
 {
   "schema": "arc-hol-guard-integration-contract.v1",
   "status": "design-only-not-run",
-  "arc_main": "c42000412f2663f893ba7382d12a3e027de061a1",
-  "hol_guard_head": "9260647758487a12381fbec31d53b65dd8106340",
+  "arc_main": "9f0cc27becc6e06bcae6140e13bb56d2168e89be",
+  "hol_guard_head": "2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190",
   "historical_prototype": {
     "head": "b6803eba0757cafb5a7a7be611bdd1f4daa1ee73",
     "rust_tests_passed": 70,

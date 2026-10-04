@@ -3,8 +3,8 @@
 Status: design-only acceptance plan for Issue #7. Every case below is `NOT_RUN` until a maintainer-approved Guard contract exists. These cases do not replace the historical 68-row prototype matrix or the historical 70/70 prototype Rust result.
 
 Baseline for this plan:
-- ARC main: `c42000412f2663f893ba7382d12a3e027de061a1`
-- audited HOL Guard: `9260647758487a12381fbec31d53b65dd8106340`
+- ARC main: `9f0cc27becc6e06bcae6140e13bb56d2168e89be`
+- audited HOL Guard: `2c8ca84b4a3258d93da13b4d1e34adb1dbc5f190`
 
 ## A. Restriction-only composition
 
