@@ -98,10 +98,13 @@ test('workflow keeps verification unprivileged and stages one exact artifact wit
   assert.equal((workflow.match(/id-token: write/g) ?? []).length, 1);
   assert.equal((workflow.match(/npm stage publish /g) ?? []).length, 1);
   assert.equal((workflow.match(/npm pack /g) ?? []).length, 1);
+  assert.equal((workflow.match(/npm audit --audit-level=high --omit=dev --ignore-scripts/g) ?? []).length, 1);
   assert.doesNotMatch(workflow, /npm (?:stage approve|publish )|secrets\./);
   assert.match(workflow, /artifact-ids: \$\{\{ needs\.verify\.outputs\.artifact_id \}\}/);
   assert.match(workflow, /--provenance --ignore-scripts --json/);
   assert.match(workflow, /cancel-in-progress: false/);
+  const coreWorkflow = readFileSync(new URL('../workflows/core.yml', import.meta.url), 'utf8');
+  assert.doesNotMatch(coreWorkflow, /npm audit/, 'dependency audit must stay release-only to avoid recurring PR CI cost');
 });
 
 import { verifyAttestationAudit, isolatedNpmConfig, signerPolicy } from './verify-publication.mjs';
