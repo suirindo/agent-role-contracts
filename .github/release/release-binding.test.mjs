@@ -96,6 +96,7 @@ test('workflow keeps verification unprivileged and stages one exact artifact wit
   const verifyJob = workflow.split('  verify:')[1].split('  stage:')[0];
   assert.doesNotMatch(verifyJob, /id-token:/);
   assert.equal((workflow.match(/id-token: write/g) ?? []).length, 1);
+  assert.equal((workflow.match(/environment: npm-publish/g) ?? []).length, 1);
   assert.equal((workflow.match(/npm stage publish /g) ?? []).length, 1);
   assert.equal((workflow.match(/npm pack /g) ?? []).length, 1);
   assert.equal((workflow.match(/npm audit --audit-level=high --omit=dev --ignore-scripts/g) ?? []).length, 1);
