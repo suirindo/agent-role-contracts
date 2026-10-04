@@ -3,7 +3,8 @@ version: 2
 # Cost-balanced maintenance for the public OSS release path.
 # The package currently has no third-party npm dependencies, so npm version-update
 # PRs would add CI noise without reducing meaningful dependency risk. GitHub Actions
-# are pinned by SHA and are refreshed as one monthly reviewed batch instead.
+# version updates are pinned by SHA and refreshed as one monthly reviewed batch.
+# Security updates remain event-driven rather than waiting for that monthly cadence.
 updates:
   - package-ecosystem: github-actions
     directory: "/"
@@ -13,6 +14,7 @@ updates:
       time: "09:00"
       timezone: Asia/Tokyo
     open-pull-requests-limit: 1
+    rebase-strategy: disabled
     groups:
       github-actions:
         patterns:

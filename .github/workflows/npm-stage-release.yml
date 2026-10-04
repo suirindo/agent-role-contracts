@@ -53,7 +53,7 @@ jobs:
           npm install --global npm@11.20.0 --ignore-scripts
           test "$(npm --version)" = '11.20.0'
       - name: Audit dependency metadata before staging
-        run: npm audit --audit-level=high --omit=dev --ignore-scripts
+        run: npm audit --audit-level=high --ignore-scripts
       - name: Verify source and release checks without OIDC permission
         run: |
           npm run check
@@ -66,6 +66,26 @@ jobs:
           mkdir -p "$RUNNER_TEMP/release-bundle"
           npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/release-bundle" > "$RUNNER_TEMP/release-bundle/pack.json"
           node .github/release/release-binding.mjs manifest "$RUNNER_TEMP/release-bundle"
+      - name: Show verified release target before npm-publish approval
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/release/release-binding.mjs bundle "$RUNNER_TEMP/release-bundle"
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const manifest = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/release-bundle/release-manifest.json`, 'utf8'));
+          const lines = [
+            '## Verified release candidate awaiting npm-publish approval',
+            '',
+            `Package: ${manifest.package}@${manifest.version}`,
+            `Tag: ${manifest.tag}`,
+            `Commit: ${manifest.commit}`,
+            `Tarball: ${manifest.artifact.filename}`,
+            `Tarball SHA-256: ${manifest.artifact.sha256}`,
+            '',
+          ];
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
+          NODE
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         id: bundle
         with:
