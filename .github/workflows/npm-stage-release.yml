@@ -78,6 +78,7 @@ jobs:
 
   stage:
     needs: verify
+    environment: npm-publish
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
