@@ -153,7 +153,7 @@ function runVector(vector) {
 
   if (op === 'approval') {
     const binding = createApprovalBinding(input.binding);
-    return consumeApproval(binding, input.current);
+    return consumeApproval(binding, input.current, { guardAuthenticationVerified: true });
   }
 
   if (op === 'approval-mismatch-set') {
@@ -162,7 +162,7 @@ function runVector(vector) {
       reasons: input.keys.map(key => {
         const current = clone(input.current);
         current[key] = current[key] + ':mismatch';
-        return consumeApproval(binding, current).reason;
+        return consumeApproval(binding, current, { guardAuthenticationVerified: true }).reason;
       })
     };
   }
@@ -174,7 +174,7 @@ function runVector(vector) {
     assert.equal(created.outcome, 'ok');
     const revoked = revokeRestriction(installed.state);
     assert.equal(revoked.outcome, 'ok');
-    return consumeApprovalWithAdmission(created.binding, revoked.state, input.request);
+    return consumeApprovalWithAdmission(created.binding, revoked.state, input.request, { guardAuthenticationVerified: true });
   }
 
   if (op === 'approval-fence') {
@@ -188,7 +188,8 @@ function runVector(vector) {
     const oldAfterMutation = consumeApprovalWithAdmission(
       oldBinding.binding,
       newState.state,
-      input.request
+      input.request,
+      { guardAuthenticationVerified: true }
     );
 
     const newBinding = createApprovalBindingForAdmission(newState.state, input.request);
@@ -196,7 +197,8 @@ function runVector(vector) {
     const newAfterMutation = consumeApprovalWithAdmission(
       newBinding.binding,
       newState.state,
-      input.request
+      input.request,
+      { guardAuthenticationVerified: true }
     );
 
     const mixedState = {
@@ -208,7 +210,8 @@ function runVector(vector) {
     const mixedAfterMutation = consumeApprovalWithAdmission(
       newBinding.binding,
       mixedState,
-      input.request
+      input.request,
+      { guardAuthenticationVerified: true }
     );
 
     return {
@@ -230,7 +233,7 @@ function runVector(vector) {
 
   if (op === 'receipt-classification') {
     const oldReceipt = receiptIdentity(input.old);
-    return classifyReceiptEvidence(oldReceipt, input.current);
+    return classifyReceiptEvidence(oldReceipt, input.current, { guardAuthenticationVerified: input.guardAuthenticationVerified === true });
   }
 
   if (op === 'receipt-currentness') {
@@ -366,6 +369,39 @@ test('approval binding fails closed when required identity fields are absent', (
   );
 });
 
+test('approval consumption requires Guard authentication and an intact binding digest', () => {
+  const base = {
+    issuerDigest: 'sha256:' + 'c'.repeat(64),
+    restrictionIdentity: 'revision:2:sha256:' + '2'.repeat(64),
+    restrictionRevision: '2',
+    restrictionDigest: 'sha256:' + '2'.repeat(64),
+    subject: 'subject:A',
+    actor: 'actor:A',
+    session: 'session:A',
+    workspace: 'workspace:A',
+    canonicalTarget: '/workspace/a.txt',
+    requestIdentity: 'request:A'
+  };
+  const binding = createApprovalBinding(base);
+  const current = {
+    ...base,
+    existingAction: 'allow',
+    arcFloor: 'NoAdditionalFloor'
+  };
+
+  assert.deepEqual(consumeApproval(binding, current), {
+    outcome: 'reject',
+    reason: 'APPROVAL_AUTHENTICATION_REQUIRED'
+  });
+
+  const forged = { ...binding, actor: 'actor:ATTACKER' };
+  const forgedCurrent = { ...current, actor: 'actor:ATTACKER' };
+  assert.deepEqual(
+    consumeApproval(forged, forgedCurrent, { guardAuthenticationVerified: true }),
+    { outcome: 'reject', reason: 'APPROVAL_BINDING_DIGEST_INVALID' }
+  );
+});
+
 test('receipt identity changes when authenticated issuer changes', () => {
   const base = {
     guardDecisionIdentity: 'guard:decision:A',
@@ -390,11 +426,11 @@ test('receipt evidence is self-consistent historical evidence but never authorit
     scopeDigest: 'sha256:' + 'b'.repeat(64)
   };
   const receipt = receiptIdentity(canonical);
-  assert.deepEqual(verifyReceiptEvidence(receipt), {
+  assert.deepEqual(verifyReceiptEvidence(receipt, { guardAuthenticationVerified: true }), {
     outcome: 'ok',
     historicalEvidence: true
   });
-  assert.deepEqual(classifyReceiptEvidence(receipt, canonical), {
+  assert.deepEqual(classifyReceiptEvidence(receipt, canonical, { guardAuthenticationVerified: true }), {
     outcome: 'ok',
     historicalEvidence: true,
     currentAuthority: false,
@@ -405,10 +441,34 @@ test('receipt evidence is self-consistent historical evidence but never authorit
     ...receipt,
     receiptIdentity: '0'.repeat(64)
   };
-  assert.deepEqual(verifyReceiptEvidence(tampered), {
+  assert.deepEqual(verifyReceiptEvidence(tampered, { guardAuthenticationVerified: true }), {
     outcome: 'reject',
     reason: 'RECEIPT_IDENTITY_INVALID'
   });
+});
+
+test('receipt verification requires Guard authentication and a closed privacy-safe shape', () => {
+  const canonical = {
+    guardDecisionIdentity: 'guard:decision:A',
+    issuerDigest: 'sha256:' + 'c'.repeat(64),
+    restrictionIdentity: 'restriction:N',
+    subjectDigest: 'sha256:' + 'a'.repeat(64),
+    scopeDigest: 'sha256:' + 'b'.repeat(64)
+  };
+  const receipt = receiptIdentity(canonical);
+  assert.deepEqual(verifyReceiptEvidence(receipt), {
+    outcome: 'reject',
+    reason: 'RECEIPT_AUTHENTICATION_REQUIRED'
+  });
+
+  const privacyViolating = {
+    ...receipt,
+    canonical: { ...receipt.canonical, rawRoleBody: 'SECRET' }
+  };
+  assert.deepEqual(
+    verifyReceiptEvidence(privacyViolating, { guardAuthenticationVerified: true }),
+    { outcome: 'reject', reason: 'RECEIPT_CANONICAL_INVALID' }
+  );
 });
 
 test('reference model does not claim execution-boundary acceptance', () => {

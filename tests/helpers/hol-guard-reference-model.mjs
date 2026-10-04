@@ -236,6 +236,19 @@ const APPROVAL_STRING_KEYS = Object.freeze([
   'requestIdentity'
 ]);
 
+const approvalCanonical = value => ({
+  issuerDigest: value.issuerDigest,
+  restrictionIdentity: value.restrictionIdentity,
+  restrictionRevision: value.restrictionRevision,
+  restrictionDigest: value.restrictionDigest,
+  subject: value.subject,
+  actor: value.actor,
+  session: value.session,
+  workspace: value.workspace,
+  canonicalTarget: value.canonicalTarget,
+  requestIdentity: value.requestIdentity
+});
+
 const approvalShapeValid = value =>
   value &&
   typeof value === 'object' &&
@@ -246,23 +259,18 @@ const approvalShapeValid = value =>
     key => typeof value[key] === 'string' && value[key].length > 0
   );
 
+const approvalBindingDigestValid = binding =>
+  typeof binding.bindingDigest === 'string' &&
+  binding.bindingDigest === stableIdentity(approvalCanonical(binding));
+
 export function createApprovalBinding(input) {
   if (!approvalShapeValid(input)) throw new Error('APPROVAL_BINDING_INVALID');
-  const binding = {
-    issuerDigest: input.issuerDigest,
-    restrictionIdentity: input.restrictionIdentity,
-    restrictionRevision: input.restrictionRevision,
-    restrictionDigest: input.restrictionDigest,
-    subject: input.subject,
-    actor: input.actor,
-    session: input.session,
-    workspace: input.workspace,
-    canonicalTarget: input.canonicalTarget,
-    requestIdentity: input.requestIdentity
-  };
-  return Object.freeze({ ...binding, bindingDigest: stableIdentity(binding) });
+  const canonical = approvalCanonical(input);
+  return Object.freeze({
+    ...canonical,
+    bindingDigest: stableIdentity(canonical)
+  });
 }
-
 export function createApprovalBindingForAdmission(admissionState, input) {
   const coherence = admissionCoherence(admissionState);
   if (coherence.outcome !== 'ok') return coherence;
@@ -277,9 +285,19 @@ export function createApprovalBindingForAdmission(admissionState, input) {
   });
 }
 
-export function consumeApproval(binding, current) {
+export function consumeApproval(
+  binding,
+  current,
+  { guardAuthenticationVerified = false } = {}
+) {
+  if (guardAuthenticationVerified !== true) {
+    return reject('APPROVAL_AUTHENTICATION_REQUIRED');
+  }
   if (!approvalShapeValid(binding) || !approvalShapeValid(current)) {
     return reject('APPROVAL_CURRENT_INVALID');
+  }
+  if (!approvalBindingDigestValid(binding)) {
+    return reject('APPROVAL_BINDING_DIGEST_INVALID');
   }
   for (const key of [
     'issuerDigest',
@@ -301,7 +319,12 @@ export function consumeApproval(binding, current) {
   });
 }
 
-export function consumeApprovalWithAdmission(binding, admissionState, current) {
+export function consumeApprovalWithAdmission(
+  binding,
+  admissionState,
+  current,
+  options = {}
+) {
   const coherence = admissionCoherence(admissionState);
   if (coherence.outcome !== 'ok') {
     return reject(
@@ -316,53 +339,76 @@ export function consumeApprovalWithAdmission(binding, admissionState, current) {
     restrictionIdentity: coherence.restrictionIdentity,
     restrictionRevision: coherence.revision,
     restrictionDigest: coherence.digest
-  });
+  }, options);
 }
+const RECEIPT_CANONICAL_KEYS = Object.freeze([
+  'guardDecisionIdentity',
+  'issuerDigest',
+  'restrictionIdentity',
+  'explicitOptionalAbsence',
+  'subjectDigest',
+  'scopeDigest'
+]);
+
+const exactKeys = (value, keys) =>
+  value &&
+  typeof value === 'object' &&
+  Object.keys(value).length === keys.length &&
+  keys.every(key => Object.hasOwn(value, key));
+
+const receiptCanonicalShapeValid = value =>
+  exactKeys(value, RECEIPT_CANONICAL_KEYS) &&
+  typeof value.guardDecisionIdentity === 'string' &&
+  value.guardDecisionIdentity.length > 0 &&
+  isDigest(value.issuerDigest) &&
+  isDigest(value.subjectDigest) &&
+  isDigest(value.scopeDigest) &&
+  typeof value.explicitOptionalAbsence === 'boolean' &&
+  (
+    value.restrictionIdentity === null ||
+    (
+      typeof value.restrictionIdentity === 'string' &&
+      value.restrictionIdentity.length > 0
+    )
+  );
 
 export function receiptIdentity(input) {
-  if (
-    !input ||
-    typeof input.guardDecisionIdentity !== 'string' ||
-    input.guardDecisionIdentity.length === 0 ||
-    !isDigest(input.issuerDigest) ||
-    !isDigest(input.subjectDigest) ||
-    !isDigest(input.scopeDigest) ||
-    !(
-      input.restrictionIdentity === null ||
-      (
-        typeof input.restrictionIdentity === 'string' &&
-        input.restrictionIdentity.length > 0
-      )
-    )
-  ) {
-    throw new Error('RECEIPT_INPUT_INVALID');
-  }
-
   const safe = {
-    guardDecisionIdentity: input.guardDecisionIdentity,
-    issuerDigest: input.issuerDigest,
-    restrictionIdentity: input.restrictionIdentity ?? null,
-    explicitOptionalAbsence: input.explicitOptionalAbsence === true,
-    subjectDigest: input.subjectDigest,
-    scopeDigest: input.scopeDigest
+    guardDecisionIdentity: input?.guardDecisionIdentity,
+    issuerDigest: input?.issuerDigest,
+    restrictionIdentity: input?.restrictionIdentity ?? null,
+    explicitOptionalAbsence: input?.explicitOptionalAbsence === true,
+    subjectDigest: input?.subjectDigest,
+    scopeDigest: input?.scopeDigest
   };
+  if (!receiptCanonicalShapeValid(safe)) throw new Error('RECEIPT_INPUT_INVALID');
   return Object.freeze({
     receiptIdentity: stableIdentity(safe),
     canonical: Object.freeze(safe)
   });
 }
 
-export function verifyReceiptEvidence(receipt) {
-  if (!receipt || typeof receipt !== 'object' || !receipt.canonical) {
-    return reject('RECEIPT_INVALID');
+export function verifyReceiptEvidence(
+  receipt,
+  { guardAuthenticationVerified = false } = {}
+) {
+  if (guardAuthenticationVerified !== true) {
+    return reject('RECEIPT_AUTHENTICATION_REQUIRED');
+  }
+  if (!receipt || typeof receipt !== 'object' || !receiptCanonicalShapeValid(receipt.canonical)) {
+    return reject('RECEIPT_CANONICAL_INVALID');
   }
   const expected = stableIdentity(receipt.canonical);
   if (receipt.receiptIdentity !== expected) return reject('RECEIPT_IDENTITY_INVALID');
   return Object.freeze({ outcome: 'ok', historicalEvidence: true });
 }
 
-export function classifyReceiptEvidence(receipt, currentCanonical) {
-  const verified = verifyReceiptEvidence(receipt);
+export function classifyReceiptEvidence(
+  receipt,
+  currentCanonical,
+  options = {}
+) {
+  const verified = verifyReceiptEvidence(receipt, options);
   if (verified.outcome !== 'ok') return verified;
 
   const current = receiptIdentity(currentCanonical);
@@ -373,7 +419,6 @@ export function classifyReceiptEvidence(receipt, currentCanonical) {
     currentIdentityMatches: receipt.receiptIdentity === current.receiptIdentity
   });
 }
-
 export function boundaryClaim(id) {
   if (!['ARC-HG-34', 'ARC-HG-35', 'ARC-HG-36', 'ARC-HG-37'].includes(id)) {
     throw new Error('BOUNDARY_ID_INVALID');

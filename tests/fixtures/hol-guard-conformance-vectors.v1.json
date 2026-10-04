@@ -643,7 +643,8 @@
           "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
           "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-        }
+        },
+        "guardAuthenticationVerified": true
       },
       "expected": {
         "outcome": "ok",
