@@ -11,8 +11,18 @@ export const GUARD_ACTIONS = Object.freeze([
 
 export const ARC_FLOORS = Object.freeze(['NoAdditionalFloor', 'Block']);
 
+const DIGEST_RE = /^sha256:[0-9a-f]{64}$/;
+const REVISION_RE = /^(0|[1-9][0-9]*)$/;
+
 const reject = reason => Object.freeze({ outcome: 'reject', reason });
 const ok = floor => Object.freeze({ outcome: 'ok', floor });
+
+const parseRevision = value => {
+  if (typeof value !== 'string' || !REVISION_RE.test(value)) return null;
+  return BigInt(value);
+};
+
+const isDigest = value => typeof value === 'string' && DIGEST_RE.test(value);
 
 export function composeGuardAction(existingAction, arcFloor) {
   if (!GUARD_ACTIONS.includes(existingAction)) throw new Error('GUARD_ACTION_INVALID');
@@ -54,13 +64,6 @@ export function resolveRestrictionContext(input) {
   return ok(restrictionBlock ? 'Block' : 'NoAdditionalFloor');
 }
 
-const bigint = value => {
-  if (typeof value !== 'string' || !/^(0|[1-9][0-9]*)$/.test(value)) {
-    throw new Error('REVISION_INVALID');
-  }
-  return BigInt(value);
-};
-
 export function newAdmissionState() {
   return Object.freeze({
     current: null,
@@ -70,11 +73,48 @@ export function newAdmissionState() {
   });
 }
 
+function admissionCoherence(state) {
+  const floor = parseRevision(state?.durableFloorRevision);
+  const revokedThrough = parseRevision(state?.revokedThroughRevision);
+  if (floor === null || revokedThrough === null) return reject('ADMISSION_STATE_INVALID');
+
+  if (state.current === null) return reject('CONTEXT_MISSING');
+  if (!state.current || typeof state.current !== 'object') return reject('ADMISSION_STATE_INVALID');
+
+  const currentRevision = parseRevision(state.current.revision);
+  if (currentRevision === null || !isDigest(state.current.digest)) {
+    return reject('ADMISSION_STATE_INVALID');
+  }
+
+  if (state.current.revoked === true || currentRevision <= revokedThrough) {
+    return reject('CONTEXT_REVOKED');
+  }
+
+  if (
+    currentRevision !== floor ||
+    !isDigest(state.durableFloorDigest) ||
+    state.current.digest !== state.durableFloorDigest
+  ) {
+    return reject('ADMISSION_INCOHERENT');
+  }
+
+  return Object.freeze({
+    outcome: 'ok',
+    revision: state.current.revision,
+    digest: state.current.digest,
+    restrictionIdentity: `revision:${state.current.revision}:${state.current.digest}`
+  });
+}
+
 export function installRestriction(state, { revision, digest }) {
-  const next = bigint(revision);
-  const floor = bigint(state.durableFloorRevision);
-  const revokedThrough = bigint(state.revokedThroughRevision);
-  if (!/^sha256:[0-9a-f]{64}$/.test(digest)) return reject('DIGEST_INVALID');
+  const next = parseRevision(revision);
+  const floor = parseRevision(state?.durableFloorRevision);
+  const revokedThrough = parseRevision(state?.revokedThroughRevision);
+  if (next === null || floor === null || revokedThrough === null) {
+    return reject('REVISION_INVALID');
+  }
+  if (!isDigest(digest)) return reject('DIGEST_INVALID');
+
   if (next < floor || next <= revokedThrough) return reject('REVISION_ROLLBACK');
   if (
     next === floor &&
@@ -84,10 +124,14 @@ export function installRestriction(state, { revision, digest }) {
   ) return reject('REVISION_REUSE');
 
   if (state.current) {
-    const currentRevision = bigint(state.current.revision);
+    const currentRevision = parseRevision(state.current.revision);
+    if (currentRevision === null || !isDigest(state.current.digest)) {
+      return reject('ADMISSION_STATE_INVALID');
+    }
     if (next < currentRevision) return reject('REVISION_ROLLBACK');
     if (next === currentRevision) {
       if (digest !== state.current.digest) return reject('REVISION_REUSE');
+      if (state.current.revoked === true) return reject('REVISION_ROLLBACK');
       return Object.freeze({ outcome: 'ok', state });
     }
   }
@@ -104,7 +148,9 @@ export function installRestriction(state, { revision, digest }) {
 }
 
 export function revokeRestriction(state) {
-  if (!state.current) return reject('NO_CURRENT_CONTEXT');
+  const coherence = admissionCoherence(state);
+  if (coherence.outcome !== 'ok') return coherence;
+
   const revision = state.current.revision;
   return Object.freeze({
     outcome: 'ok',
@@ -113,7 +159,7 @@ export function revokeRestriction(state) {
       durableFloorRevision: state.durableFloorRevision,
       durableFloorDigest: state.durableFloorDigest,
       revokedThroughRevision:
-        bigint(revision) > bigint(state.revokedThroughRevision)
+        BigInt(revision) > BigInt(state.revokedThroughRevision)
           ? revision
           : state.revokedThroughRevision
     })
@@ -126,36 +172,28 @@ export function recoverAdmission({
   durableFloorDigest = null,
   revokedThroughRevision
 }) {
-  const floor = bigint(durableFloorRevision);
-  const revokedThrough = bigint(revokedThroughRevision);
-  const failClosedState = () => Object.freeze({
+  const preserved = Object.freeze({
     current: null,
     durableFloorRevision,
     durableFloorDigest,
     revokedThroughRevision
   });
-  if (!current) {
+
+  const coherence = admissionCoherence({
+    current,
+    durableFloorRevision,
+    durableFloorDigest,
+    revokedThroughRevision
+  });
+
+  if (coherence.outcome !== 'ok') {
     return Object.freeze({
       outcome: 'fail-closed',
-      state: failClosedState()
+      reason: coherence.reason,
+      state: preserved
     });
   }
-  const currentRevision = bigint(current.revision);
-  if (
-    currentRevision < floor ||
-    currentRevision <= revokedThrough ||
-    current.revoked === true ||
-    (
-      currentRevision === floor &&
-      durableFloorDigest !== null &&
-      current.digest !== durableFloorDigest
-    )
-  ) {
-    return Object.freeze({
-      outcome: 'fail-closed',
-      state: failClosedState()
-    });
-  }
+
   return Object.freeze({
     outcome: 'ok',
     state: Object.freeze({
@@ -167,13 +205,54 @@ export function recoverAdmission({
   });
 }
 
+export function evaluateProtectedAction(admissionState, contextInput) {
+  const coherence = admissionCoherence(admissionState);
+  if (coherence.outcome !== 'ok') return coherence;
+
+  const context = resolveRestrictionContext({
+    ...contextInput,
+    state: 'present'
+  });
+  if (context.outcome !== 'ok') return context;
+
+  return Object.freeze({
+    outcome: 'ok',
+    floor: context.floor,
+    restrictionIdentity: coherence.restrictionIdentity
+  });
+}
+
 const stableIdentity = value => createHash('sha256')
   .update(JSON.stringify(value))
   .digest('hex');
 
+const APPROVAL_STRING_KEYS = Object.freeze([
+  'restrictionIdentity',
+  'subject',
+  'actor',
+  'session',
+  'workspace',
+  'canonicalTarget',
+  'requestIdentity'
+]);
+
+const approvalShapeValid = value =>
+  value &&
+  typeof value === 'object' &&
+  isDigest(value.issuerDigest) &&
+  parseRevision(value.restrictionRevision) !== null &&
+  isDigest(value.restrictionDigest) &&
+  APPROVAL_STRING_KEYS.every(
+    key => typeof value[key] === 'string' && value[key].length > 0
+  );
+
 export function createApprovalBinding(input) {
+  if (!approvalShapeValid(input)) throw new Error('APPROVAL_BINDING_INVALID');
   const binding = {
+    issuerDigest: input.issuerDigest,
     restrictionIdentity: input.restrictionIdentity,
+    restrictionRevision: input.restrictionRevision,
+    restrictionDigest: input.restrictionDigest,
     subject: input.subject,
     actor: input.actor,
     session: input.session,
@@ -184,9 +263,29 @@ export function createApprovalBinding(input) {
   return Object.freeze({ ...binding, bindingDigest: stableIdentity(binding) });
 }
 
+export function createApprovalBindingForAdmission(admissionState, input) {
+  const coherence = admissionCoherence(admissionState);
+  if (coherence.outcome !== 'ok') return coherence;
+  return Object.freeze({
+    outcome: 'ok',
+    binding: createApprovalBinding({
+      ...input,
+      restrictionIdentity: coherence.restrictionIdentity,
+      restrictionRevision: coherence.revision,
+      restrictionDigest: coherence.digest
+    })
+  });
+}
+
 export function consumeApproval(binding, current) {
+  if (!approvalShapeValid(binding) || !approvalShapeValid(current)) {
+    return reject('APPROVAL_CURRENT_INVALID');
+  }
   for (const key of [
+    'issuerDigest',
     'restrictionIdentity',
+    'restrictionRevision',
+    'restrictionDigest',
     'subject',
     'actor',
     'session',
@@ -202,7 +301,43 @@ export function consumeApproval(binding, current) {
   });
 }
 
+export function consumeApprovalWithAdmission(binding, admissionState, current) {
+  const coherence = admissionCoherence(admissionState);
+  if (coherence.outcome !== 'ok') {
+    return reject(
+      coherence.reason === 'CONTEXT_REVOKED'
+        ? 'APPROVAL_CONTEXT_REVOKED'
+        : 'APPROVAL_ADMISSION_INCOHERENT'
+    );
+  }
+
+  return consumeApproval(binding, {
+    ...current,
+    restrictionIdentity: coherence.restrictionIdentity,
+    restrictionRevision: coherence.revision,
+    restrictionDigest: coherence.digest
+  });
+}
+
 export function receiptIdentity(input) {
+  if (
+    !input ||
+    typeof input.guardDecisionIdentity !== 'string' ||
+    input.guardDecisionIdentity.length === 0 ||
+    !isDigest(input.issuerDigest) ||
+    !isDigest(input.subjectDigest) ||
+    !isDigest(input.scopeDigest) ||
+    !(
+      input.restrictionIdentity === null ||
+      (
+        typeof input.restrictionIdentity === 'string' &&
+        input.restrictionIdentity.length > 0
+      )
+    )
+  ) {
+    throw new Error('RECEIPT_INPUT_INVALID');
+  }
+
   const safe = {
     guardDecisionIdentity: input.guardDecisionIdentity,
     issuerDigest: input.issuerDigest,
@@ -214,6 +349,28 @@ export function receiptIdentity(input) {
   return Object.freeze({
     receiptIdentity: stableIdentity(safe),
     canonical: Object.freeze(safe)
+  });
+}
+
+export function verifyReceiptEvidence(receipt) {
+  if (!receipt || typeof receipt !== 'object' || !receipt.canonical) {
+    return reject('RECEIPT_INVALID');
+  }
+  const expected = stableIdentity(receipt.canonical);
+  if (receipt.receiptIdentity !== expected) return reject('RECEIPT_IDENTITY_INVALID');
+  return Object.freeze({ outcome: 'ok', historicalEvidence: true });
+}
+
+export function classifyReceiptEvidence(receipt, currentCanonical) {
+  const verified = verifyReceiptEvidence(receipt);
+  if (verified.outcome !== 'ok') return verified;
+
+  const current = receiptIdentity(currentCanonical);
+  return Object.freeze({
+    outcome: 'ok',
+    historicalEvidence: true,
+    currentAuthority: false,
+    currentIdentityMatches: receipt.receiptIdentity === current.receiptIdentity
   });
 }
 

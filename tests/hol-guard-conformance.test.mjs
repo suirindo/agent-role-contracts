@@ -1,26 +1,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import {
   ARC_FLOORS,
   GUARD_ACTIONS,
   boundaryClaim,
+  classifyReceiptEvidence,
   composeGuardAction,
   consumeApproval,
+  consumeApprovalWithAdmission,
   createApprovalBinding,
+  createApprovalBindingForAdmission,
+  evaluateProtectedAction,
   installRestriction,
   newAdmissionState,
   receiptIdentity,
   recoverAdmission,
   resolveRestrictionContext,
-  revokeRestriction
+  revokeRestriction,
+  verifyReceiptEvidence
 } from './helpers/hol-guard-reference-model.mjs';
 import { parseJsonRejectDuplicateKeys } from '../src/strict-json.mjs';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const vectors = parseJsonRejectDuplicateKeys(read('tests/fixtures/hol-guard-conformance-vectors.v1.json'));
+const vectors = parseJsonRejectDuplicateKeys(
+  read('tests/fixtures/hol-guard-conformance-vectors.v1.json')
+);
+const guardBaseline = parseJsonRejectDuplicateKeys(
+  read('tests/fixtures/hol-guard-audit-baseline.v1.json')
+);
+const canonicalContract = parseJsonRejectDuplicateKeys(
+  read('tests/fixtures/hol-guard-integration-contract.v1.json')
+);
 const packageJson = JSON.parse(read('package.json'));
 
 const clone = value => structuredClone(value);
@@ -105,9 +116,12 @@ function runVector(vector) {
     const installed = installRestriction(newAdmissionState(), input.install);
     assert.equal(installed.outcome, 'ok');
     const revoked = revokeRestriction(installed.state);
+    assert.equal(revoked.outcome, 'ok');
+    const protectedAction = evaluateProtectedAction(revoked.state, input.context);
     return {
       revokeOutcome: revoked.outcome,
-      currentRevoked: revoked.state.current.revoked
+      protectedActionOutcome: protectedAction.outcome,
+      protectedActionReason: protectedAction.reason
     };
   }
 
@@ -130,7 +144,11 @@ function runVector(vector) {
 
   if (op === 'admission-recovery-mixed') {
     const recovered = recoverAdmission(input.state);
-    return { outcome: recovered.outcome, current: recovered.state.current };
+    return {
+      outcome: recovered.outcome,
+      reason: recovered.reason,
+      current: recovered.state.current
+    };
   }
 
   if (op === 'approval') {
@@ -149,21 +167,56 @@ function runVector(vector) {
     };
   }
 
-  if (op === 'approval-race') {
-    const oldBinding = createApprovalBinding(input.oldBinding);
-    const newCurrent = {
-      ...input.oldCurrent,
-      restrictionIdentity: input.newRestrictionIdentity
+  if (op === 'approval-revoked-admission') {
+    const installed = installRestriction(newAdmissionState(), input.install);
+    assert.equal(installed.outcome, 'ok');
+    const created = createApprovalBindingForAdmission(installed.state, input.request);
+    assert.equal(created.outcome, 'ok');
+    const revoked = revokeRestriction(installed.state);
+    assert.equal(revoked.outcome, 'ok');
+    return consumeApprovalWithAdmission(created.binding, revoked.state, input.request);
+  }
+
+  if (op === 'approval-fence') {
+    const oldState = installRestriction(newAdmissionState(), input.install);
+    assert.equal(oldState.outcome, 'ok');
+    const oldBinding = createApprovalBindingForAdmission(oldState.state, input.request);
+    assert.equal(oldBinding.outcome, 'ok');
+
+    const newState = installRestriction(oldState.state, input.replacement);
+    assert.equal(newState.outcome, 'ok');
+    const oldAfterMutation = consumeApprovalWithAdmission(
+      oldBinding.binding,
+      newState.state,
+      input.request
+    );
+
+    const newBinding = createApprovalBindingForAdmission(newState.state, input.request);
+    assert.equal(newBinding.outcome, 'ok');
+    const newAfterMutation = consumeApprovalWithAdmission(
+      newBinding.binding,
+      newState.state,
+      input.request
+    );
+
+    const mixedState = {
+      current: newState.state.current,
+      durableFloorRevision: oldState.state.durableFloorRevision,
+      durableFloorDigest: oldState.state.durableFloorDigest,
+      revokedThroughRevision: oldState.state.revokedThroughRevision
     };
-    const oldAgainstNew = consumeApproval(oldBinding, newCurrent);
-    const newBinding = createApprovalBinding({
-      ...input.oldBinding,
-      restrictionIdentity: input.newRestrictionIdentity
-    });
-    const newAgainstNew = consumeApproval(newBinding, newCurrent);
+    const mixedAfterMutation = consumeApprovalWithAdmission(
+      newBinding.binding,
+      mixedState,
+      input.request
+    );
+
     return {
-      oldAgainstNew: oldAgainstNew.outcome,
-      newAgainstNew: newAgainstNew.outcome
+      oldAfterMutation: oldAfterMutation.outcome,
+      oldReason: oldAfterMutation.reason,
+      newAfterMutation: newAfterMutation.outcome,
+      mixedAfterMutation: mixedAfterMutation.outcome,
+      mixedReason: mixedAfterMutation.reason
     };
   }
 
@@ -175,12 +228,16 @@ function runVector(vector) {
     };
   }
 
+  if (op === 'receipt-classification') {
+    const oldReceipt = receiptIdentity(input.old);
+    return classifyReceiptEvidence(oldReceipt, input.current);
+  }
+
   if (op === 'receipt-currentness') {
     const oldReceipt = receiptIdentity(input.old);
     const currentReceipt = receiptIdentity(input.current);
     return {
-      identitiesDiffer: oldReceipt.receiptIdentity !== currentReceipt.receiptIdentity,
-      ...(vector.expected.oldRemainsHistorical === true ? { oldRemainsHistorical: true } : {})
+      identitiesDiffer: oldReceipt.receiptIdentity !== currentReceipt.receiptIdentity
     };
   }
 
@@ -210,30 +267,40 @@ function runVector(vector) {
   throw new Error(`VECTOR_OP_UNKNOWN:${op}`);
 }
 
-test('conformance vector set is exact, test-only and remains production NOT_RUN', () => {
+test('conformance vectors mirror the merged acceptance IDs without changing production status', () => {
   assert.equal(vectors.schema, 'arc-hol-guard-conformance-vectors.v1');
   assert.equal(vectors.status, 'test-only-reference-model');
-  assert.equal(vectors.hol_guard_head, '9260647758487a12381fbec31d53b65dd8106340');
+  assert.equal(vectors.hol_guard_head, guardBaseline.hol_guard_head);
   assert.equal(vectors.arc_main, 'a8ee53e6ac9cdbbf83e79316cdcbbe60fc0aae82');
   assert.equal(vectors.production_acceptance, 'NOT_RUN');
-  assert.deepEqual(
-    vectors.vectors.map(vector => vector.id),
-    Array.from({ length: 37 }, (_, index) => `ARC-HG-${String(index + 1).padStart(2, '0')}`)
-  );
+
+  const canonicalIds = canonicalContract.acceptance_cases.map(row => row.id);
+  assert.ok(canonicalContract.acceptance_cases.every(row => row.status === 'NOT_RUN'));
+  assert.deepEqual(vectors.vectors.map(vector => vector.id), canonicalIds);
   assert.equal(packageJson.files.includes('tests'), false);
 });
 
-test('reference composition is monotonic for every current Guard action', () => {
-  assert.deepEqual(GUARD_ACTIONS, [
-    'allow',
-    'warn',
-    'review',
-    'require-reapproval',
-    'sandbox-required',
-    'block'
-  ]);
+test('Guard action order is pinned to the exact audited source record', () => {
+  assert.deepEqual(guardBaseline, {
+    schema: 'hol-guard-audit-baseline.v1',
+    hol_guard_head: '9260647758487a12381fbec31d53b65dd8106340',
+    source_path: 'rust/crates/guard-runtime/src/policy_enforcement_matrix.rs',
+    source_sha256: 'd0733befc410c9f173a50b003346f71d52a65e64ae5a7465e4ae834bc5093a20',
+    action_floor_order: [
+      'allow',
+      'warn',
+      'review',
+      'require-reapproval',
+      'sandbox-required',
+      'block'
+    ]
+  });
+  assert.deepEqual(GUARD_ACTIONS, guardBaseline.action_floor_order);
+});
+
+test('reference composition is monotonic for every audited Guard action', () => {
   assert.deepEqual(ARC_FLOORS, ['NoAdditionalFloor', 'Block']);
-  for (const action of GUARD_ACTIONS) {
+  for (const action of guardBaseline.action_floor_order) {
     assert.equal(composeGuardAction(action, 'NoAdditionalFloor'), action);
     assert.equal(composeGuardAction(action, 'Block'), 'block');
   }
@@ -245,7 +312,26 @@ for (const vector of vectors.vectors) {
   });
 }
 
+test('recovery rejects both older and newer current state when durable floor disagrees', () => {
+  const digest1 = 'sha256:' + '1'.repeat(64);
+  const digest2 = 'sha256:' + '2'.repeat(64);
+  const digest3 = 'sha256:' + '3'.repeat(64);
 
+  for (const current of [
+    { revision: '1', digest: digest1, revoked: false },
+    { revision: '3', digest: digest3, revoked: false }
+  ]) {
+    const recovered = recoverAdmission({
+      current,
+      durableFloorRevision: '2',
+      durableFloorDigest: digest2,
+      revokedThroughRevision: '0'
+    });
+    assert.equal(recovered.outcome, 'fail-closed');
+    assert.equal(recovered.reason, 'ADMISSION_INCOHERENT');
+    assert.equal(recovered.state.current, null);
+  }
+});
 
 test('durable revision floor also pins digest after current-state loss', () => {
   const digestA = 'sha256:' + 'a'.repeat(64);
@@ -270,6 +356,16 @@ test('durable revision floor also pins digest after current-state loss', () => {
   );
 });
 
+test('approval binding fails closed when required identity fields are absent', () => {
+  assert.throws(
+    () => createApprovalBinding({
+      issuerDigest: 'sha256:' + 'c'.repeat(64),
+      restrictionIdentity: 'restriction:N'
+    }),
+    error => error?.message === 'APPROVAL_BINDING_INVALID'
+  );
+});
+
 test('receipt identity changes when authenticated issuer changes', () => {
   const base = {
     guardDecisionIdentity: 'guard:decision:A',
@@ -283,6 +379,36 @@ test('receipt identity changes when authenticated issuer changes', () => {
     issuerDigest: 'sha256:' + 'd'.repeat(64)
   };
   assert.notEqual(receiptIdentity(base).receiptIdentity, receiptIdentity(other).receiptIdentity);
+});
+
+test('receipt evidence is self-consistent historical evidence but never authority by itself', () => {
+  const canonical = {
+    guardDecisionIdentity: 'guard:decision:A',
+    issuerDigest: 'sha256:' + 'c'.repeat(64),
+    restrictionIdentity: 'restriction:N',
+    subjectDigest: 'sha256:' + 'a'.repeat(64),
+    scopeDigest: 'sha256:' + 'b'.repeat(64)
+  };
+  const receipt = receiptIdentity(canonical);
+  assert.deepEqual(verifyReceiptEvidence(receipt), {
+    outcome: 'ok',
+    historicalEvidence: true
+  });
+  assert.deepEqual(classifyReceiptEvidence(receipt, canonical), {
+    outcome: 'ok',
+    historicalEvidence: true,
+    currentAuthority: false,
+    currentIdentityMatches: true
+  });
+
+  const tampered = {
+    ...receipt,
+    receiptIdentity: '0'.repeat(64)
+  };
+  assert.deepEqual(verifyReceiptEvidence(tampered), {
+    outcome: 'reject',
+    reason: 'RECEIPT_IDENTITY_INVALID'
+  });
 });
 
 test('reference model does not claim execution-boundary acceptance', () => {

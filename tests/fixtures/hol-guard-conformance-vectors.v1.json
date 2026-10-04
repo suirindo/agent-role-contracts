@@ -334,11 +334,29 @@
         "install": {
           "revision": "2",
           "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "context": {
+          "mode": "required",
+          "current": {
+            "issuer": "issuer:A",
+            "subject": "subject:A",
+            "actor": "actor:A",
+            "session": "session:A",
+            "workspace": "workspace:A"
+          },
+          "expected": {
+            "issuer": "issuer:A",
+            "subject": "subject:A",
+            "actor": "actor:A",
+            "session": "session:A",
+            "workspace": "workspace:A"
+          }
         }
       },
       "expected": {
         "revokeOutcome": "ok",
-        "currentRevoked": true
+        "protectedActionOutcome": "reject",
+        "protectedActionReason": "CONTEXT_REVOKED"
       }
     },
     {
@@ -367,17 +385,18 @@
       "input": {
         "state": {
           "current": {
-            "revision": "1",
-            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "revision": "3",
+            "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
             "revoked": false
           },
           "durableFloorRevision": "2",
-          "revokedThroughRevision": "0",
-          "durableFloorDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+          "durableFloorDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "revokedThroughRevision": "0"
         }
       },
       "expected": {
         "outcome": "fail-closed",
+        "reason": "ADMISSION_INCOHERENT",
         "current": null
       }
     },
@@ -386,22 +405,28 @@
       "op": "approval",
       "input": {
         "binding": {
-          "restrictionIdentity": "restriction:N",
-          "subject": "subject:A",
-          "actor": "actor:A",
-          "session": "session:A",
-          "workspace": "workspace:A",
-          "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
-        },
-        "current": {
-          "restrictionIdentity": "restriction:N+1",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
           "workspace": "workspace:A",
           "canonicalTarget": "/workspace/a.txt",
           "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "current": {
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:3:sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "restrictionRevision": "3",
+          "restrictionDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
           "existingAction": "allow",
           "arcFloor": "NoAdditionalFloor"
         }
@@ -413,19 +438,14 @@
     },
     {
       "id": "ARC-HG-24",
-      "op": "approval",
+      "op": "approval-revoked-admission",
       "input": {
-        "binding": {
-          "restrictionIdentity": "restriction:N",
-          "subject": "subject:A",
-          "actor": "actor:A",
-          "session": "session:A",
-          "workspace": "workspace:A",
-          "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
+        "install": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
         },
-        "current": {
-          "restrictionIdentity": "revoked:restriction:N",
+        "request": {
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
@@ -438,7 +458,7 @@
       },
       "expected": {
         "outcome": "reject",
-        "reason": "APPROVAL_RESTRICTIONIDENTITY_MISMATCH"
+        "reason": "APPROVAL_CONTEXT_REVOKED"
       }
     },
     {
@@ -446,22 +466,28 @@
       "op": "approval-mismatch-set",
       "input": {
         "binding": {
-          "restrictionIdentity": "restriction:N",
-          "subject": "subject:A",
-          "actor": "actor:A",
-          "session": "session:A",
-          "workspace": "workspace:A",
-          "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
-        },
-        "current": {
-          "restrictionIdentity": "restriction:N",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
           "workspace": "workspace:A",
           "canonicalTarget": "/workspace/a.txt",
           "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "current": {
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
           "existingAction": "allow",
           "arcFloor": "NoAdditionalFloor"
         },
@@ -484,22 +510,28 @@
       "op": "approval",
       "input": {
         "binding": {
-          "restrictionIdentity": "restriction:N",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
           "workspace": "workspace:A",
           "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
+          "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
         },
         "current": {
-          "restrictionIdentity": "restriction:N",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
           "workspace": "workspace:A",
           "canonicalTarget": "/workspace/b.txt",
           "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
           "existingAction": "allow",
           "arcFloor": "NoAdditionalFloor"
         }
@@ -514,22 +546,28 @@
       "op": "approval",
       "input": {
         "binding": {
-          "restrictionIdentity": "restriction:N",
-          "subject": "subject:A",
-          "actor": "actor:A",
-          "session": "session:A",
-          "workspace": "workspace:A",
-          "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
-        },
-        "current": {
-          "restrictionIdentity": "restriction:N",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
           "workspace": "workspace:A",
           "canonicalTarget": "/workspace/a.txt",
           "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "current": {
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "restrictionIdentity": "revision:2:sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "restrictionRevision": "2",
+          "restrictionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
           "existingAction": "allow",
           "arcFloor": "Block"
         }
@@ -541,19 +579,18 @@
     },
     {
       "id": "ARC-HG-28",
-      "op": "approval-race",
+      "op": "approval-fence",
       "input": {
-        "oldBinding": {
-          "restrictionIdentity": "restriction:N",
-          "subject": "subject:A",
-          "actor": "actor:A",
-          "session": "session:A",
-          "workspace": "workspace:A",
-          "canonicalTarget": "/workspace/a.txt",
-          "requestIdentity": "request:A"
+        "install": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
         },
-        "oldCurrent": {
-          "restrictionIdentity": "restriction:N",
+        "replacement": {
+          "revision": "3",
+          "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "request": {
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
           "subject": "subject:A",
           "actor": "actor:A",
           "session": "session:A",
@@ -562,12 +599,14 @@
           "requestIdentity": "request:A",
           "existingAction": "allow",
           "arcFloor": "NoAdditionalFloor"
-        },
-        "newRestrictionIdentity": "restriction:N+1"
+        }
       },
       "expected": {
-        "oldAgainstNew": "reject",
-        "newAgainstNew": "ok"
+        "oldAfterMutation": "reject",
+        "oldReason": "APPROVAL_RESTRICTIONIDENTITY_MISMATCH",
+        "newAfterMutation": "ok",
+        "mixedAfterMutation": "reject",
+        "mixedReason": "APPROVAL_ADMISSION_INCOHERENT"
       }
     },
     {
@@ -589,7 +628,7 @@
     },
     {
       "id": "ARC-HG-30",
-      "op": "receipt-currentness",
+      "op": "receipt-classification",
       "input": {
         "old": {
           "guardDecisionIdentity": "guard:decision:A",
@@ -607,8 +646,10 @@
         }
       },
       "expected": {
-        "identitiesDiffer": true,
-        "oldRemainsHistorical": true
+        "outcome": "ok",
+        "historicalEvidence": true,
+        "currentAuthority": false,
+        "currentIdentityMatches": false
       }
     },
     {
