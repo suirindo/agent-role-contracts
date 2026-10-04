@@ -1,0 +1,262 @@
+{
+  "schema": "arc-hol-guard-integration-contract.v1",
+  "status": "design-only-not-run",
+  "arc_main": "c42000412f2663f893ba7382d12a3e027de061a1",
+  "hol_guard_head": "9260647758487a12381fbec31d53b65dd8106340",
+  "historical_prototype": {
+    "head": "b6803eba0757cafb5a7a7be611bdd1f4daa1ee73",
+    "rust_tests_passed": 70,
+    "adversarial_rows": 68,
+    "rerun_on_hol_guard_head": false
+  },
+  "restriction": {
+    "arc_floor_values": [
+      "NoAdditionalFloor",
+      "Block"
+    ],
+    "positive_authority_values_forbidden": [
+      "allow",
+      "warn",
+      "review",
+      "require-reapproval",
+      "sandbox-required"
+    ],
+    "command_extensions_as_arc_carrier": false
+  },
+  "presence": {
+    "required_missing": "reject",
+    "optional_explicit_absence": "NoAdditionalFloor",
+    "optional_invalid_stale_or_revoked": "reject"
+  },
+  "runtime_surface": {
+    "package_dependency": false,
+    "package_export": false,
+    "src_integration": false,
+    "bin_integration": false,
+    "schema_integration": false
+  },
+  "acceptance_cases": [
+    {
+      "id": "ARC-HG-01",
+      "case": "Guard allows, ARC has no additional restriction",
+      "required_result": "preserve Guard result; ARC does not manufacture authority",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-02",
+      "case": "Guard allows, ARC blocks",
+      "required_result": "final block",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-03",
+      "case": "Guard review, ARC has no additional restriction",
+      "required_result": "review remains review",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-04",
+      "case": "Guard review, ARC blocks",
+      "required_result": "final block",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-05",
+      "case": "Guard require-reapproval, ARC has no additional restriction",
+      "required_result": "require-reapproval remains",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-06",
+      "case": "Guard sandbox-required, ARC has no additional restriction",
+      "required_result": "sandbox-required remains",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-07",
+      "case": "Guard blocks, ARC has no additional restriction",
+      "required_result": "block remains",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-08",
+      "case": "Any ARC input attempts to express allow/review/sandbox/approval authority",
+      "required_result": "reject contract/input",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-09",
+      "case": "Required context missing",
+      "required_result": "fail closed",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-10",
+      "case": "Optional context has authenticated explicit absence",
+      "required_result": "no additional ARC floor",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-11",
+      "case": "Optional context malformed/stale/revoked",
+      "required_result": "fail closed; do not reinterpret as absence",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-12",
+      "case": "ARC subject digest mismatches current task/action subject",
+      "required_result": "reject",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-13",
+      "case": "actor/session binding mismatches current authenticated principal",
+      "required_result": "reject",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-14",
+      "case": "workspace/scope binding mismatches Guard current scope",
+      "required_result": "reject",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-15",
+      "case": "write target outside admitted ARC scope",
+      "required_result": "block before effect",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-16",
+      "case": "ARC path text claims in-scope but Guard canonical target is out-of-scope",
+      "required_result": "block using Guard canonical target",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-17",
+      "case": "install revision N then N-1",
+      "required_result": "reject downgrade",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-18",
+      "case": "same revision reused with different restriction digest",
+      "required_result": "reject reuse",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-19",
+      "case": "N replaced by N+1",
+      "required_result": "N can never become current again",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-20",
+      "case": "current context revoked",
+      "required_result": "subsequent protected action fails closed",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-21",
+      "case": "restart after replacement/revocation",
+      "required_result": "retained floor prevents rollback to older/permissive state",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-22",
+      "case": "crash/partial mutation between authority marker and admitted state",
+      "required_result": "recover fail closed; never expose mixed policy/restriction state",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-23",
+      "case": "approval challenge created under N; N replaced before consume",
+      "required_result": "consume rejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-24",
+      "case": "approval challenge created under N; N revoked before consume",
+      "required_result": "consume rejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-25",
+      "case": "approval reused for different actor/session/workspace",
+      "required_result": "rejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-26",
+      "case": "approval reused for different canonical action target",
+      "required_result": "rejected",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-27",
+      "case": "valid approval exists but ARC floor is Block",
+      "required_result": "approval cannot override block",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-28",
+      "case": "mutation races challenge creation/consumption",
+      "required_result": "coherent old or new state only; no mixed acceptance",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-29",
+      "case": "ARC governed decision",
+      "required_result": "canonical decision identity binds privacy-safe ARC restriction identity",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-30",
+      "case": "old receipt from N inspected after N+1",
+      "required_result": "may remain historical evidence but is not current authority",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-31",
+      "case": "raw role body, credentials or file contents present in receipt",
+      "required_result": "reject/redact according to Guard receipt contract",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-32",
+      "case": "receipt identity differs only because governing ARC restriction differs",
+      "required_result": "decision identity must differ",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-33",
+      "case": "ARC did not govern decision because Optional absence was authenticated",
+      "required_result": "receipt can distinguish explicit absence from ARC-present state without inventing authority",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-34",
+      "case": "cooperative direct write through supported Guard interception",
+      "required_result": "pre-effect restriction evaluated against canonical target",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-35",
+      "case": "child process or uninstrumented code writes after decision",
+      "required_result": "must not be claimed covered unless a mandatory execution/filesystem mediator exists",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-36",
+      "case": "restriction revoked after decision but before mediated effect",
+      "required_result": "effect rejected if the selected production guarantee extends through completion",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ARC-HG-37",
+      "case": "write succeeds/fails at OS boundary",
+      "required_result": "decision receipt alone must not be described as proof of write completion",
+      "status": "NOT_RUN"
+    }
+  ]
+}
