@@ -1,0 +1,718 @@
+{
+  "schema": "arc-hol-guard-conformance-vectors.v1",
+  "status": "test-only-reference-model",
+  "hol_guard_head": "9260647758487a12381fbec31d53b65dd8106340",
+  "arc_main": "a8ee53e6ac9cdbbf83e79316cdcbbe60fc0aae82",
+  "production_acceptance": "NOT_RUN",
+  "vectors": [
+    {
+      "id": "ARC-HG-01",
+      "op": "compose",
+      "input": {
+        "existingAction": "allow",
+        "arcFloor": "NoAdditionalFloor"
+      },
+      "expected": {
+        "result": "allow"
+      }
+    },
+    {
+      "id": "ARC-HG-02",
+      "op": "compose",
+      "input": {
+        "existingAction": "allow",
+        "arcFloor": "Block"
+      },
+      "expected": {
+        "result": "block"
+      }
+    },
+    {
+      "id": "ARC-HG-03",
+      "op": "compose",
+      "input": {
+        "existingAction": "review",
+        "arcFloor": "NoAdditionalFloor"
+      },
+      "expected": {
+        "result": "review"
+      }
+    },
+    {
+      "id": "ARC-HG-04",
+      "op": "compose",
+      "input": {
+        "existingAction": "review",
+        "arcFloor": "Block"
+      },
+      "expected": {
+        "result": "block"
+      }
+    },
+    {
+      "id": "ARC-HG-05",
+      "op": "compose",
+      "input": {
+        "existingAction": "require-reapproval",
+        "arcFloor": "NoAdditionalFloor"
+      },
+      "expected": {
+        "result": "require-reapproval"
+      }
+    },
+    {
+      "id": "ARC-HG-06",
+      "op": "compose",
+      "input": {
+        "existingAction": "sandbox-required",
+        "arcFloor": "NoAdditionalFloor"
+      },
+      "expected": {
+        "result": "sandbox-required"
+      }
+    },
+    {
+      "id": "ARC-HG-07",
+      "op": "compose",
+      "input": {
+        "existingAction": "block",
+        "arcFloor": "NoAdditionalFloor"
+      },
+      "expected": {
+        "result": "block"
+      }
+    },
+    {
+      "id": "ARC-HG-08",
+      "op": "compose-invalid-floor",
+      "input": {
+        "existingAction": "review",
+        "arcFloor": "Allow"
+      },
+      "expected": {
+        "error": "ARC_FLOOR_INVALID"
+      }
+    },
+    {
+      "id": "ARC-HG-09",
+      "op": "context",
+      "input": {
+        "mode": "required",
+        "state": "missing"
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "CONTEXT_MISSING"
+      }
+    },
+    {
+      "id": "ARC-HG-10",
+      "op": "context",
+      "input": {
+        "mode": "optional",
+        "state": "absent",
+        "absenceAuthenticated": true
+      },
+      "expected": {
+        "outcome": "ok",
+        "floor": "NoAdditionalFloor"
+      }
+    },
+    {
+      "id": "ARC-HG-11",
+      "op": "context-invalid-set",
+      "input": {
+        "mode": "optional",
+        "states": [
+          "malformed",
+          "stale",
+          "revoked"
+        ]
+      },
+      "expected": {
+        "reasons": [
+          "CONTEXT_MALFORMED",
+          "CONTEXT_STALE",
+          "CONTEXT_REVOKED"
+        ]
+      }
+    },
+    {
+      "id": "ARC-HG-12",
+      "op": "context",
+      "input": {
+        "mode": "required",
+        "state": "present",
+        "current": {
+          "subject": "subject:B",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "expected": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "SUBJECT_MISMATCH"
+      }
+    },
+    {
+      "id": "ARC-HG-13",
+      "op": "context-mismatch-set",
+      "input": {
+        "mode": "required",
+        "state": "present",
+        "current": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "expected": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "keys": [
+          "actor",
+          "session"
+        ]
+      },
+      "expected": {
+        "reasons": [
+          "ACTOR_MISMATCH",
+          "SESSION_MISMATCH"
+        ]
+      }
+    },
+    {
+      "id": "ARC-HG-14",
+      "op": "context",
+      "input": {
+        "mode": "required",
+        "state": "present",
+        "current": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:B"
+        },
+        "expected": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "WORKSPACE_MISMATCH"
+      }
+    },
+    {
+      "id": "ARC-HG-15",
+      "op": "context",
+      "input": {
+        "mode": "required",
+        "state": "present",
+        "current": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "expected": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "guardCanonicalTargetInScope": false
+      },
+      "expected": {
+        "outcome": "ok",
+        "floor": "Block"
+      }
+    },
+    {
+      "id": "ARC-HG-16",
+      "op": "context",
+      "input": {
+        "mode": "required",
+        "state": "present",
+        "current": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "expected": {
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A"
+        },
+        "arcClaimedTargetInScope": true,
+        "guardCanonicalTargetInScope": false
+      },
+      "expected": {
+        "outcome": "ok",
+        "floor": "Block"
+      }
+    },
+    {
+      "id": "ARC-HG-17",
+      "op": "admission-rollback",
+      "input": {
+        "first": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "second": {
+          "revision": "1",
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "REVISION_ROLLBACK",
+        "currentRevision": "2"
+      }
+    },
+    {
+      "id": "ARC-HG-18",
+      "op": "admission-reuse",
+      "input": {
+        "first": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "second": {
+          "revision": "2",
+          "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "REVISION_REUSE",
+        "currentDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    },
+    {
+      "id": "ARC-HG-19",
+      "op": "admission-replacement",
+      "input": {
+        "first": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "replacement": {
+          "revision": "3",
+          "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "oldAgain": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "REVISION_ROLLBACK",
+        "currentRevision": "3"
+      }
+    },
+    {
+      "id": "ARC-HG-20",
+      "op": "admission-revoke",
+      "input": {
+        "install": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "expected": {
+        "revokeOutcome": "ok",
+        "currentRevoked": true
+      }
+    },
+    {
+      "id": "ARC-HG-21",
+      "op": "admission-restart-floor",
+      "input": {
+        "install": {
+          "revision": "2",
+          "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "restartCurrent": null,
+        "rollback": {
+          "revision": "1",
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "expected": {
+        "recoveryOutcome": "fail-closed",
+        "rollbackOutcome": "reject",
+        "rollbackReason": "REVISION_ROLLBACK"
+      }
+    },
+    {
+      "id": "ARC-HG-22",
+      "op": "admission-recovery-mixed",
+      "input": {
+        "state": {
+          "current": {
+            "revision": "1",
+            "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+            "revoked": false
+          },
+          "durableFloorRevision": "2",
+          "revokedThroughRevision": "0",
+          "durableFloorDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "expected": {
+        "outcome": "fail-closed",
+        "current": null
+      }
+    },
+    {
+      "id": "ARC-HG-23",
+      "op": "approval",
+      "input": {
+        "binding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "current": {
+          "restrictionIdentity": "restriction:N+1",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "NoAdditionalFloor"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "APPROVAL_RESTRICTIONIDENTITY_MISMATCH"
+      }
+    },
+    {
+      "id": "ARC-HG-24",
+      "op": "approval",
+      "input": {
+        "binding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "current": {
+          "restrictionIdentity": "revoked:restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "NoAdditionalFloor"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "APPROVAL_RESTRICTIONIDENTITY_MISMATCH"
+      }
+    },
+    {
+      "id": "ARC-HG-25",
+      "op": "approval-mismatch-set",
+      "input": {
+        "binding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "current": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "NoAdditionalFloor"
+        },
+        "keys": [
+          "actor",
+          "session",
+          "workspace"
+        ]
+      },
+      "expected": {
+        "reasons": [
+          "APPROVAL_ACTOR_MISMATCH",
+          "APPROVAL_SESSION_MISMATCH",
+          "APPROVAL_WORKSPACE_MISMATCH"
+        ]
+      }
+    },
+    {
+      "id": "ARC-HG-26",
+      "op": "approval",
+      "input": {
+        "binding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "current": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/b.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "NoAdditionalFloor"
+        }
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "APPROVAL_CANONICALTARGET_MISMATCH"
+      }
+    },
+    {
+      "id": "ARC-HG-27",
+      "op": "approval",
+      "input": {
+        "binding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "current": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "Block"
+        }
+      },
+      "expected": {
+        "outcome": "ok",
+        "finalAction": "block"
+      }
+    },
+    {
+      "id": "ARC-HG-28",
+      "op": "approval-race",
+      "input": {
+        "oldBinding": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A"
+        },
+        "oldCurrent": {
+          "restrictionIdentity": "restriction:N",
+          "subject": "subject:A",
+          "actor": "actor:A",
+          "session": "session:A",
+          "workspace": "workspace:A",
+          "canonicalTarget": "/workspace/a.txt",
+          "requestIdentity": "request:A",
+          "existingAction": "allow",
+          "arcFloor": "NoAdditionalFloor"
+        },
+        "newRestrictionIdentity": "restriction:N+1"
+      },
+      "expected": {
+        "oldAgainstNew": "reject",
+        "newAgainstNew": "ok"
+      }
+    },
+    {
+      "id": "ARC-HG-29",
+      "op": "receipt",
+      "input": {
+        "value": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expected": {
+        "restrictionIdentity": "restriction:N",
+        "explicitOptionalAbsence": false
+      }
+    },
+    {
+      "id": "ARC-HG-30",
+      "op": "receipt-currentness",
+      "input": {
+        "old": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "current": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N+1",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expected": {
+        "identitiesDiffer": true,
+        "oldRemainsHistorical": true
+      }
+    },
+    {
+      "id": "ARC-HG-31",
+      "op": "receipt-redaction",
+      "input": {
+        "value": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "rawRoleBody": "SECRET_ROLE",
+          "credentials": "SECRET_TOKEN",
+          "fileContents": "SECRET_FILE",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expected": {
+        "leakedCanonicalKeys": []
+      }
+    },
+    {
+      "id": "ARC-HG-32",
+      "op": "receipt-currentness",
+      "input": {
+        "old": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "current": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N+1",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expected": {
+        "identitiesDiffer": true
+      }
+    },
+    {
+      "id": "ARC-HG-33",
+      "op": "receipt-absence",
+      "input": {
+        "absent": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": null,
+          "explicitOptionalAbsence": true,
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "present": {
+          "guardDecisionIdentity": "guard:decision:A",
+          "restrictionIdentity": "restriction:N",
+          "subjectDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "scopeDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "issuerDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      },
+      "expected": {
+        "identitiesDiffer": true,
+        "absenceFlag": true
+      }
+    },
+    {
+      "id": "ARC-HG-34",
+      "op": "boundary",
+      "input": {},
+      "expected": {
+        "outcome": "not-executable-in-reference-model",
+        "productionAcceptance": "NOT_RUN"
+      }
+    },
+    {
+      "id": "ARC-HG-35",
+      "op": "boundary",
+      "input": {},
+      "expected": {
+        "outcome": "not-executable-in-reference-model",
+        "productionAcceptance": "NOT_RUN"
+      }
+    },
+    {
+      "id": "ARC-HG-36",
+      "op": "boundary",
+      "input": {},
+      "expected": {
+        "outcome": "not-executable-in-reference-model",
+        "productionAcceptance": "NOT_RUN"
+      }
+    },
+    {
+      "id": "ARC-HG-37",
+      "op": "boundary",
+      "input": {},
+      "expected": {
+        "outcome": "not-executable-in-reference-model",
+        "productionAcceptance": "NOT_RUN"
+      }
+    }
+  ]
+}
