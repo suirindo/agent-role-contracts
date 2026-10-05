@@ -15,6 +15,52 @@ const lock = { name: PACKAGE, version: subject.version, packages: { '': { name: 
 const response = { [PACKAGE]: { ...pack[0], id: `${PACKAGE}@${subject.version}`, stageId: '00000000-0000-4000-8000-000000000001' } };
 const clone = (value) => structuredClone(value);
 
+function workflowJob(workflow, name) {
+  const lines = workflow.split(/\r?\n/);
+  const start = lines.findIndex((line) => line === `  ${name}:`);
+  assert.notEqual(start, -1, `missing ${name} job`);
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^  [A-Za-z0-9_-]+:\s*$/.test(lines[index])) { end = index; break; }
+  }
+  return lines.slice(start, end).filter((line) => !/^\s*#/.test(line)).join('\n');
+}
+
+function exactIndentedBlock(text, header) {
+  const lines = text.split(/\r?\n/);
+  const start = lines.findIndex((line) => line === header);
+  assert.notEqual(start, -1, `missing ${header.trim()} block`);
+  const indent = header.length - header.trimStart().length;
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (!line.trim() || /^\s*#/.test(line)) continue;
+    const lineIndent = line.length - line.trimStart().length;
+    if (lineIndent <= indent) { end = index; break; }
+  }
+  return lines.slice(start, end).filter((line) => line.trim() && !/^\s*#/.test(line)).join('\n');
+}
+
+function assertReleaseWorkflowBoundary(workflow) {
+  const verifyJob = workflowJob(workflow, 'verify');
+  const stageJob = workflowJob(workflow, 'stage');
+  assert.equal(exactIndentedBlock(workflow, 'permissions:'), 'permissions:\n  contents: read', 'workflow permissions must remain exactly contents: read');
+  assert.equal(exactIndentedBlock(stageJob, '    permissions:'), '    permissions:\n      contents: read\n      id-token: write', 'stage permissions must remain exactly contents:read + id-token:write');
+  assert.doesNotMatch(verifyJob, /^    environment:/m, 'verify must not enter a protected environment');
+  assert.doesNotMatch(verifyJob, /^    permissions:/m, 'verify must inherit the workflow read-only permissions');
+  assert.doesNotMatch(verifyJob, /^\s+id-token:\s*write\s*$/m, 'verify must not receive OIDC minting permission');
+  assert.match(verifyJob, /Show verified release target before npm-publish approval/);
+  assert.match(verifyJob, /GITHUB_STEP_SUMMARY/);
+  assert.match(stageJob, /^    needs:\s*verify\s*$/m);
+  assert.match(stageJob, /^    environment:\s*npm-publish\s*$/m);
+  assert.match(stageJob, /^    permissions:\s*$/m);
+  assert.match(stageJob, /^      contents:\s*read\s*$/m);
+  assert.match(stageJob, /^      id-token:\s*write\s*$/m);
+  assert.doesNotMatch(stageJob, /npm audit/);
+  assert.equal((verifyJob.match(/npm audit --audit-level=high --ignore-scripts/g) ?? []).length, 1);
+  assert.doesNotMatch(workflow, /npm audit[^\n]*--omit=dev/);
+}
+
 test('binds protected dispatch tag, exact approved commit/version/hash and workflow identity', () => {
   assert.equal(subject.commit, env.EXPECTED_COMMIT);
   verifyPackage(pkg, lock, subject);
@@ -93,19 +139,39 @@ test('uses pinned npm keyed stage JSON and rejects absent or conflicting respons
 
 test('workflow keeps verification unprivileged and stages one exact artifact without automatic approval', () => {
   const workflow = readFileSync(new URL('../workflows/npm-stage-release.yml', import.meta.url), 'utf8');
-  const verifyJob = workflow.split('  verify:')[1].split('  stage:')[0];
-  assert.doesNotMatch(verifyJob, /id-token:/);
-  assert.equal((workflow.match(/id-token: write/g) ?? []).length, 1);
-  assert.equal((workflow.match(/environment: npm-publish/g) ?? []).length, 1);
+  assertReleaseWorkflowBoundary(workflow);
   assert.equal((workflow.match(/npm stage publish /g) ?? []).length, 1);
   assert.equal((workflow.match(/npm pack /g) ?? []).length, 1);
-  assert.equal((workflow.match(/npm audit --audit-level=high --omit=dev --ignore-scripts/g) ?? []).length, 1);
+  const packIndex = workflow.indexOf('npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/release-bundle" > "$RUNNER_TEMP/release-bundle/pack.json"');
+  const manifestIndex = workflow.indexOf('node .github/release/release-binding.mjs manifest "$RUNNER_TEMP/release-bundle"');
+  const cleanupIndex = workflow.indexOf('rm -- "$RUNNER_TEMP/release-bundle/pack.json"');
+  const bundleIndex = workflow.indexOf('node .github/release/release-binding.mjs bundle "$RUNNER_TEMP/release-bundle"');
+  assert.ok(packIndex >= 0 && packIndex < manifestIndex && manifestIndex < cleanupIndex && cleanupIndex < bundleIndex, 'pack metadata must be removed before exact bundle validation');
   assert.doesNotMatch(workflow, /npm (?:stage approve|publish )|secrets\./);
   assert.match(workflow, /artifact-ids: \$\{\{ needs\.verify\.outputs\.artifact_id \}\}/);
   assert.match(workflow, /--provenance --ignore-scripts --json/);
   assert.match(workflow, /cancel-in-progress: false/);
   const coreWorkflow = readFileSync(new URL('../workflows/core.yml', import.meta.url), 'utf8');
   assert.doesNotMatch(coreWorkflow, /npm audit/, 'dependency audit must stay release-only to avoid recurring PR CI cost');
+});
+
+test('release boundary rejects deleted, moved, and commented gates in local fixtures', () => {
+  const workflow = readFileSync(new URL('../workflows/npm-stage-release.yml', import.meta.url), 'utf8');
+  const dir = mkdtempSync(join(tmpdir(), 'arc-workflow-fixtures-'));
+  try {
+    const fixtures = new Map([
+      ['deleted-needs.yml', workflow.replace('    needs: verify\n', '')],
+      ['moved-environment.yml', workflow.replace('    environment: npm-publish\n', '').replace('  verify:\n', '  verify:\n    environment: npm-publish\n')],
+      ['commented-oidc.yml', workflow.replace('      id-token: write\n', '      # id-token: write\n')],
+      ['weakened-global-permissions.yml', workflow.replace('permissions:\n  contents: read\n', 'permissions: write-all\n')],
+      ['expanded-stage-permissions.yml', workflow.replace('      id-token: write\n', '      id-token: write\n      actions: write\n')],
+    ]);
+    for (const [name, contents] of fixtures) {
+      const file = join(dir, name);
+      writeFileSync(file, contents);
+      assert.throws(() => assertReleaseWorkflowBoundary(readFileSync(file, 'utf8')), undefined, name);
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 import { verifyAttestationAudit, isolatedNpmConfig, signerPolicy } from './verify-publication.mjs';
