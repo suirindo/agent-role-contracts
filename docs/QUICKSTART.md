@@ -60,13 +60,15 @@ The demo uses only portable Node.js file reads and JSON checks. No Bash, Docker,
 
 ## Integration demos
 
-From this source checkout, run these declaration-only demos. They are also included in the published `0.5.0-alpha.1` preview; stable `0.1.0` does not include these G1/G2/G3 preview surfaces:
+From a source checkout, run these declaration-only npm scripts:
 
 ```sh
 npm run demo:binding
 npm run demo:filesystem-adapter
 npm run demo:lifecycle
 ```
+
+The corresponding G1/G2/G3 code, examples, and subpaths are included in the published `0.5.0-alpha.1` preview, while stable `0.1.0` does not include these preview surfaces. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the published APIs, CLI, and packaged example files rather than expecting those repository scripts to appear in its own `package.json`.
 
 See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 review binding, the explicit optional G2 adapter and G3 lifecycle declarations. These demos neither execute actions nor verify artifact bytes.
 
