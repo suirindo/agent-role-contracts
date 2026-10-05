@@ -169,7 +169,7 @@ runtime固有宣言の検出は意図的に限定されています。汎用的�
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
 npm install @netsujo/agent-role-contracts@0.5.0
-# または: npm install @netsujo/agent-role-contracts@0.5.0
+# または: npm install @netsujo/agent-role-contracts
 ```
 
 versionを省略したpackage名は`latest`に従い、現在は安定版`0.5.0`を取得します。
