@@ -172,7 +172,7 @@ npm install @netsujo/agent-role-contracts@0.5.0
 # または: npm install @netsujo/agent-role-contracts@0.5.0
 ```
 
-versionを省略したpackage名は`latest`に従い、現在は安定版`0.1.0`を取得します。
+versionを省略したpackage名は`latest`に従い、現在は安定版`0.5.0`を取得します。
 
 ## APIとCLI
 
