@@ -1,10 +1,12 @@
 # Agent Role Contracts
 
-G0, G1, G2 and G3 are merged and implemented in repository main. Public preview `0.5.0-alpha.1` is published on npm under the `next` dist-tag; stable `latest` remains `0.1.0`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+**Catch contradictions in AI-agent roles, task scopes, reviews, and handoffs before execution.**
 
-Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
+A task can say an agent may write only inside `src/**` while the next request points somewhere else. A workflow can claim independent review while its declarations route implementation and review through the same role. Agent Role Contracts turns those mismatches into deterministic, offline checks before an agent runs.
 
-**Public preview: `0.5.0-alpha.1` on npm `next`.** Stable `latest` remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
+No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
+
+**Public preview: `0.5.0-alpha.1` on npm `next`.** Stable `latest` remains `0.1.0`. The preview includes the general core plus G1 task/action binding, the optional G2 `/adapters/filesystem-write` mapping, and G3 lifecycle declarations. Onchain finance remains an optional profile.
 
 ## Quick Start — three minutes
 
