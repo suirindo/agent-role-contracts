@@ -15,3 +15,12 @@ Before opening a pull request:
 5. avoid provider credentials, customer data, internal paths and runtime-specific authority in fixtures.
 
 Breaking public schema or API changes require an explicit package/schema version change. Security reports should follow `SECURITY.md`.
+
+
+## Feedback without a code change
+
+You do not need a patch to contribute useful evidence. If you tried Agent Role Contracts against one real or representative workflow, use the [real-workflow feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml).
+
+Useful feedback includes a contradiction the checker caught, a rule it could not express, setup or maintenance cost, overlap with an existing control, or evidence that the same contract remained useful on a second task. A result that your existing controls are sufficient is valid evidence.
+
+For a reproducible software defect, use the bug report template. Keep credentials, customer data, private repository paths, production secrets and other sensitive material out of public issues.
