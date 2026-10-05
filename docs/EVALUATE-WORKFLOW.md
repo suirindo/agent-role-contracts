@@ -42,7 +42,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 Then adapt the starter bundle and task to your workflow. The useful result is not simply a PASS. Change one important assumption deliberately and verify that the relevant command rejects the stale or out-of-scope declaration.
 
-From the cloned repository root, make a task copy before running the checks:
+From the directory where you ran `git clone`, enter the repository and make a task copy before running the checks:
 
 ```sh
 cd agent-role-contracts
