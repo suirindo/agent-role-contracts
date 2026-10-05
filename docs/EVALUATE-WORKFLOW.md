@@ -40,14 +40,40 @@ git clone https://github.com/suirindo/agent-role-contracts.git
 npm --prefix agent-role-contracts run demo --silent
 ```
 
-Then adapt the starter bundle and task to your workflow. The useful result is not simply a PASS. Change one important assumption deliberately and verify that the checker rejects the stale or out-of-scope declaration.
+Then adapt the starter bundle and task to your workflow. The useful result is not simply a PASS. Change one important assumption deliberately and verify that the relevant command rejects the stale or out-of-scope declaration.
+
+Use the command that actually covers the assumption you are testing:
+
+```sh
+# Scope containment: copy and edit the starter task, then rerun explain.
+node bin/agent-role-contracts.mjs explain \
+  --bundle examples/starter-bundle.json \
+  --task task.demo.json \
+  --format text
+
+# Declared self-review.
+node bin/agent-role-contracts.mjs validate \
+  --bundle examples/invalid-self-review.json
+
+# G1 subject binding: the demo mutates meaningful task/action input
+# and rejects the stale review/approval binding.
+npm run demo:binding
+
+# Handoff consistency.
+node bin/agent-role-contracts.mjs handoff \
+  --bundle examples/team.json \
+  --task examples/task.json \
+  --handoff examples/handoff.json
+```
+
+See [the task-edit quickstart](QUICKSTART.md#check-your-own-edit) and [the integration sequence](INTEGRATION.md#integration-sequence) before adapting those examples.
 
 Useful mutations include:
 
 - request a path outside the implementer's declared write scope;
 - make the implementer and reviewer the same declared role;
-- change a task input after a review or approval binding was created;
-- change the declared handoff subject.
+- change a meaningful task input after a review or approval binding was created and verify that the stale binding is rejected;
+- change a copied handoff's `task_id` or `suggested_next_agent` and verify that the handoff no longer matches the declared task or route.
 
 ## 3. Keep declaration checks separate from runtime enforcement
 
@@ -88,7 +114,7 @@ A stronger signal is the same enforcement or evidence gap appearing in at least 
 
 The public package checks declarations. Some preview APIs also cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
 
-It does not authenticate agents, grant runtime permission, verify output bytes, enforce arbitrary SaaS/API permissions, or prove that a reviewer was independent in the real execution environment. Check the README for the exact boundary of the version you are using.
+It does not authenticate agents, grant runtime permission, verify output bytes, enforce any runtime, filesystem, SaaS or API permission, or prove that a reviewer was independent in the real execution environment. Check the README for the exact boundary of the version you are using.
 
 ## Evaluate with Netsujo
 
