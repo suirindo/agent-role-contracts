@@ -42,10 +42,17 @@ npm --prefix agent-role-contracts run demo --silent
 
 Then adapt the starter bundle and task to your workflow. The useful result is not simply a PASS. Change one important assumption deliberately and verify that the relevant command rejects the stale or out-of-scope declaration.
 
+From the cloned repository root, make a task copy before running the checks:
+
+```sh
+cd agent-role-contracts
+cp examples/starter-task.json task.demo.json
+```
+
 Use the command that actually covers the assumption you are testing:
 
 ```sh
-# Scope containment: copy and edit the starter task, then rerun explain.
+# Scope containment: edit task.demo.json, then rerun explain.
 node bin/agent-role-contracts.mjs explain \
   --bundle examples/starter-bundle.json \
   --task task.demo.json \
