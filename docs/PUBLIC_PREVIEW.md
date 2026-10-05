@@ -1,6 +1,6 @@
 # Next public preview: 0.5.0-alpha.1
 
-This is the release candidate guide. Registry publication and production runtime adoption remain separate acceptance steps. Check npm dist-tags before using a registry installation command; this document alone is not publication evidence.
+Public preview `0.5.0-alpha.1` is published on npm under the `next` dist-tag. Stable `latest` remains `0.1.0`. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
 
 ## Architecture at a glance
 
@@ -28,18 +28,31 @@ npm run demo:lifecycle
 
 These are offline synthetic examples. They perform declaration checks without executing the represented business actions. Existing v0.1 synchronous APIs and schemas remain compatible; the filesystem adapter is an explicit subpath, separate from the root facade and core. See [COMPATIBILITY.md](COMPATIBILITY.md).
 
-## Publish and verify the preview
+## Published preview
 
-1. Accept PR #28's release-gate changes and this preview follow-up after the required independent reviews. Bind the final candidate commit, protected `v0.5.0-alpha.1` tag and tarball SHA-256 packed with npm 11.20.0. A changed candidate requires current evidence.
-2. Verify npm Trusted Publisher configuration for this repository/workflow and `npm-publish` environment. Keep the required human reviewer and disabled admin bypass. Use the existing OIDC staging workflow; do not substitute a publishing token.
-3. Dispatch the existing workflow against the protected tag with the exact commit/version/tarball hash. Review the verified artifact and derived `next` dist-tag before environment approval.
-4. Read back the single staged artifact through an authenticated maintainer session, compare bytes with the receipt, and separately approve the exact stage ID with the required authentication. Reconcile an uncertain stage result before any retry.
-5. Run the existing publication verifier with the exact version, commit and tarball SHA-256. It must verify registry bytes, npm/Sigstore provenance and workflow/commit identity, `next` pointing to the candidate, and `latest` not pointing to that preview.
+Publication completed on 2026-10-05 through npm staged publishing.
 
-After this readback succeeds, users can install the exact preview:
+Verified state:
+
+- package: `@netsujo/agent-role-contracts`
+- version: `0.5.0-alpha.1`
+- dist-tag: `next`
+- stable `latest`: `0.1.0`
+- release commit: `395ac5d9dfc607590fa2933a0903ecd03445d678`
+- staged package shasum: `0ce7d38a73e9eaaffbca87bd67e5f1fbdab3eae3`
+- GitHub Actions staging run: `37284758073`
+- clean external install of `@netsujo/agent-role-contracts@next`: PASS
+
+Install the preview:
+
+```sh
+npm install @netsujo/agent-role-contracts@next
+```
+
+For immutable selection:
 
 ```sh
 npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
 ```
 
-The stable package stays on its existing `latest` channel. The preview channel is `next`; stable releases use `latest`. Supported preview versions are `alpha.N`, `beta.N` or `rc.N` with a canonical nonnegative integer. Arbitrary channels, build metadata and malformed versions are rejected. This follow-up does not itself stage, approve, publish or wire HOL Guard into production.
+The preview channel is `next`; stable releases use `latest`. Runtime enforcement, production adoption and HOL Guard integration remain separate work.
