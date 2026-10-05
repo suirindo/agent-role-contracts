@@ -4,7 +4,7 @@ G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merge
 
 G3 lifecycle provides generic core declarations in the published `0.5.0-alpha.1` public preview on npm `next`, not a runtime, state machine or authenticator. G2 filesystem-write is included through its optional subpath. Finance and Safe remain optional profiles; this demo uses only the generic core. Production adoption is not claimed.
 
-Run from this source checkout, or install the public preview explicitly with `@next`:
+Run the bundled demo from this source checkout:
 
 ```sh
 npm run demo:lifecycle
