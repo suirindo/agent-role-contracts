@@ -91,6 +91,8 @@ This project does not turn a declaration PASS into runtime authority. Identity, 
 - [Integrate the checker without treating PASS as execution permission](docs/INTEGRATION.md).
 - [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
+If the checker catches something you would want to catch again, [star the repository](https://github.com/suirindo/agent-role-contracts) to keep it handy, and share the workflow result so the next change is driven by evidence rather than feature speculation.
+
 ## General-purpose core and optional profiles
 
 Agent Role Contracts has a general-purpose core for role, authority, task-scope, review and handoff declarations. Software development, data processing and support drafting use the same core; onchain finance is one optional profile.
