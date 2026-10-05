@@ -31,7 +31,13 @@ npm公開プレビュー`0.5.0-alpha.1`をcloneせず試す手順は、英語正
 
 プロンプトで`src/**`への限定を指示していても、次のタスクが別の場所を要求することがあります。役割とタスクの宣言を検査器へ渡すと、その不整合を具体的な診断コードで確認できます。実装役とレビュー役の兼務宣言も検知します。PASSは宣言の整合を示し、実際の権限制御やレビュー担当者の独立性確認は実行側で行う必要があります。
 
-次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)、[実サービス統合時の責任境界](docs/INTEGRATION.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
+### プロジェクトの方向性
+
+Netsujoは、**Building trustworthy infrastructure for AI agents in the real world.** を技術的な旗印にしています。Agent Role Contractsは、その中で役割・権限・作業範囲・レビュー分離・引き継ぎの宣言を、実行前に検査できるようにする公開レイヤーです。
+
+このOSSのPASSをruntime権限へ変換しません。本人確認、実際のアクセス権、外部操作の強制、証拠の真正性、業務上の受入は別の責務です。より広い信頼インフラの主張は、それらの境界を特定の実行環境で統合・検証できた範囲に限定します。
+
+次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[1つの実ワークフローで評価する](docs/EVALUATE-WORKFLOW.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)、[実サービス統合時の責任境界](docs/INTEGRATION.md)へ進めます。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
 ## 汎用コアと用途別拡張
 

@@ -72,9 +72,16 @@ The `next` channel currently resolves to `0.5.0-alpha.1`. Use `@netsujo/agent-ro
 
 A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
 
+### Project direction
+
+Netsujo is building trustworthy infrastructure for AI agents in the real world. Agent Role Contracts is the public, narrow declaration-checking layer of that direction: make role, authority, scope, review separation and handoffs explicit enough to validate before relying on them.
+
+This project does not turn a declaration PASS into runtime authority. Identity, permissions, side-effect enforcement, evidence authenticity and business acceptance remain separate responsibilities. The project earns broader claims only when those boundaries are integrated and verified in the specific execution environment.
+
 ### Try your own task next
 
 - [Change a task scope and check it yourself](docs/QUICKSTART.md).
+- [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md) without treating a declaration PASS as runtime authority.
 - [Explore coordination and handoffs](#full-three-role-example).
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
 - [Integrate the checker without treating PASS as execution permission](docs/INTEGRATION.md).
