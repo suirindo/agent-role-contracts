@@ -2,9 +2,9 @@
 
 G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source is the published public preview `0.5.0-alpha.1` on npm `next`; stable `latest` remains `0.1.0`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
-G3 lifecycle provides generic core declarations in the unreleased repository source, not a runtime, state machine or authenticator. G2 filesystem-write is included through its optional subpath. Finance and Safe remain optional profiles; this demo uses only the generic core. No package publication is claimed.
+G3 lifecycle provides generic core declarations in the published `0.5.0-alpha.1` public preview on npm `next`, not a runtime, state machine or authenticator. G2 filesystem-write is included through its optional subpath. Finance and Safe remain optional profiles; this demo uses only the generic core. Production adoption is not claimed.
 
-Run from this unreleased source checkout:
+Run from this source checkout, or install the public preview explicitly with `@next`:
 
 ```sh
 npm run demo:lifecycle
