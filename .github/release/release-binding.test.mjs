@@ -41,9 +41,19 @@ function exactIndentedBlock(text, header) {
   return lines.slice(start, end).filter((line) => line.trim() && !/^\s*#/.test(line)).join('\n');
 }
 
+function workflowJobNames(workflow) {
+  const lines = workflow.split(/\r?\n/);
+  const jobs = lines.findIndex((line) => line === 'jobs:');
+  assert.notEqual(jobs, -1, 'missing jobs');
+  return lines.slice(jobs + 1)
+    .map((line) => /^  ([A-Za-z0-9_-]+):\s*$/.exec(line)?.[1] ?? null)
+    .filter(Boolean);
+}
+
 function assertReleaseWorkflowBoundary(workflow) {
   const verifyJob = workflowJob(workflow, 'verify');
   const stageJob = workflowJob(workflow, 'stage');
+  assert.deepEqual(workflowJobNames(workflow), ['verify', 'stage'], 'release workflow must contain exactly verify then stage');
   assert.equal(exactIndentedBlock(workflow, 'permissions:'), 'permissions:\n  contents: read', 'workflow permissions must remain exactly contents: read');
   assert.equal(exactIndentedBlock(stageJob, '    permissions:'), '    permissions:\n      contents: read\n      id-token: write', 'stage permissions must remain exactly contents:read + id-token:write');
   assert.doesNotMatch(verifyJob, /^    environment:/m, 'verify must not enter a protected environment');
@@ -165,6 +175,7 @@ test('release boundary rejects deleted, moved, and commented gates in local fixt
       ['commented-oidc.yml', workflow.replace('      id-token: write\n', '      # id-token: write\n')],
       ['weakened-global-permissions.yml', workflow.replace('permissions:\n  contents: read\n', 'permissions: write-all\n')],
       ['expanded-stage-permissions.yml', workflow.replace('      id-token: write\n', '      id-token: write\n      actions: write\n')],
+      ['extra-release-job.yml', workflow.replace('jobs:\n  verify:', 'jobs:\n  rogue:\n    runs-on: ubuntu-latest\n    permissions:\n      id-token: write\n    steps: []\n  verify:')],
     ]);
     for (const [name, contents] of fixtures) {
       const file = join(dir, name);
