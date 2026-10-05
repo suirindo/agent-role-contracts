@@ -15,7 +15,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
-For a published first run without cloning, use [the no-clone instructions](../README.md#try-the-published-package-instead-no-clone), including recovery from an `EPERM` npm cache error. The public preview `0.5.0-alpha.1` is published on the `next` dist-tag and includes G1/G2/G3; stable `latest` remains `0.1.0`. Use the exact preview version when you need those preview APIs.
+For a published first run without cloning, use [the no-clone instructions](../README.md#try-the-published-package-instead-no-clone), including recovery from an `EPERM` npm cache error. Stable `0.5.0` includes G1/G2/G3 and npm stable installs use the `latest` dist-tag. Pin `@netsujo/agent-role-contracts@0.5.0` when exact release identity matters.
 
 ## Check your own edit
 
@@ -68,7 +68,7 @@ npm run demo:filesystem-adapter
 npm run demo:lifecycle
 ```
 
-The corresponding G1/G2/G3 code, examples, and subpaths are included in the published `0.5.0-alpha.1` preview, while stable `0.1.0` does not include these preview surfaces. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the published APIs, CLI, and packaged example files rather than expecting those repository scripts to appear in its own `package.json`.
+The corresponding G1/G2/G3 code, examples, and subpaths are included in stable `0.5.0`; the older `0.1.0` release does not include these 0.5 surfaces. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the published APIs, CLI, and packaged example files rather than expecting those repository scripts to appear in its own `package.json`.
 
 See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 review binding, the explicit optional G2 adapter and G3 lifecycle declarations. These demos neither execute actions nor verify artifact bytes.
 
