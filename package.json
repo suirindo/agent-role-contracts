@@ -3,7 +3,7 @@
   "version": "0.5.0-alpha.1",
   "license": "MIT",
   "type": "module",
-  "description": "Offline, general-purpose AI-agent role, authority, task-scope, review and handoff declaration checks.",
+  "description": "Offline checks for AI-agent roles, authority, task scope, review separation, and handoffs before execution.",
   "engines": {
     "node": ">=22.5"
   },
@@ -48,7 +48,7 @@
     "type": "git",
     "url": "git+https://github.com/suirindo/agent-role-contracts.git"
   },
-  "homepage": "https://github.com/suirindo/agent-role-contracts#readme",
+  "homepage": "https://netsujo.jp/en/products/agent-role-contracts",
   "bugs": {
     "url": "https://github.com/suirindo/agent-role-contracts/issues"
   },
@@ -58,16 +58,20 @@
   },
   "keywords": [
     "ai-agents",
+    "multi-agent",
     "coding-agents",
+    "agent-governance",
     "governance",
     "authority",
     "review",
     "handoff",
     "validation",
+    "workflow",
+    "developer-tools",
     "web3",
     "onchain-finance",
     "treasury",
     "erc20"
   ],
-  "author": "Netsujo\u682a\u5f0f\u4f1a\u793e"
+  "author": "Netsujo株式会社"
 }
