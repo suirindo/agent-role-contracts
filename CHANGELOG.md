@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 — stable release (npm `latest`)
+
+- Promote the G0 → G3 line from the `0.5.0-alpha.1` public preview to stable without broadening authority semantics.
+- Keep the general core, G1 task/action binding, explicit G2 filesystem-write adapter, G3 lifecycle declarations, and optional finance/Safe profile in one package line.
+- Preserve the declaration-only boundary: no runtime authority, identity authentication, filesystem/API enforcement, artifact-byte verification, replay prevention, signing, broadcasting, or production-adoption claim.
+- Ship the current package discovery metadata plus English/Japanese quickstart and real-workflow evaluation guidance.
+
 ## 0.5.0-alpha.1 — public preview (npm `next` line)
 
 - Add generic lifecycle description/validation APIs, strict lifecycle schema 0.4, CLI commands and six checked demo outcomes.

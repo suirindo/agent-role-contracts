@@ -42,7 +42,7 @@ test('G3 public candidate exports and schema totals remain additive', async () =
     assert.equal(typeof core[name], 'function');
     assert.equal(root[name], core[name]);
   }
-  assert.equal(core.VERSION, '0.5.0-alpha.1');
+  assert.equal(core.VERSION, '0.5.0');
   assert.equal(Object.keys(schemas).length, 12);
   assert.equal(schemas['task-lifecycle'].properties.schema_version.const, '0.4');
 });

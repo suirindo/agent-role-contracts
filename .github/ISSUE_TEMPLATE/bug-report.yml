@@ -10,7 +10,7 @@ body:
     id: version
     attributes:
       label: Version or commit
-      placeholder: "@netsujo/agent-role-contracts@0.5.0-alpha.1 or commit SHA"
+      placeholder: "@netsujo/agent-role-contracts@0.5.0 or commit SHA"
     validations:
       required: true
   - type: input

@@ -6,7 +6,7 @@ A task can say an agent may write only inside `src/**` while the next request po
 
 No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
 
-**Public preview: `0.5.0-alpha.1` on npm `next`.** Stable `latest` remains `0.1.0`. The preview includes the general core plus G1 task/action binding, the optional G2 `/adapters/filesystem-write` mapping, and G3 lifecycle declarations. Onchain finance remains an optional profile.
+**Stable package line: `0.5.0`.** npm stable installs use the `latest` dist-tag. The stable package includes the general core plus G1 task/action binding, the optional G2 `/adapters/filesystem-write` mapping, and G3 lifecycle declarations. Onchain finance remains an optional profile.
 
 ## Quick Start — three minutes
 
@@ -47,13 +47,13 @@ The demo calls the real contract checker, repairs only the task JSON in memory a
 
 ### Try the published package instead (no clone)
 
-To run the published `0.5.0-alpha.1` public preview without cloning the repository, start in an empty directory:
+To run the stable `0.5.0` package without cloning the repository, start in an empty directory:
 
 ```sh
 mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@next
+npm install --ignore-scripts @netsujo/agent-role-contracts@0.5.0
 npx --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
@@ -65,10 +65,10 @@ The last command prints `PASS: explain`. It checks the bundled two-role declarat
 If `npm install` reports `EPERM` about root-owned files in a shared npm cache, do not use `sudo`. Retry with a cache local to this directory:
 
 ```sh
-NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@next
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.5.0
 ```
 
-The `next` channel currently resolves to `0.5.0-alpha.1`. Use `@netsujo/agent-role-contracts@0.5.0-alpha.1` when you need an immutable preview version. Stable `latest` remains `0.1.0`.
+npm `latest` is the stable install channel. Use `@netsujo/agent-role-contracts@0.5.0` when you need an immutable version.
 
 ### Why it matters
 
@@ -103,7 +103,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-The published `0.5.0-alpha.1` preview provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+The published `0.5.0` preview provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -115,7 +115,7 @@ G0 core isolation and G1 task/action binding are **merged and implemented**; sou
 node examples/action-binding/demo.mjs
 ```
 
-The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The public preview is published on npm under `next`. Action IDs do not establish task/run replay identity; replay policy remains external.
+The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The stable release is part of the `0.5.0` stable package. Action IDs do not establish task/run replay identity; replay policy remains external.
 
 For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
 
@@ -123,7 +123,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-write is **merged and implemented in repository main**; npm public-preview publication is complete; production adoption is still not claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main and included in the `0.5.0-alpha.1` public preview; production adoption remains separate.
+G2 filesystem-write is **merged and implemented in repository main**; G2 is included in the `0.5.0` stable package; production adoption is still not claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main and included in the `0.5.0` stable release; production adoption remains separate.
 
 The integration API is an optional import:
 
@@ -142,17 +142,17 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-The published `0.5.0-alpha.1` preview includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
+The published `0.5.0` preview includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## G3 lifecycle declarations
 
-G3 lifecycle is **merged, implemented, and included in the published `0.5.0-alpha.1` public preview**; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+G3 lifecycle is **merged, implemented, and included in the `0.5.0` stable release**; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
 
 ```sh
 npm run demo:lifecycle
 ```
 
-The published `0.5.0-alpha.1` preview provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
+The published `0.5.0` preview provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
 Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Public-preview package publication is complete; runtime adoption and execution remain separate.
 
@@ -206,12 +206,12 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-For the published preview, check the live dist-tags and use the exact preview version or `next`:
+For the published preview, check the live dist-tags and use the exact stable version or `latest`:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
-npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
-# or: npm install @netsujo/agent-role-contracts@next
+npm install @netsujo/agent-role-contracts@0.5.0
+# or: npm install @netsujo/agent-role-contracts@0.5.0
 ```
 
 The unversioned package name follows `latest`, which currently remains the stable `0.1.0` release.

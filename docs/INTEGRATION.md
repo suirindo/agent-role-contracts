@@ -2,7 +2,7 @@
 
 Agent Role Contracts validates supplied declarations. A PASS is a preflight consistency result; it grants no permission to run an agent, write files, call an external tool, merge a change, move funds or publish a release.
 
-Stable npm `latest` remains `0.1.0`, while the public preview `0.5.0-alpha.1` is published on npm `next` with G0/G1/G2/G3 merged and implemented. The generic `/core` includes G1 task/action binding and G3 lifecycle declarations; G2 is available only through the explicit optional `/adapters/filesystem-write` subpath. Finance and Safe remain an optional `/profiles/onchain-finance` profile. Keep the checker version and exact inputs with every integration record, and install the preview explicitly with `@next` or `@0.5.0-alpha.1` when using preview APIs.
+`0.5.0` is the stable package line and npm stable installs use `latest`. G0/G1/G2/G3 are merged and implemented. The generic `/core` includes G1 task/action binding and G3 lifecycle declarations; G2 is available only through the explicit optional `/adapters/filesystem-write` subpath. Finance and Safe remain an optional `/profiles/onchain-finance` profile. Keep the checker version and exact inputs with every integration record, and pin `@netsujo/agent-role-contracts@0.5.0` when exact release identity matters.
 
 ## Bind the check to the proposed work
 
@@ -10,7 +10,7 @@ Supply the approved bundle and policy from a trusted source. User- or task-suppl
 
 For the v0.1 bundle/task/handoff APIs, retain the exact input bytes, checker version and your own trusted task/source revision with the result. A saved PASS has no built-in expiry or revocation mechanism.
 
-For the G1 APIs included in the `0.5.0-alpha.1` public preview, `describeTaskAction` returns a `subject_digest` over the complete validated bundle, task and declared action. `validateTaskActionBinding` can check that routed review and required accountable-approval declarations refer to that same subject. The digest provides integrity binding only: it is not a signature, identity proof, timestamp, approval receipt, runtime authorization or replay token. A changed subject must invalidate the old binding rather than causing the integration to synthesize a new approval.
+For the G1 APIs included in `0.5.0`, `describeTaskAction` returns a `subject_digest` over the complete validated bundle, task and declared action. `validateTaskActionBinding` can check that routed review and required accountable-approval declarations refer to that same subject. The digest provides integrity binding only: it is not a signature, identity proof, timestamp, approval receipt, runtime authorization or replay token. A changed subject must invalidate the old binding rather than causing the integration to synthesize a new approval.
 
 If the CLI exits 1 or 2, or an API report is invalid, missing or unverifiable, stop the dependent action. Do not widen authority automatically to turn a failure into PASS.
 

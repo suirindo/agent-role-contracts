@@ -4,4 +4,4 @@ A public release is accepted only on exact public-candidate bytes after provenan
 
 A validation PASS means only that the supplied declarations are internally consistent under the supported package profile. It does not authenticate runtime identity, grant execution authority, enforce a filesystem lock, verify source evidence, scan secrets, or implement full JSON Schema.
 
-Release evidence is bound to the exact public HEAD and package artifact. Runtime adapters, actual agent execution, credentials, host permissions, provider calls and GUI control remain outside v0.1.0.
+Release evidence is bound to the exact public HEAD and package artifact. Runtime execution, credentials, host permissions, provider calls, GUI control and enforcement remain outside v0.5.0. The explicit filesystem-write adapter maps declarations only; it does not perform writes or grant permission.

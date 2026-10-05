@@ -1,6 +1,6 @@
 # Onchain finance intent checks — v0.2 preview
 
-Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The current repository public preview is `0.5.0-alpha.1`, published on npm under `next`, and includes this optional profile. Stable npm `latest` remains `0.1.0` and does not include this feature.
+Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The `0.5.0` stable package includes this optional profile, and npm stable installs use `latest`. The finance profile remains an optional, separately scoped capability.
 
 ## Try the demo
 
@@ -63,7 +63,7 @@ import {
   describeFinancialIntent,
   validateFinancialIntent,
   validateFinancialExecution,
-} from '@netsujo/agent-role-contracts/profiles/onchain-finance'; // included in the 0.5.0-alpha.1 public preview
+} from '@netsujo/agent-role-contracts/profiles/onchain-finance'; // included in the 0.5.0 stable package
 
 // JSON strings supplied by your application, from separately trusted inputs.
 const subject = await describeFinancialIntent(
