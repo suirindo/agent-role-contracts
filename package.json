@@ -1,6 +1,6 @@
 {
   "name": "@netsujo/agent-role-contracts",
-  "version": "0.5.0-alpha.1",
+  "version": "0.5.0",
   "license": "MIT",
   "type": "module",
   "description": "Offline checks for AI-agent roles, authority, task scope, review separation, and handoffs before execution.",
@@ -54,7 +54,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "keywords": [
     "ai-agents",
