@@ -1,10 +1,12 @@
 # Agent Role Contracts
 
-Agent Role Contracts `0.5.0` is the stable G0 → G3 release line. It checks declared roles, authority, task scope, review separation, handoffs, task/action binding, the explicit filesystem-write mapping, and lifecycle declarations. G2 remains an optional `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 is a declaration-consistency layer, not a runtime, state machine, authenticator, or execution authority.
+**Catch contradictions in AI-agent roles, task scopes, reviews, and handoffs before execution.**
 
-Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
+A task can say an agent may write only inside `src/**` while the next request points somewhere else. A workflow can claim independent review while its declarations route implementation and review through the same role. Agent Role Contracts turns those mismatches into deterministic, offline checks before an agent runs.
 
-**Stable package line: `0.5.0`.** npm stable installs use the `latest` dist-tag. The generic v0.1 role-contract profile and synchronous APIs remain compatible, with onchain finance available as an optional profile.
+No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
+
+**Stable package line: `0.5.0`.** npm stable installs use the `latest` dist-tag. The stable package includes the general core plus G1 task/action binding, the optional G2 `/adapters/filesystem-write` mapping, and G3 lifecycle declarations. Onchain finance remains an optional profile.
 
 ## Quick Start — three minutes
 
