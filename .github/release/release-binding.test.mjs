@@ -144,7 +144,7 @@ test('workflow keeps verification unprivileged and stages one exact artifact wit
   assert.equal((workflow.match(/npm pack /g) ?? []).length, 1);
   const packIndex = workflow.indexOf('npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/release-bundle" > "$RUNNER_TEMP/release-bundle/pack.json"');
   const manifestIndex = workflow.indexOf('node .github/release/release-binding.mjs manifest "$RUNNER_TEMP/release-bundle"');
-  const cleanupIndex = workflow.indexOf('rm "$RUNNER_TEMP/release-bundle/pack.json"');
+  const cleanupIndex = workflow.indexOf('rm -- "$RUNNER_TEMP/release-bundle/pack.json"');
   const bundleIndex = workflow.indexOf('node .github/release/release-binding.mjs bundle "$RUNNER_TEMP/release-bundle"');
   assert.ok(packIndex >= 0 && packIndex < manifestIndex && manifestIndex < cleanupIndex && cleanupIndex < bundleIndex, 'pack metadata must be removed before exact bundle validation');
   assert.doesNotMatch(workflow, /npm (?:stage approve|publish )|secrets\./);
