@@ -2,7 +2,7 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-**開発プレビュー：`0.5.0-alpha.1`。** npmの公開版は引き続き`0.1.0`です。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
+**公開プレビュー：`0.5.0-alpha.1`をnpmの`next`で公開済み。** 安定版`latest`は`0.1.0`のままです。既存の汎用v0.1 role-contract profileと同期APIを維持し、v0.2金融プレビューは用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
 
@@ -25,7 +25,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
-公開済みnpm `0.1.0`をcloneせず試す手順は、英語正本の[Try the published package instead](README.md#try-the-published-package-instead-no-clone)にあります。現在のrepository sourceはnpm公開版より新しいため、両者を同一の機能集合として扱わないでください。
+npm公開プレビュー`0.5.0-alpha.1`をcloneせず試す手順は、英語正本の[Try the published package instead](README.md#try-the-published-package-instead-no-clone)にあります。`next`は現在この版を指し、安定版`latest`は`0.1.0`を維持しています。
 
 ### 何が変わるか
 
@@ -43,7 +43,7 @@ Agent Role Contractsは、AIの役割・権限・作業範囲・レビュー・�
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-この未公開のrepository sourceでは、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
+公開済み`0.5.0-alpha.1`プレビューでは、汎用入口`@netsujo/agent-role-contracts/core`と用途別入口`@netsujo/agent-role-contracts/profiles/onchain-finance`を追加しています。従来のroot importは互換維持します。`/core`は金融コード・金融スキーマを読み込みません。互換rootは既存の金融exportも保持します。古いnpm導入版に新しい入口が存在するとは主張しません。
 
 デモは出力ファイルに関する宣言検査です。業務の実行・顧客への送信・成果物の真正性確認は行いません。[汎用設計と進化計画](docs/ARCHITECTURE.md)を参照してください。
 
@@ -55,7 +55,7 @@ G0のcore分離とG1のタスク・アクションbindingは**merge・実装済�
 node examples/action-binding/demo.mjs
 ```
 
-`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発版は未公開です。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
+`/core`は非同期API `describeTaskAction(bundleJson, taskJson, actionJson)`と`validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`を公開します。`npm run demo:binding`で実行できます。actionとbindingのJSONは`schema_version: "0.3"`、binding profileは`task-action/0.3`です。開発プレビューはnpmの`next`で公開済みです。action IDはtask/runのリプレイ識別子を保証せず、リプレイ方針は外部で扱います。
 
 各例でdigestを取得し、routeのreviewerによるpassと`route.accountable`による必須承認を宣言してPASSを確認します。その後、意味のあるtask入力またはaction parameterを変更し、元のbindingが`G1_SUBJECT_MISMATCH`で失敗することを確認します。完全なcanonical subjectはprofile、**policy・roles・routesを含むbundle全体、task全体、宣言action全体**を対象とし、レビュー・承認の宣言は現在のsubjectに結び付きます。
 
@@ -63,7 +63,7 @@ digestが示すのは整合対象の完全性であり、真正性や実行許�
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm公開・本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleもrepository mainにmerge済み・実装済みです。公開・採用は別の状態として扱います。
+G2 filesystem-writeは**repository mainにmerge済み・実装済み**です。npm public previewは公開済みで、本番採用は主張しません。最初の具体的adapterにfilesystem-writeを選ぶ理由は、既存のportableな相対scopeの意味を、業界固有schemaなしでソフトウェア変更・データクリーニング・サポート下書きに再利用できるためです。G3 lifecycleもrepository mainにmerge済み・実装済みです。公開・採用は別の状態として扱います。
 
 optional APIは次のとおりです。
 
@@ -82,19 +82,19 @@ profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-この未公開のrepository sourceにはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
+公開済み`0.5.0-alpha.1`プレビューにはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
 ## G3 lifecycle宣言
 
-G3 lifecycleは**repository mainにmerge済み・実装済み**の未公開開発プレビューです。npm公開・本番採用は主張しません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
+G3 lifecycleは**repository mainにmerge済み・実装済みで、`0.5.0-alpha.1` public previewに含まれます。** 本番採用は主張しません。[デモとAPI説明](examples/task-lifecycle/README.md)はソフトウェア変更・データクリーニング・返信下書きで、3件のPASSと古いsubject・成果物digest衝突の拒否を確認します。
 
 ```sh
 npm run demo:lifecycle
 ```
 
-この未公開のrepository sourceでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`、G3 PR #19は`d18f867d91ec8abb4038af85f17c7b3d4954b869`です。repository sourceは未公開開発プレビュー`0.5.0-alpha.1`のままです。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3は汎用coreのlifecycle宣言であり、runtime・state machine・authenticatorではありません。merge・実装はnpm公開・本番採用・runtime権限・deployment・認証済み証拠・実行権限を意味しません。finance・Safeは任意profileです。
+公開済み`0.5.0-alpha.1`プレビューでは、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`、G3 PR #19は`d18f867d91ec8abb4038af85f17c7b3d4954b869`です。repository sourceとnpmの`next` public previewは`0.5.0-alpha.1`で揃っています。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3は汎用coreのlifecycle宣言であり、runtime・state machine・authenticatorではありません。merge・実装はnpm公開・本番採用・runtime権限・deployment・認証済み証拠・実行権限を意味しません。finance・Safeは任意profileです。
 
-lifecycle PASSは宣言の整合だけを示し、eventの真実性・認証・artifact bytesの検証・runtime受入を意味しません。外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。package公開は主張しません。
+lifecycle PASSは宣言の整合だけを示し、eventの真実性・認証・artifact bytesの検証・runtime受入を意味しません。外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。packageのpublic preview公開は完了しています。runtime受入・本番採用・実行権限は別です。
 
 ## 詳細な3-role例
 
@@ -156,9 +156,13 @@ runtime固有宣言の検出は意図的に限定されています。汎用的�
 
 ## インストール
 
+公開プレビュー：
+
 ```sh
-npm install @netsujo/agent-role-contracts
+npm install @netsujo/agent-role-contracts@next
 ```
+
+現在の`next`は`0.5.0-alpha.1`です。安定版`latest`は`0.1.0`を維持しています。
 
 ## APIとCLI
 
