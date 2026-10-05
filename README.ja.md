@@ -39,6 +39,8 @@ Netsujoは、**Building trustworthy infrastructure for AI agents in the real wor
 
 次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[1つの実ワークフローで評価する](docs/EVALUATE-WORKFLOW.md)、[5つの具体的な失敗例を再現する](docs/FAILURE-CASES.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)、[実サービス統合時の責任境界](docs/INTEGRATION.md)へ進めます。実ワークフローで試した結果は[専用フィードバックフォーム](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml)から共有できます。既存の制御で十分だった、という結果も有用です。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
+一度きりの閲覧で終わらず、また使いたいと感じた場合は[リポジトリをStar](https://github.com/suirindo/agent-role-contracts)して保存してください。実ワークフローで何が役立ったかも共有されると、次の変更を想像ではなく実証に基づいて決められます。
+
 ## 汎用コアと用途別拡張
 
 Agent Role Contractsは、AIの役割・権限・作業範囲・レビュー・引き継ぎの宣言を検査する汎用OSSです。ソフトウェア開発・データ処理・問い合わせ返信の下書きは同じコアを利用し、オンチェーン金融は用途別拡張の一つに位置付けます。
