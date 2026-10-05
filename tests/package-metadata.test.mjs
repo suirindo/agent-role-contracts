@@ -12,6 +12,9 @@ test('both README files identify the current public version',()=>{
  assert.equal(read('README.md').includes('currently remains the stable `0.1.0` release'),false);
  assert.equal(read('README.ja.md').includes('現在は安定版`0.1.0`を取得します'),false);
  assert.equal(read('README.md').includes('The published `0.5.0` preview'),false);
+ assert.equal(read('README.md').includes('For the published preview'),false);
+ assert.equal(read('README.md').includes('# or: npm install @netsujo/agent-role-contracts@0.5.0'),false);
+ assert.equal(read('README.ja.md').includes('# または: npm install @netsujo/agent-role-contracts@0.5.0'),false);
 });
 
 test('binding demo is part of the development package commands',()=>{
