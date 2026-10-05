@@ -129,11 +129,11 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-The published `0.5.0-alpha.1` preview includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
+The published `0.5.0-alpha.1` preview includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## G3 lifecycle declarations
 
-G3 lifecycle is **merged and implemented in repository main** in the unreleased development preview; npm public-preview publication is complete; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+G3 lifecycle is **merged, implemented, and included in the published `0.5.0-alpha.1` public preview**; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
 
 ```sh
 npm run demo:lifecycle
