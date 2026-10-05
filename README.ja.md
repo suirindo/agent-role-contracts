@@ -82,7 +82,7 @@ profileは`filesystem-write/0.1`、mappingの`schema_version`は`"0.1"`です。
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-公開済み`0.5.0-alpha.1`プレビューにはoptional adapter subpathが含まれます。公開済みnpm版の対応を主張しません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
+公開済み`0.5.0-alpha.1`プレビューにはoptional adapter subpathが含まれます。安定版`0.1.0`にはこのsubpathは含まれません。[例の補足](examples/filesystem-write-adapter/README.md)も参照してください。
 
 ## G3 lifecycle宣言
 
@@ -156,13 +156,15 @@ runtime固有宣言の検出は意図的に限定されています。汎用的�
 
 ## インストール
 
-公開プレビュー：
+公開プレビューは、live dist-tagsを確認してexact versionまたは`next`を指定します。
 
 ```sh
-npm install @netsujo/agent-role-contracts@next
+npm view @netsujo/agent-role-contracts dist-tags --json
+npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
+# または: npm install @netsujo/agent-role-contracts@next
 ```
 
-現在の`next`は`0.5.0-alpha.1`です。安定版`latest`は`0.1.0`を維持しています。
+versionを省略したpackage名は`latest`に従い、現在は安定版`0.1.0`を取得します。
 
 ## APIとCLI
 

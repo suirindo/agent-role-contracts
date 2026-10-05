@@ -193,9 +193,15 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
+For the published preview, check the live dist-tags and use the exact preview version or `next`:
+
 ```sh
-npm install @netsujo/agent-role-contracts
+npm view @netsujo/agent-role-contracts dist-tags --json
+npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
+# or: npm install @netsujo/agent-role-contracts@next
 ```
+
+The unversioned package name follows `latest`, which currently remains the stable `0.1.0` release.
 
 ## API
 

@@ -1,4 +1,4 @@
-# Next public preview: 0.5.0-alpha.1
+# Public preview: 0.5.0-alpha.1
 
 Public preview `0.5.0-alpha.1` is published on npm under the `next` dist-tag. Stable `latest` remains `0.1.0`. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
 

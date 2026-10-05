@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.5.0-alpha.1 — unreleased development preview
+## 0.5.0-alpha.1 — public preview (npm `next` line)
 
 - Add generic lifecycle description/validation APIs, strict lifecycle schema 0.4, CLI commands and six checked demo outcomes.
 - Bind declarations to current G1 subjects and independently check artifact identities; verify no execution, authenticity, bytes, replay or runtime acceptance.
-- Preserve finance/Safe semantics and seven core, one adapter and four finance schemas. G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. This source version remains unreleased. Merge and implementation do not imply npm publication, production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+- Preserve finance/Safe semantics and seven core, one adapter and four finance schemas. G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. This version is designated for npm `next`; current registry presence is verified separately. Package availability does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
 ## 0.4.0-alpha.1 — unreleased development candidate
 
