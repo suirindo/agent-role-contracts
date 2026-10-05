@@ -15,7 +15,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
-For an exact published `0.1.0` first run without cloning, use [the no-clone instructions](../README.md#try-the-published-package-instead-no-clone), including recovery from an `EPERM` npm cache error. The repository source is `0.5.0-alpha.1`; its G1/G2/G3 APIs and commands are not available in that public release.
+For a published first run without cloning, use [the no-clone instructions](../README.md#try-the-published-package-instead-no-clone), including recovery from an `EPERM` npm cache error. The public preview `0.5.0-alpha.1` is published on the `next` dist-tag and includes G1/G2/G3; stable `latest` remains `0.1.0`. Use the exact preview version when you need those preview APIs.
 
 ## Check your own edit
 
@@ -58,9 +58,9 @@ Prompt instructions alone do not provide a diagnostic when a task and its role's
 
 The demo uses only portable Node.js file reads and JSON checks. No Bash, Docker, provider credentials, account login, network calls or installation scripts are required for the demo itself.
 
-## Source-only integration demos
+## Integration demos
 
-From this source checkout, run these declaration-only demos (not commands for npm `0.1.0`):
+From this source checkout, run these declaration-only demos. They are also included in the published `0.5.0-alpha.1` preview; stable `0.1.0` does not include these G1/G2/G3 preview surfaces:
 
 ```sh
 npm run demo:binding
