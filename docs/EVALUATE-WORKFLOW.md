@@ -119,7 +119,7 @@ A stronger signal is the same enforcement or evidence gap appearing in at least 
 
 ## What this project currently covers
 
-The public package checks declarations. Some preview APIs also cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
+The public package checks declarations. Stable v0.5.0 APIs also cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
 
 It does not authenticate agents, grant runtime permission, verify output bytes, enforce any runtime, filesystem, SaaS or API permission, or prove that a reviewer was independent in the real execution environment. Check the README for the exact boundary of the version you are using.
 
