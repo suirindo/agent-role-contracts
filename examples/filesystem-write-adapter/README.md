@@ -2,7 +2,7 @@
 
 G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source is the published public preview `0.5.0-alpha.1` on npm `next`; stable `latest` remains `0.1.0`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
-G2 filesystem-write is merged and implemented in repository main; no npm publication or production adoption is claimed. G3 lifecycle is also merged and implemented in repository main; publication and adoption remain separate.
+G2 filesystem-write is merged and implemented in repository main and published in `0.5.0-alpha.1` on npm `next`; production adoption is still not claimed. G3 lifecycle is also merged, implemented and included in the same public preview; production adoption remains separate.
 
 Run from the repository root with Node.js 22.5 or newer:
 
