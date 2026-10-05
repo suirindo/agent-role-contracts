@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       package_version:
-        description: 'Approved stable package version (tag must be vVERSION)'
+        description: 'Approved stable or alpha.N/beta.N/rc.N version (tag must be vVERSION)'
         required: true
         type: string
       expected_tarball_sha256:
@@ -73,11 +73,13 @@ jobs:
           node .github/release/release-binding.mjs bundle "$RUNNER_TEMP/release-bundle"
           node --input-type=module <<'NODE'
           import { appendFileSync, readFileSync } from 'node:fs';
+          import { releaseDistTag } from './.github/release/release-binding.mjs';
           const manifest = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/release-bundle/release-manifest.json`, 'utf8'));
           const lines = [
             '## Verified release candidate awaiting npm-publish approval',
             '',
             `Package: ${manifest.package}@${manifest.version}`,
+            `npm dist-tag: ${releaseDistTag(manifest.version)}`,
             `Tag: ${manifest.tag}`,
             `Commit: ${manifest.commit}`,
             `Tarball: ${manifest.artifact.filename}`,
@@ -130,8 +132,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          RELEASE_DIST_TAG="$(node .github/release/release-binding.mjs dist-tag .)"
           printf '%s\n' 'STAGING_STARTED_OUTCOME_UNCERTAIN_UNTIL_RECEIPT' > "$RUNNER_TEMP/release-stage/stage-status.txt"
-          npm stage publish "$RUNNER_TEMP/release-stage/bundle/netsujo-agent-role-contracts-$PACKAGE_VERSION.tgz" --access public --provenance --ignore-scripts --json --registry=https://registry.npmjs.org > "$RUNNER_TEMP/release-stage/stage-response.json"
+          npm stage publish "$RUNNER_TEMP/release-stage/bundle/netsujo-agent-role-contracts-$PACKAGE_VERSION.tgz" --access public --tag "$RELEASE_DIST_TAG" --provenance --ignore-scripts --json --registry=https://registry.npmjs.org > "$RUNNER_TEMP/release-stage/stage-response.json"
           node .github/release/release-binding.mjs receipt "$RUNNER_TEMP/release-stage"
           printf '%s\n' 'STAGED_AWAITING_MAINTAINER_READBACK_AND_APPROVAL' > "$RUNNER_TEMP/release-stage/stage-status.txt"
       - name: Preserve staging outcome and exact approval identity

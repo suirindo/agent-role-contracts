@@ -5,11 +5,18 @@ import { join, resolve, dirname, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { parseJsonRejectDuplicateKeys } from '../../src/strict-json.mjs';
-import { digest, PACKAGE, REPOSITORY, NPM_VERSION } from './release-binding.mjs';
+import { digest, PACKAGE, REPOSITORY, NPM_VERSION, releaseDistTag } from './release-binding.mjs';
 
 const assert = (condition, code) => { if (!condition) throw new Error(code); };
 const PROVENANCE = 'https://slsa.dev/provenance/v1';
 const ISSUER = 'https://token.actions.githubusercontent.com';
+
+export function verifyRegistryChannel(tags, version) {
+  const distTag = releaseDistTag(version);
+  assert(tags && typeof tags === 'object' && !Array.isArray(tags) && tags[distTag] === version, 'PUBLICATION_CHANNEL_MISMATCH');
+  assert(distTag !== 'next' || tags.latest !== version, 'PUBLICATION_PREVIEW_ON_LATEST');
+  return distTag;
+}
 
 export function signerPolicy(subject) {
   const uri = `https://github.com/${REPOSITORY}/.github/workflows/npm-stage-release.yml@refs/tags/v${subject.version}`;
@@ -87,7 +94,8 @@ export function verifyAttestationAudit(audit, subject, bytes, signer) {
 
 async function main() {
   const [version, commit, sha256, ...extra] = process.argv.slice(2);
-  assert(extra.length === 0 && /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?![\s\S])/.test(version ?? '') && /^[0-9a-f]{40}(?![\s\S])/.test(commit ?? '') && /^[0-9a-f]{64}(?![\s\S])/.test(sha256 ?? ''), 'PUBLICATION_INPUT_INVALID');
+  assert(extra.length === 0 && /^[0-9a-f]{40}(?![\s\S])/.test(commit ?? '') && /^[0-9a-f]{64}(?![\s\S])/.test(sha256 ?? ''), 'PUBLICATION_INPUT_INVALID');
+  releaseDistTag(version);
   const subject = { version, commit, sha256 };
   const dir = mkdtempSync(join(tmpdir(), 'arc-publication-verify-'));
   try {
@@ -95,6 +103,7 @@ async function main() {
     const npm = (args) => execFileSync('npm', [...args, ...config], { cwd: dir, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024 });
     assert(npm(['--version']).trim() === NPM_VERSION, 'PUBLICATION_NPM_VERSION_MISMATCH');
     const metadata = parseJsonRejectDuplicateKeys(npm(['view', `${PACKAGE}@${version}`, '--json']), 'PUBLICATION_METADATA_INVALID');
+    const distTag = verifyRegistryChannel(parseJsonRejectDuplicateKeys(npm(['view', PACKAGE, 'dist-tags', '--json']), 'PUBLICATION_CHANNEL_INVALID'), version);
     assert(metadata.name === PACKAGE && metadata.version === version && metadata.dist?.attestations, 'PUBLICATION_ATTESTATIONS_ABSENT');
     const tarballUrl = new URL(metadata.dist.tarball);
     assert(tarballUrl.origin === 'https://registry.npmjs.org' && tarballUrl.pathname === `/@netsujo/agent-role-contracts/-/agent-role-contracts-${version}.tgz` && !tarballUrl.search && !tarballUrl.hash, 'PUBLICATION_TARBALL_URL_INVALID');
@@ -112,7 +121,7 @@ async function main() {
     try { signer = await sigstore.verify(provenanceBundle(audit, subject), { ...signerPolicy(subject), tufCachePath: join(dir, 'tuf') }); }
     catch { throw new Error('PUBLICATION_SIGNER_CRYPTO_INVALID'); }
     const match = verifyAttestationAudit(audit, subject, bytes, signer);
-    console.log(JSON.stringify({ ...match, status: 'VERIFIED_PUBLICATION', provenance: 'VERIFIED_BY_NPM_AUDIT_SIGSTORE_IDENTITY_AND_EXACT_SUBJECT_BINDING' }, null, 2));
+    console.log(JSON.stringify({ ...match, distTag, status: 'VERIFIED_PUBLICATION', provenance: 'VERIFIED_BY_NPM_AUDIT_SIGSTORE_IDENTITY_AND_EXACT_SUBJECT_BINDING' }, null, 2));
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 

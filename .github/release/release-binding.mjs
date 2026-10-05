@@ -10,12 +10,17 @@ export const REPOSITORY = 'suirindo/agent-role-contracts';
 export const NPM_VERSION = '11.20.0';
 const COMMIT = /^[0-9a-f]{40}(?![\s\S])/;
 const SHA256 = /^[0-9a-f]{64}(?![\s\S])/;
-const VERSION = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?![\s\S])/;
+const VERSION = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-(?:alpha|beta|rc)\.(0|[1-9][0-9]*))?(?![\s\S])/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}(?![\s\S])/i;
 const assert = (condition, code) => { if (!condition) throw new Error(code); };
 const json = (file) => parseJsonRejectDuplicateKeys(readFileSync(file), 'RELEASE_JSON_INVALID');
 export const digest = (bytes, algorithm = 'sha256', encoding = 'hex') => createHash(algorithm).update(bytes).digest(encoding);
 export const filename = (version) => `netsujo-agent-role-contracts-${version}.tgz`;
+
+export function releaseDistTag(version) {
+  assert(typeof version === 'string' && VERSION.test(version), 'RELEASE_VERSION_INVALID');
+  return version.includes('-') ? 'next' : 'latest';
+}
 
 export function binding(env) {
   const commit = env.EXPECTED_COMMIT;
@@ -43,7 +48,9 @@ export function verifyPackage(pkg, lock, subject) {
   assert(pkg.name === PACKAGE && pkg.version === subject.version && pkg.private !== true, 'RELEASE_PACKAGE_MISMATCH');
   assert(pkg.repository?.type === 'git' && pkg.repository.url === `git+https://github.com/${REPOSITORY}.git`, 'RELEASE_SOURCE_REPOSITORY_INVALID');
   assert(lock.name === PACKAGE && lock.version === subject.version && lock.packages?.['']?.name === PACKAGE && lock.packages?.['']?.version === subject.version, 'RELEASE_LOCK_MISMATCH');
-  assert(pkg.publishConfig?.access === 'public' && Object.keys(pkg.publishConfig).every((key) => key === 'access'), 'RELEASE_PUBLISH_CONFIG_INVALID');
+  const distTag = releaseDistTag(subject.version);
+  assert(pkg.publishConfig?.access === 'public' && Object.keys(pkg.publishConfig).every((key) => key === 'access' || key === 'tag'), 'RELEASE_PUBLISH_CONFIG_INVALID');
+  assert(pkg.publishConfig.tag === distTag || (distTag === 'latest' && !Object.hasOwn(pkg.publishConfig, 'tag')), 'RELEASE_PUBLISH_TAG_INVALID');
 }
 
 function git(root, args) {
@@ -108,6 +115,7 @@ function main() {
   assert(extra.length === 0 && dir, 'RELEASE_CLI_INVALID');
   const subject = binding(process.env);
   const root = process.cwd();
+  if (command === 'dist-tag') { console.log(releaseDistTag(subject.version)); return; }
   if (command === 'source') return verifySource(resolve(dir), subject);
   if (command === 'manifest') {
     verifySource(root, subject);
