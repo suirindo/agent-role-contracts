@@ -4,7 +4,7 @@ version: 2
 # The package currently has no third-party npm dependencies, so npm version-update
 # PRs would add CI noise without reducing meaningful dependency risk. GitHub Actions
 # version updates are pinned by SHA and refreshed as one monthly reviewed batch.
-# Security updates remain event-driven rather than waiting for that monthly cadence.
+# Dependabot security updates, when enabled in repository settings, remain event-driven rather than waiting for that monthly cadence.
 updates:
   - package-ecosystem: github-actions
     directory: "/"

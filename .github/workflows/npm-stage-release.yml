@@ -66,6 +66,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/release-bundle"
           npm pack --ignore-scripts --json --pack-destination "$RUNNER_TEMP/release-bundle" > "$RUNNER_TEMP/release-bundle/pack.json"
           node .github/release/release-binding.mjs manifest "$RUNNER_TEMP/release-bundle"
+          rm -- "$RUNNER_TEMP/release-bundle/pack.json"
       - name: Show verified release target before npm-publish approval
         shell: bash
         run: |
