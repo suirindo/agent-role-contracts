@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a reproducible problem in the checker, CLI, package, or documented examples.
+title: "[bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide the smallest reproducible case you can. Remove credentials, customer data, private paths, and other sensitive material.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "@netsujo/agent-role-contracts@0.5.0-alpha.1 or commit SHA"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS and Node.js version.
+      placeholder: "macOS 15.x, Node.js 22.5.0"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or API call
+      description: Show the exact command or minimal API call that reproduces the problem.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include deterministic diagnostics or exit codes when available.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction inputs
+      description: Use synthetic or redacted JSON. Do not include secrets or customer data.
+      render: json
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Sensitive-data check
+      options:
+        - label: I removed credentials, customer data, private paths, production secrets, and other sensitive material.
+          required: true
