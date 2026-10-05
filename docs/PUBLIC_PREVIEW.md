@@ -1,6 +1,6 @@
 # Next public preview: 0.5.0-alpha.1
 
-This is the release candidate guide. Registry publication and production runtime adoption remain separate acceptance steps. Check npm dist-tags before using a registry installation command; this document alone is not publication evidence.
+This is the `0.5.0-alpha.1` public-preview guide. Registry availability and production runtime adoption remain separate readbacks. Check npm dist-tags before using a registry installation command; this document alone is not publication evidence.
 
 ## Architecture at a glance
 
@@ -42,4 +42,4 @@ After this readback succeeds, users can install the exact preview:
 npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
 ```
 
-The stable package stays on its existing `latest` channel. The preview channel is `next`; stable releases use `latest`. Supported preview versions are `alpha.N`, `beta.N` or `rc.N` with a canonical nonnegative integer. Arbitrary channels, build metadata and malformed versions are rejected. This follow-up does not itself stage, approve, publish or wire HOL Guard into production.
+The stable package stays on its existing `latest` channel. The preview channel is `next`; stable releases use `latest`. Supported preview versions are `alpha.N`, `beta.N` or `rc.N` with a canonical nonnegative integer. Arbitrary channels, build metadata and malformed versions are rejected. This document does not by itself prove a current stage/publish state or wire HOL Guard into production.
