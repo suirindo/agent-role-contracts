@@ -110,7 +110,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-write is **merged and implemented in repository main**; npm public-preview publication is complete; production adoption is still not claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main; publication and adoption remain separate.
+G2 filesystem-write is **merged and implemented in repository main**; npm public-preview publication is complete; production adoption is still not claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main and included in the `0.5.0-alpha.1` public preview; production adoption remains separate.
 
 The integration API is an optional import:
 

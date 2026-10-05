@@ -63,7 +63,7 @@ import {
   describeFinancialIntent,
   validateFinancialIntent,
   validateFinancialExecution,
-} from '@netsujo/agent-role-contracts/profiles/onchain-finance'; // this unreleased source candidate
+} from '@netsujo/agent-role-contracts/profiles/onchain-finance'; // included in the 0.5.0-alpha.1 public preview
 
 // JSON strings supplied by your application, from separately trusted inputs.
 const subject = await describeFinancialIntent(
