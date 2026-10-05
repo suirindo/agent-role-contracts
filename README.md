@@ -75,6 +75,7 @@ A prompt can ask an agent to stay in `src/**`, while the next task requests a ch
 ### Try your own task next
 
 - [Change a task scope and check it yourself](docs/QUICKSTART.md).
+- [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md) without treating a declaration PASS as runtime authority.
 - [Explore coordination and handoffs](#full-three-role-example).
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).
 - [Integrate the checker without treating PASS as execution permission](docs/INTEGRATION.md).
