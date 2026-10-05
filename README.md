@@ -206,12 +206,12 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-For the published preview, check the live dist-tags and use the exact stable version or `latest`:
+For the published stable release, use either the exact version or the `latest` channel:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
 npm install @netsujo/agent-role-contracts@0.5.0
-# or: npm install @netsujo/agent-role-contracts@0.5.0
+# or: npm install @netsujo/agent-role-contracts
 ```
 
 The unversioned package name follows `latest`, which currently resolves to the stable `0.5.0` release.
