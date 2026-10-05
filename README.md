@@ -103,7 +103,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-The published `0.5.0` preview provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+The stable `0.5.0` release provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -142,7 +142,7 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-The published `0.5.0` preview includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
+The stable `0.5.0` release includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## G3 lifecycle declarations
 
@@ -152,9 +152,9 @@ G3 lifecycle is **merged, implemented, and included in the `0.5.0` stable releas
 npm run demo:lifecycle
 ```
 
-The published `0.5.0` preview provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
+The stable `0.5.0` release provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
-Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Public-preview package publication is complete; runtime adoption and execution remain separate.
+Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Stable package publication is complete; runtime adoption and execution remain separate.
 
 ## Full three-role example
 
@@ -206,15 +206,15 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-For the published preview, check the live dist-tags and use the exact stable version or `latest`:
+For the published stable release, use either the exact version or the `latest` channel:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
 npm install @netsujo/agent-role-contracts@0.5.0
-# or: npm install @netsujo/agent-role-contracts@0.5.0
+# or: npm install @netsujo/agent-role-contracts
 ```
 
-The unversioned package name follows `latest`, which currently remains the stable `0.1.0` release.
+The unversioned package name follows `latest`, which currently resolves to the stable `0.5.0` release.
 
 ## API
 

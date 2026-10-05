@@ -1,6 +1,6 @@
-# Public preview: 0.5.0-alpha.1
+# Historical public preview: 0.5.0-alpha.1
 
-Public preview `0.5.0-alpha.1` is published on npm under the `next` dist-tag. Stable `latest` remains `0.1.0`. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
+This document records the `0.5.0-alpha.1` public-preview state published on 2026-10-05. Stable `0.5.0` is now the public `latest` release. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
 
 ## Architecture at a glance
 
@@ -28,7 +28,7 @@ npm run demo:lifecycle
 
 These are offline synthetic examples. They perform declaration checks without executing the represented business actions. Existing v0.1 synchronous APIs and schemas remain compatible; the filesystem adapter is an explicit subpath, separate from the root facade and core. See [COMPATIBILITY.md](COMPATIBILITY.md).
 
-## Published preview
+## Historical preview record
 
 Publication completed on 2026-10-05 through npm staged publishing.
 
@@ -37,7 +37,8 @@ Verified state:
 - package: `@netsujo/agent-role-contracts`
 - version: `0.5.0-alpha.1`
 - dist-tag: `next`
-- stable `latest`: `0.1.0`
+- stable `latest` at preview time: `0.1.0`
+- current stable release: `0.5.0`
 - release commit: `395ac5d9dfc607590fa2933a0903ecd03445d678`
 - staged package shasum: `0ce7d38a73e9eaaffbca87bd67e5f1fbdab3eae3`
 - GitHub Actions staging run: `37284758073`
@@ -55,4 +56,4 @@ For immutable selection:
 npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
 ```
 
-The preview channel is `next`; stable releases use `latest`. Runtime enforcement, production adoption and HOL Guard integration remain separate work.
+At preview publication time, the preview channel was `next`; stable releases use `latest`. The current stable release is `0.5.0`. Runtime enforcement, production adoption and HOL Guard integration remain separate work.
