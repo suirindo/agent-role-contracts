@@ -1,0 +1,73 @@
+name: Real-workflow evaluation feedback
+description: Share what happened when you tried Agent Role Contracts on one real or representative workflow.
+title: "[workflow feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing a concrete workflow. The useful signal is what changed in your process, including cases where your existing controls were already sufficient.
+        
+        Do not include credentials, customer data, private repository paths, production secrets, or other sensitive material.
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow evaluated
+      description: Describe the narrow workflow you tested and the roles or handoff you wanted to check.
+      placeholder: "Example: approved change request -> scoped implementation -> independent review -> acceptance"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Package version, dist-tag resolution, or repository commit used.
+      placeholder: "@netsujo/agent-role-contracts@0.5.0-alpha.1 or commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened
+      description: State the expected PASS/FAIL behavior and the result you observed.
+    validations:
+      required: true
+  - type: textarea
+    id: useful
+    attributes:
+      label: What was useful
+      description: What inconsistency, recheck burden, or ambiguity did the contract help expose?
+    validations:
+      required: false
+  - type: textarea
+    id: friction
+    attributes:
+      label: What was missing or costly
+      description: Note false positives, concepts you could not express, setup burden, or controls your existing stack handled better.
+    validations:
+      required: true
+  - type: dropdown
+    id: reuse
+    attributes:
+      label: Would you use the same contract on a second task?
+      options:
+        - "Yes"
+        - "Maybe"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: existing_controls
+    attributes:
+      label: Existing enforcement or review controls
+      description: Optional. Mention IAM, CI, sandbox, runtime, approval, or evidence controls that overlap with this check.
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundaries
+      options:
+        - label: I removed credentials, customer data, private paths, production secrets, and other sensitive material.
+          required: true
+        - label: I understand that a declaration PASS does not grant runtime authority or prove identity, execution, or artifact authenticity.
+          required: true
