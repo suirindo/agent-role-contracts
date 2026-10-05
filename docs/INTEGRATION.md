@@ -32,7 +32,7 @@ npm run demo:lifecycle
 node bin/agent-role-contracts.mjs --help
 ```
 
-The demos construct fictional declarations in memory and execute no actions. For your own JSON files, the current source CLI offers `action-subject` (`--bundle`, `--task`, `--action`), `action-bind` (also `--binding`), `adapter-filesystem-write` (also `--mapping`), and `lifecycle-describe` / `lifecycle` (also `--lifecycle`). All accept `--format json|text`; see the help for exact command syntax. These APIs, subpaths and commands are source-only, not part of public npm `0.1.0`. See the executable [G1 example](../examples/action-binding/demo.mjs), [G2 example](../examples/filesystem-write-adapter/demo.mjs) and [G3 example](../examples/task-lifecycle/demo.mjs).
+The demos construct fictional declarations in memory and execute no actions. For your own JSON files, the current source CLI offers `action-subject` (`--bundle`, `--task`, `--action`), `action-bind` (also `--binding`), `adapter-filesystem-write` (also `--mapping`), and `lifecycle-describe` / `lifecycle` (also `--lifecycle`). All accept `--format json|text`; see the help for exact command syntax. These APIs, subpaths and commands are included in the stable public npm `0.5.0` package. See the executable [G1 example](../examples/action-binding/demo.mjs), [G2 example](../examples/filesystem-write-adapter/demo.mjs) and [G3 example](../examples/task-lifecycle/demo.mjs).
 
 ## Responsibilities retained by the integration
 
