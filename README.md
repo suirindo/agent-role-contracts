@@ -1,10 +1,10 @@
 # Agent Role Contracts
 
-G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source remains the unreleased development preview `0.5.0-alpha.1`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Source merge and implementation do not imply npm publication, production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+G0, G1, G2 and G3 are merged and implemented in repository main. Public preview `0.5.0-alpha.1` is published on npm under the `next` dist-tag; stable `latest` remains `0.1.0`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
 Check AI-agent roles, declared authority, task scope, review separation and handoffs with a general-purpose, offline core.
 
-**Development preview: `0.5.0-alpha.1`.** The published npm release remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
+**Public preview: `0.5.0-alpha.1` on npm `next`.** Stable `latest` remains `0.1.0`. The current repository preserves the generic v0.1 role-contract profile and synchronous APIs, with onchain finance available as an optional v0.2 profile.
 
 ## Quick Start — three minutes
 
@@ -45,13 +45,13 @@ The demo calls the real contract checker, repairs only the task JSON in memory a
 
 ### Try the published package instead (no clone)
 
-To run the exact public `0.1.0` package without cloning the repository, start in an empty directory:
+To run the published `0.5.0-alpha.1` public preview without cloning the repository, start in an empty directory:
 
 ```sh
 mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@next
 npx --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
@@ -63,10 +63,10 @@ The last command prints `PASS: explain`. It checks the bundled two-role declarat
 If `npm install` reports `EPERM` about root-owned files in a shared npm cache, do not use `sudo`. Retry with a cache local to this directory:
 
 ```sh
-NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.1.0
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@next
 ```
 
-The repository source is currently newer than the published package. These commands deliberately pin the public `0.1.0` release and use only fixtures shipped in that package.
+The `next` channel currently resolves to `0.5.0-alpha.1`. Use `@netsujo/agent-role-contracts@0.5.0-alpha.1` when you need an immutable preview version. Stable `latest` remains `0.1.0`.
 
 ### Why it matters
 
@@ -90,7 +90,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-This unreleased repository source provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+The published `0.5.0-alpha.1` preview provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -102,7 +102,7 @@ G0 core isolation and G1 task/action binding are **merged and implemented**; sou
 node examples/action-binding/demo.mjs
 ```
 
-The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development version is unreleased. Action IDs do not establish task/run replay identity; replay policy remains external.
+The core exports async `/core` APIs `describeTaskAction(bundleJson, taskJson, actionJson)` and `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`. Run `npm run demo:binding`. Action and binding JSON use `schema_version: "0.3"`; the binding profile is `task-action/0.3`. The development preview is published on npm under `next`. Action IDs do not establish task/run replay identity; replay policy remains external.
 
 For each case, the demo obtains a digest, declares a routed reviewer pass and required approval from `route.accountable`, checks PASS, then changes a meaningful task input or action parameter and rejects the unchanged binding with `G1_SUBJECT_MISMATCH`. The complete canonical subject covers the profile, **full bundle (including policy, roles and routes), full task and declared action**. Review and approval declarations must bind that current subject.
 
@@ -110,7 +110,7 @@ The digest provides integrity, not authenticity or authorization. The demo execu
 
 ## G2 filesystem-write adapter
 
-G2 filesystem-write is **merged and implemented in repository main**; no npm publication or production adoption is claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main; publication and adoption remain separate.
+G2 filesystem-write is **merged and implemented in repository main**; npm public-preview publication is complete; production adoption is still not claimed. It is the first concrete adapter because the existing portable relative scope semantics cover software changes, data cleaning and support drafts without industry schemas. G3 lifecycle is also merged and implemented in repository main; publication and adoption remain separate.
 
 The integration API is an optional import:
 
@@ -129,19 +129,19 @@ The [filesystem demo](examples/filesystem-write-adapter/demo.mjs) reuses the gen
 node examples/filesystem-write-adapter/demo.mjs
 ```
 
-This unreleased repository source includes the optional adapter subpath; it is not a claim about the published npm release. See the [example notes](examples/filesystem-write-adapter/README.md).
+The published `0.5.0-alpha.1` preview includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
 ## G3 lifecycle declarations
 
-G3 lifecycle is **merged and implemented in repository main** in the unreleased development preview; no npm publication or production adoption is claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
+G3 lifecycle is **merged, implemented, and included in the published `0.5.0-alpha.1` public preview**; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:
 
 ```sh
 npm run demo:lifecycle
 ```
 
-This unreleased repository source provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
+The published `0.5.0-alpha.1` preview provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
-Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. No package publication is claimed.
+Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Public-preview package publication is complete; runtime adoption and execution remain separate.
 
 ## Full three-role example
 
