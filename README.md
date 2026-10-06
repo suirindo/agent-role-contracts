@@ -168,6 +168,22 @@ node examples/filesystem-write-adapter/demo.mjs
 
 The stable `0.5.0` release includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
+## CrewAI adapter spike (source only)
+
+A source-only CrewAI adapter spike now checks one bounded CrewAI task pair against an existing ARC bundle without deriving authority from role text. CrewAI's current default project format is JSON-first (`crew.jsonc` plus `agents/*.jsonc`); the spike consumes the strict JSON subset of that config and keeps parsing/runtime concerns outside ARC. Classic YAML can later be normalized into the same adapter input without changing the authority boundary.
+
+The adapter maps only explicit framework fields: implementation `agent`, implementation `output_file`, review `agent`, review `context`, and an explicit ARC task type. The ARC bundle remains the source of truth for authority, scope and reviewer separation. Unsupported tool, delegation, directory-creation or extra-project semantics fail closed rather than being inferred.
+
+Run the proof from a source checkout:
+
+```sh
+node examples/crewai-adapter-spike/demo.mjs
+```
+
+The demo proves `PASS -> FAIL -> PASS` by changing only CrewAI's `output_file` from `docs/example.md` to `secrets/production.txt`; the unchanged ARC bundle rejects the drift with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`, then accepts the repaired config. No CrewAI agent is started and no file is written. See [the spike boundary and fixtures](examples/crewai-adapter-spike/README.md).
+
+This is repository-source evidence only. It is **not** part of the published `0.5.0` npm API or a claim of CrewAI runtime enforcement.
+
 ## G3 lifecycle declarations
 
 G3 lifecycle is **merged, implemented, and included in the `0.5.0` stable release**; production adoption is still not claimed. The [lifecycle demo and API notes](examples/task-lifecycle/README.md) reuse software change, data cleaning and support drafting, showing three PASS results plus stale-subject and conflicting-artifact failures:

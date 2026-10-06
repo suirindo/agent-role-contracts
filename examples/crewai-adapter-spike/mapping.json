@@ -1,0 +1,6 @@
+{
+  "schema_version": "0.1",
+  "implementation_task": "implement_change",
+  "review_task": "review_change",
+  "arc_task_type": "documentation-change"
+}
