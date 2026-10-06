@@ -14,6 +14,23 @@ For the G1 APIs included in `0.5.0`, `describeTaskAction` returns a `subject_dig
 
 If the CLI exits 1 or 2, or an API report is invalid, missing or unverifiable, stop the dependent action. Do not widen authority automatically to turn a failure into PASS.
 
+## Map workflow roles by authority, not by source-system labels
+
+Do not copy a source workflow's labels mechanically into ARC route fields. ARC uses `executors` for roles that may perform the declared work and `reviewers` for separate **read-only** review roles. Another system may use words such as “reviewer”, “checker”, “QA”, or “gate” more broadly.
+
+A QA or test role that may repair failures is still write-capable for ARC purposes. Model it as an executor within the same bounded task scope, then route a distinct read-only verifier/reviewer for independent acceptance. Do not weaken the source role to `read_only` merely to satisfy ARC, and do not broaden its write scope to make the task pass.
+
+When adapting an existing organization model:
+
+1. classify each role from its effective authority and actual workflow action, not its display label;
+2. keep write-capable implementation/test/fix roles in `executors` with explicit portable write scopes;
+3. keep ARC `reviewers` read-only and distinct from every executor;
+4. declare the complete capability taxonomy needed by the extracted bundle, including prohibited capabilities;
+5. close or explicitly map role relationships that point outside the extracted bundle rather than inventing missing roles;
+6. record every schema normalization or dynamic-scope resolution as integration evidence.
+
+If this translation changes the meaning of the original workflow, stop. A syntactically valid ARC bundle is not useful evidence if the adapter achieved PASS by weakening or relabelling the source authority model.
+
 ## Integration sequence
 
 1. Load trusted policy inputs: obtain the canonical bundle, task and proposed action from controlled sources, and record their exact revision and checker version.
