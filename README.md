@@ -2,6 +2,18 @@
 
 **Catch out-of-scope agent tasks, self-review, and stale handoffs before execution.**
 
+## 30-second overview
+
+[Watch the 30-second Agent Role Contracts overview](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
+
+The video shows the core preflight flow: declare **role**, **permissions**, and **work scope**; keep implementation and review separate; make the **handoff** explicit; fail on contradictions before execution.
+
+**PASS ≠ execution authority.** A passing ARC check means the supplied declarations are internally consistent under the checks that ran. Runtime identity, actual permissions, side-effect enforcement, evidence verification, and execution approval remain separate responsibilities.
+
+- [Try the three-minute quick start](#quick-start--three-minutes)
+- [Read the v0.5.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v0.5.0)
+- [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
+
 Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
 
 Agent Role Contracts turns those contradictions into deterministic, offline preflight checks.
