@@ -4,7 +4,7 @@
 
 ## 30-second overview
 
-[Watch the 30-second Agent Role Contracts overview](https://resource2.heygen.ai/video/e55ee9d54a3f4cf9bf0d0b708f8c0803/original.mp4)
+[Watch the 30-second Agent Role Contracts overview](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
 
 The video shows the core preflight flow: declare **role**, **permissions**, and **work scope**; keep implementation and review separate; make the **handoff** explicit; fail on contradictions before execution.
 
