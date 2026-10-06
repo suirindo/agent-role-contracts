@@ -1,8 +1,20 @@
 # Agent Role Contracts
 
-**Catch contradictions in AI-agent roles, task scopes, reviews, and handoffs before execution.**
+**Catch out-of-scope agent tasks, self-review, and stale handoffs before execution.**
 
-A task can say an agent may write only inside `src/**` while the next request points somewhere else. A workflow can claim independent review while its declarations route implementation and review through the same role. Agent Role Contracts turns those mismatches into deterministic, offline checks before an agent runs.
+Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
+
+Agent Role Contracts turns those contradictions into deterministic, offline preflight checks.
+
+| Workflow mistake | What ARC checks |
+| --- | --- |
+| A task requests a write outside declared authority | Rejects it with a specific scope diagnostic |
+| Implementer and reviewer collapse into one declared role | Rejects the invalid role separation |
+| A reviewed task or action changes afterward | Rejects the stale subject binding |
+| A filesystem mapping drifts from the declared action | Rejects the declaration mismatch |
+| Lifecycle or handoff declarations become stale | Fails closed on the inconsistency |
+
+**If an agent is only chatting, you probably do not need ARC yet. If it can act, hand off, or review, prompt-only rules become much harder to trust.**
 
 No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
 
