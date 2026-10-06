@@ -2,6 +2,14 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
+## 30秒で概要を見る
+
+[Agent Role Contracts v0.5.0 — 30秒概要動画](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
+
+役割、権限、作業範囲を宣言し、実装とレビューを分離し、引き継ぎを明示して、実行前に矛盾を検査する流れを30秒で確認できます。
+
+**PASS ≠ 実行権限。** PASSは、実行した検査の範囲で供給された宣言が整合していることを示します。本人確認、実際のアクセス権、side effectの強制、証拠検証、実行承認は別の責務です。
+
 **安定版ライン：`0.5.0`。** npmの安定版インストールは`latest`を使います。既存の汎用v0.1 role-contract profileと同期APIを維持し、オンチェーン金融は用途別の拡張として提供します。
 
 ## 3分で体験する Quick Start
