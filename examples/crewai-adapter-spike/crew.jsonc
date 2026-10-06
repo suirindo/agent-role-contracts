@@ -1,0 +1,25 @@
+{
+  "name": "ARC CrewAI Adapter Spike",
+  "agents": ["coordinator", "implementer", "reviewer"],
+  "tasks": [
+    {
+      "name": "implement_change",
+      "description": "Explain a small documentation change and produce the bounded output file.",
+      "expected_output": "The requested documentation change is written within the declared scope.",
+      "agent": "implementer",
+      "output_file": "docs/example.md",
+      "markdown": true,
+      "create_directory": false
+    },
+    {
+      "name": "review_change",
+      "description": "Review the implementation task output against its requested scope and expected result.",
+      "expected_output": "A review verdict with any blocking issue stated explicitly.",
+      "agent": "reviewer",
+      "context": ["implement_change"]
+    }
+  ],
+  "inputs": {},
+  "process": "sequential",
+  "verbose": false
+}
