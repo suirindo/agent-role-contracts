@@ -4,6 +4,18 @@ These examples are designed to make Agent Role Contracts easy to evaluate agains
 
 They are reproducible declaration checks using the repository's existing demos and fixtures. They are not production incident reports, runtime authorization tests, or evidence that an agent was actually constrained at execution time.
 
+## Five failures in one view
+
+| Before | ARC check | Repair |
+| --- | --- | --- |
+| Task requests `secrets/production.txt` while authority is `src/**` | `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` | Correct the task scope or intentionally revise policy; do not widen authority just to make the task pass |
+| Implementation and review route through the same declared role | Invalid self-review fixture is rejected | Route review through a separate declared reviewer role |
+| Task/action changes after review or approval | `G1_SUBJECT_MISMATCH` | Bind review and approval to the current subject and review it again |
+| Filesystem path or content identity changes after mapping | G2 mapping mismatch is rejected | Rebuild the mapping for the current declared action |
+| Lifecycle or artifact declarations become stale or conflict | G3 lifecycle check rejects the inconsistency | Regenerate lifecycle declarations against the current subject and artifact identity |
+
+The useful pattern is **PASS → meaningful contradiction → deterministic FAIL → repair → PASS**. That is the shortest way to decide whether a check belongs in a real workflow.
+
 ## 1. Task scope exceeds declared write authority
 
 Start with the three-minute demo:
