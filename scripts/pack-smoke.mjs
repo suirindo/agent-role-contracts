@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { assertPackedReadmes } from './packed-readme-check.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dir = mkdtempSync(join(tmpdir(), 'arc-pack-'));
@@ -20,6 +21,7 @@ try {
   mkdirSync(consumer);
   writeFileSync(join(consumer, 'package.json'), '{"private":true,"type":"module"}\n');
   run([process.env.npm_execpath, 'install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], consumer);
+  assertPackedReadmes(join(consumer, 'node_modules', '@netsujo', 'agent-role-contracts'));
   run(['--input-type=module', '-e', `
     import assert from 'node:assert/strict';
     import { readFileSync } from 'node:fs';
