@@ -175,3 +175,31 @@ test('both README files identify the current public version and demos remain wir
   assert.equal(scripts['demo:binding'], 'node examples/action-binding/demo.mjs');
   assert.equal(scripts['demo:filesystem-adapter'], 'node examples/filesystem-write-adapter/demo.mjs');
 });
+
+
+test('lifecycle description is distinct from full semantic validation', async t => {
+  const bundle = fixture('starter-bundle'), task = fixture('starter-task');
+  const action = json({schema_version: '0.3', id: 'compatibility-lifecycle-semantics', kind: 'document', parameters: {revision: 1}});
+  const {subject_digest} = await core.describeTaskAction(bundle, task, action);
+  const route = JSON.parse(bundle).routes[0];
+  const review = {event_id: 'review', phase: 'review', actor_role_id: route.reviewers[0], decision: 'pass', subject_digest};
+  const approval = {event_id: 'approval', phase: 'approval', actor_role_id: route.accountable, decision: 'approved', subject_digest};
+  const cases = [
+    {name: 'missing required review', events: [approval], code: 'G3_REVIEW_REQUIRED'},
+    {name: 'wrong phase actor', events: [{...review, actor_role_id: route.accountable}, approval], code: 'G3_PHASE_ACTOR'},
+    {name: 'wrong phase decision', events: [{...review, decision: 'approved'}, approval], code: 'G3_PHASE_DECISION'},
+    {name: 'negative decisions remain consistent declarations', events: [{...review, decision: 'blocked'}, {...approval, decision: 'denied'}], code: null},
+  ];
+  for (const {name, events, code} of cases) await t.test(name, async () => {
+    const lifecycle = json({schema_version: '0.4', run_id: 'compatibility-semantic-review', subject_digest, events});
+    const described = await core.describeTaskLifecycle(bundle, task, action, lifecycle);
+    const validated = await core.validateTaskLifecycle(bundle, task, action, lifecycle);
+    assertReport(described, {kind: 'task-lifecycle', valid: true});
+    assert.equal(described.lifecycle_matches_subject, code === null);
+    assert.deepEqual(described.errors, []);
+    assertReport(validated, {kind: 'task-lifecycle-validation', valid: code === null});
+    assert.equal(validated.lifecycle_matches_subject, code === null);
+    if (code) assert.ok(validated.errors.some(error => error.code === code), code);
+    else assert.deepEqual(validated.errors, []);
+  });
+});
