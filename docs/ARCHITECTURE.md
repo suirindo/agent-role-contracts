@@ -1,8 +1,8 @@
 # General-purpose architecture and evolution
 
-G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source matches the `0.5.0` stable package line; npm stable installs use `latest`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+G0, G1, G2 and G3 are implemented in the current repository history. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. The public `0.5.0` tarball is a distinct archived artifact; conformance tests compare it with a freshly packed candidate rather than assuming repository-source byte identity. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
-Design revision: 2026-10-03. This source proposal restores the general-purpose product direction. Its implementation status is stated separately from future design below. Source acceptance, merge and registry publication are distinct milestones.
+Design revision: 2026-10-14. This document describes the implemented general-purpose product direction and identifies future work separately. Source acceptance, merge, registry publication and downstream adoption are distinct milestones.
 
 ## 1. Product purpose
 
@@ -31,7 +31,7 @@ The current scope validator is specifically a portable relative file/directory d
 
 A declared read-only reviewer is not proof of real runtime independence. An evidence reference is not evidence authentication. A handoff status of complete is not a verified execution receipt. These limits remain explicit even when an example passes.
 
-## 4. Source architecture in this proposal
+## 4. Source architecture
 
 | Entry or module | Role |
 | --- | --- |
@@ -48,7 +48,7 @@ A declared read-only reviewer is not proof of real runtime independence. An evid
 
 Schema JSON files remain the only authored schema source. The existing generator builds and verifies every generated module. G1 adds action/binding declarations without replacing the existing role/task schemas or introducing an industry-specific core schema.
 
-**Optional imports are not separate npm packages.** This proposal still ships one package. The compatibility root necessarily imports the existing finance facade; consumers requiring a domain-isolated dependency graph should use `/core`. A future package split or root-export removal would require an explicit compatibility decision, not a silent refactor.
+**Optional imports are not separate npm packages.** The current distribution ships one package. The compatibility root necessarily imports the existing finance facade; consumers requiring a domain-isolated dependency graph should use `/core`. A future package split or root-export removal would require an explicit compatibility decision, not a silent refactor.
 
 Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. The stable package line is `0.5.0`; npm stable installs use `latest`.
 
@@ -66,7 +66,7 @@ Each checks the assigned task, rejects out-of-scope work, rejects self-review, r
 
 ## 6. Ordered evolution, not a finance-led feature queue
 
-| Phase | Work | Acceptance boundary | Status in this proposal |
+| Phase | Work | Acceptance boundary | Current status |
 | --- | --- | --- | --- |
 | G0: core isolation | Separate entrypoints and schemas, preserve compatibility, generic-first documentation, non-financial examples | Core/CLI/quickstart work with finance files absent; existing behavior remains covered | Merged and implemented; included in the `0.5.0` stable package |
 | G1: generic task/action binding | Reuse the idea of complete-subject binding for any task, independent of assets or wallets | Changes to role policy, route, inputs, objective, acceptance or declared action invalidate old bindings; at least three non-financial examples | Merged and implemented; included in the `0.5.0` stable package; production adoption separate |
@@ -82,7 +82,7 @@ G1 identifies the complete canonical subject `canonical({profile: 'task-action/0
 
 The executable `examples/action-binding/demo.mjs` reuses the cross-domain builders and generic team/task/handoff fixtures. Software change and data cleaning mutate action parameters; support drafting mutates a task input. Each obtains the digest with async `describeTaskAction(bundleJson, taskJson, actionJson)`, declares routed passing review and required approval from `route.accountable`, validates PASS with async `validateTaskActionBinding(bundleJson, taskJson, actionJson, bindingJson)`, and requires `G1_SUBJECT_MISMATCH` for the unchanged binding after mutation. It executes no action and authenticates no reviewer or approver.
 
-Run `npm run demo:binding` from the repository source for six expected binding outcomes. G0 and G1 are merged and implemented; merge is not release, publication or adoption evidence.
+Run `npm run demo:binding` from the repository source for six expected binding outcomes. G0 and G1 are implemented, but this source demo alone is not evidence about archived package bytes, downstream adoption or runtime execution.
 
 Referenced output artifacts need their own exact-byte digest supplied or computed by a trusted adapter; a path or URL alone is not immutable evidence or an immutable artifact identity. G1 binds the reference declaration, not the retrieved artifact bytes.
 
@@ -106,7 +106,7 @@ G3 is merged and implemented in repository main and included in the `0.5.0` stab
 
 Caller-supplied external `run_id` correlates declarations; it provides no replay protection. Event decisions are declarations, not authenticated events. No timestamps, clock reads or state-machine ordering are introduced. Artifact `sha256` is declared identity, not a byte-verification result; bytes are never read and locators remain inert.
 
-Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are distinct. A consistent declaration can still describe fictional evidence or an unauthenticated review, approval or execution. Runtime acceptance, identity verification, artifact-byte verification and replay enforcement belong to trusted external integrations. Finance and Safe remain optional; no package publication is claimed.
+Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are distinct. A consistent declaration can still describe fictional evidence or an unauthenticated review, approval or execution. Runtime acceptance, identity verification, artifact-byte verification and replay enforcement belong to trusted external integrations. Finance and Safe remain optional; their presence in the published package does not establish runtime adoption or verification.
 
 ## 8. Merged optional Safe profile
 

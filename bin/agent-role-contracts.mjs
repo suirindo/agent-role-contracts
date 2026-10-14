@@ -16,8 +16,8 @@ Usage:
   node bin/agent-role-contracts.mjs finance --bundle B.json --task T.json --policy P.json --intent I.json [--at UTC_TIME] [--format json|text]
   node bin/agent-role-contracts.mjs finance-execution --bundle B.json --task T.json --policy P.json --intent I.json --receipt R.json [--at UTC_TIME] [--format json|text]
   node bin/agent-role-contracts.mjs finance-safe --bundle B.json --task T.json --policy P.json --intent I.json --safe-proposal S.json [--at UTC_TIME] [--format json|text]
-Finance is a v0.2 preview. The CLI defaults --at to its current UTC clock; the API requires an explicit time.
-Exit 0: declared contracts consistent. Exit 1: invalid declaration. Exit 2: CLI/file error.
+The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.
+Exit 0: the invoked declaration check passed; it does not mean another operation passed. Exit 1: invalid declaration. Exit 2: CLI/file error.
 No command executes agents, evidence commands, network requests, or writes files.
 `;
 const safeText = value => String(value).replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/g, c => '\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
