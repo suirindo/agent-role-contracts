@@ -1,47 +1,71 @@
-# Compatibility and extraction boundary
+# Public compatibility surface
 
-G0, G1, G2 and G3 are merged and implemented in repository main. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. Repository source matches the `0.5.0` stable package line; npm stable installs use `latest`. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+This document records the compatibility surface that already exists in package version `0.5.0`. It is also the proposed minimum commitment for a future v1. No v1 release, test result, publication, adoption, or production acceptance is asserted here. Moving from the current release to v1 still requires the release and independent-acceptance work described below.
 
-Agent Role Contracts v0.1.0 is a bounded extraction and generalization of declaration-checking ideas used in Netsujo's internal AI-agent development operations. It is not a byte-compatible or runtime-compatible replacement for Netsujo's internal Agent OS or Orchestrator.
+The package is an offline declaration checker. A `valid: true` report means that the declarations passed the checks performed by the invoked operation; it is not a substitute for a different validation operation. In particular, `describeTaskLifecycle` and `lifecycle-describe` can return `valid: true` with `lifecycle_matches_subject: false` when route or phase semantics fail. Use `validateTaskLifecycle` or `lifecycle` for full lifecycle declaration validation. A valid lifecycle may still declare `blocked`, `denied`, `declared_failure` or `missing`; consistency is not work success. It never means that an action was authorized or executed, an identity or evidence was authenticated, a provider was called, a filesystem or chain was inspected, or a deployment or production adoption occurred.
 
-## Reused and adapted concepts
+## Extraction boundary
 
-The public package retains selected declaration concepts: strict JSON parsing, role identity and mission fields, explicit authority, required and conditional inputs, reviewer separation, explicit routing, task-scope containment, knowledge references, and handoff relationships.
+Agent Role Contracts began as a bounded extraction and generalization of declaration-checking ideas from Netsujo's internal AI-agent operations. It is not a byte-compatible or runtime-compatible replacement for Agent OS or the Controller. Public code excludes private organization registries, credentials, host state, customer data and internal execution authority. Role bodies are inline; knowledge references are declarations rather than discovered files or fetched resources.
 
-Public code removes company registries, production policy state, runtime credentials, host state, customer data, and internal execution authority. Consumers provide the declarations and policy boundaries to validate.
+## Package and API contract
 
-## Deliberately public-specific behavior
+The package remains `@netsujo/agent-role-contracts@0.5.0`, requires Node.js `>=22.5`, and has these public mappings:
 
-The package provides standalone bundle, task, role, and handoff schemas; JSON-text APIs; a CLI; deterministic diagnostics; bounded input parsing; fictional examples; and a prewritten starter workflow.
+| Import | Target | Exports |
+| --- | --- | --- |
+| `@netsujo/agent-role-contracts` | `./src/index.mjs` | the complete core and finance sets below |
+| `@netsujo/agent-role-contracts/core` | `./src/core.mjs` | `VERSION`, `MAX_INPUT_BYTES`, `validateBundle`, `explainTask`, `validateHandoff`, `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle` |
+| `@netsujo/agent-role-contracts/profiles/onchain-finance` | `./src/finance-profile.mjs` | `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, `validateSafeProposal` |
+| `@netsujo/agent-role-contracts/adapters/filesystem-write` | `./src/filesystem-write-adapter.mjs` | `validateFilesystemWriteMapping` |
+| `@netsujo/agent-role-contracts/schemas/*` | `./schemas/*` | the schema files listed below |
 
-Role body text is inline. The package does not discover internal role files, HOME configuration, or repository profiles. Knowledge references are declarations only and are not fetched.
+Every core and finance export on the root facade is the identical JavaScript value exported by its explicit subpath. The filesystem adapter is intentionally not exported from root or `/core`.
 
-The schema engine implements only the documented bounded profile used by the bundled schemas. It is not a general JSON Schema implementation.
+`VERSION` identifies the installed package version (currently `"0.5.0"`); it is not a constant frozen across a later release. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
 
-## Excluded from v0.1.0
+## Schema contract
 
-v0.1.0 does not include:
+Exactly these twelve schema paths are public:
 
-- actual runtime permission enforcement;
-- provider execution or credentials;
-- company or customer organization registries;
-- private knowledge/policy bodies;
-- scheduling, recovery orchestration or deployment;
-- source-file/evidence authentication;
-- secret scanning;
-- managed control-plane state.
+| Path | Declared schema version |
+| --- | --- |
+| `schemas/role-contract.schema.json` | embedded role contract; no top-level `schema_version` |
+| `schemas/bundle.schema.json` | `0.1` |
+| `schemas/task.schema.json` | `0.1` |
+| `schemas/handoff.schema.json` | `0.1` |
+| `schemas/task-action.schema.json` | `0.3` |
+| `schemas/task-action-binding.schema.json` | `0.3` |
+| `schemas/task-lifecycle.schema.json` | `0.4` |
+| `schemas/filesystem-write-mapping.schema.json` | `0.1` |
+| `schemas/financial-policy.schema.json` | `0.2` |
+| `schemas/financial-intent.schema.json` | `0.2` |
+| `schemas/financial-execution.schema.json` | `0.2` |
+| `schemas/safe-proposal.schema.json` | `0.2` |
 
-## Public compatibility guarantee
+The seven core, one adapter, and four finance/Safe schemas remain disjoint. Their supported validation subset is documented in [SCHEMA_PROFILE.md](SCHEMA_PROFILE.md); it is not a general JSON Schema implementation. A compatibility release must preserve the paths, the schema versions, and the accepted/rejected meaning of existing fields. Byte or digest identity is required when evidence claims the same artifact; a changed schema byte set must be reviewed and versioned as a changed artifact rather than represented as the old digest.
 
-A successful validation means only that the supplied declarations are internally consistent under the v0.1.0 profile.
+## Report and digest contract
 
-It does not authenticate identity, verify evidence, grant filesystem or repository permissions, authorize merge/deploy, or prove that a runtime can enforce the declared controls.
+Machine reports are deterministic for identical explicit inputs. Every API report includes `tool: "agent-role-contracts"`, `version: "0.5.0"`, a stable `kind`, boolean `valid`, sorted `errors` containing `{code,path,message}`. Error `code` and `path` are machine compatibility fields; human message wording is not a byte-stable API. Reports also include these fail-closed fields set to `false`:
 
-v0.1.0 is the first public compatibility baseline. Future incompatible public contract changes require an explicit schema/package version change.
+`execution_authorized`, `runtime_enforcement`, `identity_verified`, `evidence_verified`, `source_files_checked`, `sensitive_data_scanned`, and `output_schema_validated`.
 
-## Additive core/profile source split (0.5.0 stable)
+Profile reports add stable context and limitation fields. In particular, G1 reports use `binding_profile: "task-action/0.3"`; G2 uses `adapter_profile: "filesystem-write/0.1"`; G3 uses `lifecycle_profile: "task-lifecycle/0.4"`; finance uses its existing profile and explicit evaluation fields. Successful adapter, lifecycle, or finance checks continue to report their authentication, byte/state, execution, replay, chain, simulation, serialization, receipt, and transaction-verification limitations as `false` where applicable.
 
-The merged repository source preserves the existing root exports, synchronous generic APIs, asynchronous finance APIs, schemas and diagnostics. It adds `/core` and `/profiles/onchain-finance` import subpaths. The core entrypoint and generic CLI commands do not load the optional finance modules or schemas. The root remains a compatibility facade and still imports finance; optional entrypoints do not mean separate npm packages. See [the design](ARCHITECTURE.md) for implemented versus planned boundaries.
+Subject digests are canonical lowercase `sha256:` values over the declarations defined by the relevant profile. G1 hashes the complete object `{profile: 'task-action/0.3', bundle, task, action}`, including the full bundle's roles, policy and routes. Canonicalization recursively sorts object keys using current JavaScript string ordering, retains array order, serializes scalars as currently implemented, encodes UTF-8 and hashes with SHA-256. This custom format is not labelled RFC 8785/JCS. Object member order and harmless JSON whitespace do not change a subject digest. Changing bound task/action/policy/transaction content changes the digest, so a stale binding, mapping, lifecycle, intent, receipt, or Safe proposal fails with the existing typed mismatch diagnostics. Digests bind supplied declarations; they are not signatures, provenance, authenticated evidence, artifact-byte verification, replay protection, or execution authority.
+
+## CLI contract
+
+The `agent-role-contracts` binary and its existing commands remain public: `validate`, `explain`, `handoff`, `action-subject`, `action-bind`, `adapter-filesystem-write`, `lifecycle-describe`, `lifecycle`, `finance-subject`, `finance`, `finance-execution`, and `finance-safe`; `help` and `--help` remain available. JSON is the default machine format and `--format text` is the human-readable format. The invoked check exits 0 when its report is valid and 1 when its report is invalid; CLI usage or input-file errors exit 2. The description-versus-validation distinction above also applies to `lifecycle-describe` and `lifecycle`. Validation reports use stdout; CLI/file failures use a separate `CLI_ERROR` JSON object on stderr. Unknown, duplicate, missing or command-inappropriate options are rejected. Exit 0 grants no execution authority.
+
+The finance CLI deliberately retains its current behavior when `--at` is omitted: it supplies the current CLI clock as an ISO timestamp. The library finance validators do not supply an implicit clock; callers pass the evaluation time. This clock behavior is part of current 0.5.0 compatibility, not a claim of deterministic output across different invocation times.
+
+## What PASS does not guarantee
+
+PASS does not authenticate agents, reviewers, approvers, evidence, source files, locators, receipts, or proposals. It does not verify content bytes, filesystem state, path existence, chain state, address checksums, simulations, transaction serialization or hashes. It does not enforce permissions, scopes, a lifecycle state machine, replay prevention, runtime quotas, or provider selection. It does not perform writes, transactions, network access, merge, publication, deployment, scheduling, recovery, or production adoption. Role bodies, knowledge references, evidence commands, artifact locators, extensions, and output schemas remain inert declarations where documented.
+
+The filesystem adapter checks mapping consistency and eligible declared writers only; it supplies neither G1 review/approval PASS nor actual filesystem permission. Lifecycle run IDs are correlation values, negative decisions can be valid declarations, locators are not fetched, and artifact bytes are not read. Finance and Safe PASS remain offline proposal checks and never establish financial safety or real-chain execution.
 
 ## Required candidate compatibility matrix
 
@@ -52,14 +76,12 @@ The merged repository source preserves the existing root exports, synchronous ge
 | `macos-latest` | `22` | macOS compatibility |
 | `windows-latest` | `22` | Windows compatibility |
 
-`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The packed consumer checks root/core/adapter/finance imports, all 12 schema exports (7 core + 1 adapter + 4 finance/Safe), the CLI and all seven demos without lifecycle scripts or registry dependencies. `tests/compatibility-matrix.test.mjs` guards the required rows and commands.
+`.github/workflows/core.yml` runs schema checks, the full test suite, release-guard tests and `npm run pack:smoke` in every row. The existing packed consumer checks public imports, all twelve schemas and seven demos without lifecycle scripts or registry dependencies. Draft PRs skip hosted CI unless manually dispatched. Local checks are not four-platform acceptance; candidate evidence must bind its exact HEAD and satisfy independent review.
 
-Draft pull requests skip hosted CI unless the workflow is manually dispatched. Local checks do not establish four-platform acceptance: all four jobs must pass on the candidate's exact HEAD, followed by independent review. This matrix describes required coverage, not a claim that a particular candidate has passed.
+## Proposed v1 commitment and remaining gates
 
-## G1/G2 APIs in 0.5.0
+For v1, the surface above is proposed as the fixed compatibility floor: existing import paths and identities, sync/async behavior, schema paths and versions, deterministic report structure and typed diagnostics, canonical digest behavior, CLI commands/exit classes, and fail-closed limitations must not be silently weakened or removed. Additive fields or entrypoints must preserve existing consumers; an incompatible change requires an explicit versioned compatibility decision.
 
-The root and `/core` also expose async `describeTaskAction` and `validateTaskActionBinding`. 12 schemas ship as three disjoint groups: 7 core, 1 adapter and 4 unchanged finance/Safe. The explicit `/adapters/filesystem-write` subpath validates only mapping declaration consistency; it is absent from root and `/core` exports. Generic CLI commands load neither adapter nor finance, and each optional command loads only its own module. Mapping PASS does not supply G1 review/approval PASS or permission. New action/binding schemas use version `0.3` and binding profile `task-action/0.3`. Binding PASS means declaration subject consistency only; it authenticates no identity, review, approval, evidence or permission and provides no execution or replay enforcement. Action IDs do not establish external task/run replay identity.
+The proposed migration keeps existing declaration/profile versions and public call paths unchanged. Compare archived published 0.5.0 consumer fixtures with the candidate's actual packed artifact; compare digests exactly and normalize only specifically documented version/time/message differences. Existing tags and tarballs are immutable. Canonical documentation and conformance evidence remain tracked in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), and publication follows [RELEASE_GATES.md](RELEASE_GATES.md).
 
-## G3 lifecycle declarations (0.5.0 stable)
-
-Root and `/core` export async `describeTaskLifecycle` and `validateTaskLifecycle`. Seven core schemas, one adapter schema and four unchanged finance/Safe schemas form the twelve-schema aggregate. Lifecycle schema `0.4` / profile `task-lifecycle/0.4` binds the current G1 subject. Describe checks structure and subject/artifact identity; validate additionally checks routed actors, phase decisions and required review/approval declarations. `lifecycle_matches_subject` always reflects full validation; artifact identity consistency is independent. Negative decisions remain valid declarations. Run IDs are correlation only; locators are inert and artifact bytes are never read. No runtime, authenticity, replay or state-machine enforcement is provided. G3 is merged and implemented in repository main and included in the `0.5.0` stable package; production adoption remains separate.
+Source preparation alone is not v1 acceptance. A v1 candidate still needs an explicit version/release decision, exact-candidate package and lock metadata, packed-artifact verification, the supported OS/Node matrix, all release/security/provenance gates, documentation review, and independent review and acceptance on the exact candidate commit. Publication and downstream production adoption are separate decisions and evidence.
