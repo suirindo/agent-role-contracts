@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { describeTaskAction, validateTaskActionBinding } from '@netsujo/agent-role-contracts/core';
+import { createHash } from 'node:crypto';
+import { VERSION, describeTaskAction, validateTaskActionBinding } from '@netsujo/agent-role-contracts/core';
 
 // Issue #14: new action/binding declarations are 0.3; existing bundle/task
 // declarations retain their own schema version. No implementation helpers used.
@@ -30,6 +31,93 @@ function fail(result, binding = false) {
 const describe = d => describeTaskAction(json(d.bundle), json(d.task), json(d.action));
 const validate = (d, binding = d.binding) => validateTaskActionBinding(
   json(d.bundle), json(d.task), json(d.action), json(binding));
+
+const goldenBundleText = readFileSync(new URL('../examples/starter-bundle.json', import.meta.url), 'utf8');
+const goldenTaskText = readFileSync(new URL('../examples/starter-task.json', import.meta.url), 'utf8');
+const sha256 = text => createHash('sha256').update(text).digest('hex');
+const goldenVectors = [
+  ['published-starter-ascii',
+    '{"schema_version":"0.3","id":"baseline-action","kind":"propose-change","parameters":{"revision":1}}',
+    'sha256:84eb08c51c7945bf8bcc781e780f3dc62c7d9097655707e7561375cc61556310'],
+  ['unicode-numeric-keys-scalars',
+    '{"schema_version":"0.3","id":"golden-action","kind":"propose-change","parameters":{"10":"ten","2":"two","\u{10000}":"astral","\uE000":"bmp","label":"日本語 😀 é e\u0301","negative_zero":-0,"fraction":1e-7,"max_integer":9007199254740991,"truth":true,"absent":null}}',
+    'sha256:8c75b8a4123007d5f97085e895bc69734224147c5780ef00ab7071b11e9cb6d2'],
+  ['unicode-decomposed',
+    '{"schema_version":"0.3","id":"golden-action","kind":"propose-change","parameters":{"label":"e\u0301"}}',
+    'sha256:fefa014b56e1f623272d8bb7b3a4ed3b87e8551c75d95d83a0d17df99f619b42'],
+  ['unicode-precomposed',
+    '{"schema_version":"0.3","id":"golden-action","kind":"propose-change","parameters":{"label":"\u00E9"}}',
+    'sha256:eed3cc44bdb37dbed7595374306eca79e37462bfc322297df75e206087a29b56'],
+];
+const reportFalseFields = [...claims, 'source_files_checked', 'sensitive_data_scanned',
+  'output_schema_validated', ...bindingClaims];
+
+test('reviewed G1 digest vectors pin published starter fixture bytes', () => {
+  assert.equal(sha256(goldenBundleText),
+    '80896fdce4b047969954275e659061031b9b5d668b4d66b6a1541d8df4caab6c');
+  assert.equal(sha256(goldenTaskText),
+    '86845f79369bd0a5cb06715771505bc4192977d69bf57942405ed1610594cc7c');
+});
+
+for (const [name, actionText, expectedDigest] of goldenVectors) {
+  test(`reviewed G1 digest vector: ${name}`, async () => {
+    const result = await describeTaskAction(goldenBundleText, goldenTaskText, actionText);
+    const expectedReport = {
+      subject_digest: expectedDigest,
+      binding_profile: 'task-action/0.3',
+      task_id: 'starter-change-1',
+      action_id: JSON.parse(actionText).id,
+      action: JSON.parse(actionText),
+      subject_authenticated: false,
+      review_authenticated: false,
+      human_approval_authenticated: false,
+      action_executed: false,
+      replay_protection_enforced: false,
+      tool: 'agent-role-contracts',
+      version: VERSION,
+      kind: 'task-action',
+      valid: true,
+      execution_authorized: false,
+      runtime_enforcement: false,
+      identity_verified: false,
+      evidence_verified: false,
+      source_files_checked: false,
+      sensitive_data_scanned: false,
+      output_schema_validated: false,
+      errors: [],
+    };
+    // Pin existing fields while permitting the documented additive report extensions.
+    assert.deepEqual(Object.fromEntries(Object.keys(expectedReport)
+      .map(key => [key, result[key]])), expectedReport);
+    for (const field of reportFalseFields) assert.equal(result[field], false, field);
+
+    const whitespace = ` \n ${actionText.replaceAll(':', ' : ').replaceAll(',', ',\n')} \n`;
+    let reordered = json(reverseKeys(JSON.parse(actionText)));
+    if (name === 'unicode-numeric-keys-scalars') {
+      reordered = reordered.replace('"negative_zero":0', '"negative_zero":-0');
+      assert.match(reordered, /"negative_zero":-0/);
+      assert.match(reordered, /"fraction":1e-7/);
+    }
+    for (const variant of [whitespace, reordered]) {
+      const variantResult = await describeTaskAction(
+        ` \n${json(reverseKeys(JSON.parse(goldenBundleText)))}\n`,
+        `\n${json(reverseKeys(JSON.parse(goldenTaskText)))} \n`, variant);
+      pass(variantResult);
+      assert.equal(variantResult.subject_digest, expectedDigest);
+    }
+  });
+}
+
+test('mixed G1 vector preserves raw -0 and 1e-7 lexical invariance', async () => {
+  const [, actionText, expectedDigest] = goldenVectors[1];
+  assert.match(actionText, /"negative_zero":-0/);
+  assert.match(actionText, /"fraction":1e-7/);
+  const lexicalVariant = actionText
+    .replace('"negative_zero":-0', '"negative_zero" : -0')
+    .replace('"fraction":1e-7', '"fraction" : 1e-7');
+  assert.equal((await describeTaskAction(
+    goldenBundleText, goldenTaskText, lexicalVariant)).subject_digest, expectedDigest);
+});
 
 async function fixture(humanApproval = true) {
   const bundle = load('starter-bundle');
@@ -103,6 +191,15 @@ for (const name of ['bundle', 'task', 'action', 'all']) test(`JSON key order is 
   pass(result);
   assert.equal(result.subject_digest, original);
   pass(await validate(d, reverseKeys(d.binding)), true);
+});
+
+test('array order remains digest-sensitive for a schema-valid role list', async () => {
+  const d = await fixture();
+  const original = d.binding.subject_digest;
+  d.bundle.roles.reverse();
+  const reordered = await describe(d);
+  pass(reordered);
+  assert.notEqual(reordered.subject_digest, original);
 });
 
 const wrongDigest = 'sha256:' + '0'.repeat(64);
