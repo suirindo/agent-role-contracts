@@ -203,3 +203,70 @@ test('lifecycle description is distinct from full semantic validation', async t 
     else assert.deepEqual(validated.errors, []);
   });
 });
+
+test('adapter and lifecycle PASS do not supply G1 review/approval; one routed reviewer is sufficient', async () => {
+  const bundleValue = JSON.parse(fixture('starter-bundle'));
+  const secondReviewer = structuredClone(bundleValue.roles.find(({contract}) => contract.id === 'reviewer'));
+  secondReviewer.contract.id = 'reviewer-2';
+  bundleValue.roles.push(secondReviewer);
+  bundleValue.routes[0].reviewers.push(secondReviewer.contract.id);
+  const bundle = json(bundleValue), task = fixture('starter-task'), route = bundleValue.routes[0];
+  const actionValue = {schema_version: '0.3', id: 'separate-gates', kind: 'filesystem-write', parameters: {path: JSON.parse(task).inputs.scope, content_sha256: 'sha256:' + 'a'.repeat(64)}};
+  const action = json(actionValue), subject = await core.describeTaskAction(bundle, task, action);
+  assertReport(subject, {kind: 'task-action', valid: true});
+  const mapping = json({schema_version: '0.1', subject_digest: subject.subject_digest, operation: 'write_file', ...actionValue.parameters});
+  assertReport(await validateFilesystemWriteMapping(bundle, task, action, mapping), {kind: 'filesystem-write-mapping', valid: true});
+  const missingBinding = await core.validateTaskActionBinding(bundle, task, action, json({schema_version: '0.3', subject_digest: subject.subject_digest, reviews: []}));
+  assertReport(missingBinding, {kind: 'task-action-binding', valid: false});
+  assert.ok(missingBinding.errors.some(error => error.code === 'SCHEMA_MINITEMS'));
+  const oneReview = {event_id: 'review', phase: 'review', actor_role_id: route.reviewers[1], decision: 'pass', subject_digest: subject.subject_digest};
+  const approval = {event_id: 'approval', phase: 'approval', actor_role_id: route.accountable, decision: 'approved', subject_digest: subject.subject_digest};
+  const lifecycle = json({schema_version: '0.4', run_id: 'one-of-many-reviewers', subject_digest: subject.subject_digest, events: [oneReview, approval]});
+  const lifecycleReport = await core.validateTaskLifecycle(bundle, task, action, lifecycle);
+  assertReport(lifecycleReport, {kind: 'task-lifecycle-validation', valid: true});
+  const singleReviewBinding = {schema_version: '0.3', subject_digest: subject.subject_digest,
+    reviews: [{role_id: route.reviewers[1], decision: 'pass', subject_digest: subject.subject_digest}]};
+  const noApproval = await core.validateTaskActionBinding(bundle, task, action, json(singleReviewBinding));
+  assertReport(noApproval, {kind: 'task-action-binding', valid: false});
+  assert.ok(noApproval.errors.some(error => error.code === 'G1_APPROVAL_REQUIRED'));
+  singleReviewBinding.human_approval = {role_id: route.accountable, decision: 'approved', subject_digest: subject.subject_digest};
+  assertReport(await core.validateTaskActionBinding(bundle, task, action, json(singleReviewBinding)),
+    {kind: 'task-action-binding', valid: true});
+
+  assert.equal(lifecycleReport.review_verified, false);
+  assert.equal(lifecycleReport.approval_verified, false);
+});
+
+test('schema-valid handoff controls reach exact byte, depth and node limits without authority', () => {
+  const bundle = fixture('team'), task = fixture('task'), original = JSON.parse(fixture('handoff'));
+  const check = value => core.validateHandoff(bundle, task, typeof value === 'string' ? value : json(value));
+  assertReport(check(original), {kind: 'handoff', valid: true});
+  const encoded = json(original);
+  const padded = encoded + ' '.repeat(core.MAX_INPUT_BYTES - new TextEncoder().encode(encoded).length);
+  assert.equal(new TextEncoder().encode(padded).length, 1_048_576);
+  assertReport(check(padded), {kind: 'handoff', valid: true});
+  const tooLarge = check(padded + ' ');
+  assertReport(tooLarge, {kind: 'handoff', valid: false});
+  assert.ok(tooLarge.errors.some(error => error.code === 'INPUT_TOO_LARGE'));
+  const nodeCount = value => 1 + (value && typeof value === 'object'
+    ? Object.values(value).reduce((sum, child) => sum + nodeCount(child), 0) : 0);
+  const many = structuredClone(original); many.extensions = {payload: []};
+  many.extensions.payload = Array(50_000 - nodeCount(many)).fill(null);
+  assert.equal(nodeCount(many), 50_000);
+  assert.ok(new TextEncoder().encode(json(many)).length < core.MAX_INPUT_BYTES);
+  assertReport(check(many), {kind: 'handoff', valid: true});
+  many.extensions.payload.push(null); assert.equal(nodeCount(many), 50_001);
+  const tooMany = check(many);
+  assertReport(tooMany, {kind: 'handoff', valid: false});
+  assert.ok(tooMany.errors.some(error => error.code === 'INPUT_NODE_LIMIT'));
+  const depth = (value, current = 0) => value && typeof value === 'object'
+    ? Math.max(current, ...Object.values(value).map(child => depth(child, current + 1))) : current;
+  const nested = structuredClone(original); let extension = {value: 0};
+  for (let index = 0; index < 62; index++) extension = {next: extension};
+  nested.extensions = extension; assert.equal(depth(nested), 64);
+  assertReport(check(nested), {kind: 'handoff', valid: true});
+  nested.extensions = {next: nested.extensions}; assert.equal(depth(nested), 65);
+  const tooDeep = check(nested);
+  assertReport(tooDeep, {kind: 'handoff', valid: false});
+  assert.ok(tooDeep.errors.some(error => error.code === 'JSON_INVALID'));
+});
