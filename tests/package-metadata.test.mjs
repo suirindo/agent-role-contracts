@@ -6,6 +6,7 @@ import * as core from '../src/core.mjs';
 import * as finance from '../src/finance-profile.mjs';
 import * as adapter from '../src/filesystem-write-adapter.mjs';
 const {validateFilesystemWriteMapping} = adapter;
+const candidateVersion = '1.0.0';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const json = value => JSON.stringify(value);
@@ -14,7 +15,7 @@ const financialFixture = name => read('examples/onchain-finance/' + name + '.jso
 const commonLimitations = ['execution_authorized', 'runtime_enforcement', 'identity_verified', 'evidence_verified', 'source_files_checked', 'sensitive_data_scanned', 'output_schema_validated'];
 const assertReport = (report, {kind, valid}) => {
   assert.equal(report.tool, 'agent-role-contracts');
-  assert.equal(report.version, '0.5.0');
+  assert.equal(report.version, core.VERSION);
   assert.equal(report.kind, kind);
   assert.equal(report.valid, valid);
   for (const field of commonLimitations) assert.equal(report[field], false, field);
@@ -22,9 +23,9 @@ const assertReport = (report, {kind, valid}) => {
   for (const error of report.errors) assert.deepEqual(Object.keys(error).sort(), ['code', 'message', 'path']);
 };
 
-test('package, lockfile and public constants pin the current 0.5.0 release', () => {
+test('package, lockfile and public constants pin the 1.0.0 candidate metadata', () => {
   const pkg = JSON.parse(read('package.json')), lock = JSON.parse(read('package-lock.json'));
-  assert.equal(pkg.version, '0.5.0');
+  assert.equal(pkg.version, candidateVersion);
   assert.equal(pkg.version, core.VERSION);
   assert.equal(lock.version, core.VERSION);
   assert.equal(lock.packages[''].version, core.VERSION);

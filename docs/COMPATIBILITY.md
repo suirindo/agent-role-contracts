@@ -1,6 +1,12 @@
 # Public compatibility surface
 
-This document records the compatibility surface that already exists in package version `0.5.0`. It is also the proposed minimum commitment for a future v1. No v1 release, test result, publication, adoption, or production acceptance is asserted here. Moving from the current release to v1 still requires the release and independent-acceptance work described below.
+This document is the canonical compatibility commitment for the `1.0.0` source candidate. Preparation snapshot (2026-10-15): this candidate was unpublished when prepared. Current release-gate acceptance and registry publication are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), rather than inferred from this versioned document. Downstream adoption is a separate outcome. Its floor is the genuinely published `0.5.0` surface, with only installed package/report version metadata intentionally changing.
+
+## Migrating from 0.5.0
+
+Upgrading requires no declaration rewrite. Node.js `>=22.5`, all public import paths, synchronous and promise-returning API shapes, CLI commands and exit classes, false limitation claims, the twelve schema files and their existing versions/IDs—including lifecycle schema `0.4` and IDs containing their historical lifecycle versions—and exact G1 digest behavior remain unchanged. Machine reports identify the installed package as `1.0.0`; that top-level `version` field is the sole approved differential from the archived `0.5.0` corpus.
+
+The 1.x line follows semantic versioning. Compatible additions must preserve existing consumers; deprecations remain available with a documented migration period within the applicable major line, and incompatible contract removal requires a new major version. Candidate testing may install a reviewed local `.tgz`. Any `npm install @netsujo/agent-role-contracts@1.0.0` instruction is conditional on authorized publication and independent registry verification. See [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52) and [RELEASE_GATES.md](RELEASE_GATES.md); acceptance of those gates is recorded for the exact candidate in that issue.
 
 The package is an offline declaration checker. A `valid: true` report means that the declarations passed the checks performed by the invoked operation; it is not a substitute for a different validation operation. In particular, `describeTaskLifecycle` and `lifecycle-describe` can return `valid: true` with `lifecycle_matches_subject: false` when route or phase semantics fail. Use `validateTaskLifecycle` or `lifecycle` for full lifecycle declaration validation. A valid lifecycle may still declare `blocked`, `denied`, `declared_failure` or `missing`; consistency is not work success. It never means that an action was authorized or executed, an identity or evidence was authenticated, a provider was called, a filesystem or chain was inspected, or a deployment or production adoption occurred.
 
@@ -10,7 +16,7 @@ Agent Role Contracts began as a bounded extraction and generalization of declara
 
 ## Package and API contract
 
-The package remains `@netsujo/agent-role-contracts@0.5.0`, requires Node.js `>=22.5`, and has these public mappings:
+The source package candidate is `@netsujo/agent-role-contracts@1.0.0`, requires Node.js `>=22.5`, and has these unchanged public mappings:
 
 | Import | Target | Exports |
 | --- | --- | --- |
@@ -22,7 +28,7 @@ The package remains `@netsujo/agent-role-contracts@0.5.0`, requires Node.js `>=2
 
 Every core and finance export on the root facade is the identical JavaScript value exported by its explicit subpath. The filesystem adapter is intentionally not exported from root or `/core`.
 
-`VERSION` identifies the installed package version (currently `"0.5.0"`); it is not a constant frozen across a later release. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
+`VERSION` identifies the installed package version (`"1.0.0"` in this candidate); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
 
 ## Schema contract
 
@@ -47,7 +53,7 @@ The seven core, one adapter, and four finance/Safe schemas remain disjoint. Thei
 
 ## Report and digest contract
 
-Machine reports are deterministic for identical explicit inputs. Every API report includes `tool: "agent-role-contracts"`, `version: "0.5.0"`, a stable `kind`, boolean `valid`, sorted `errors` containing `{code,path,message}`. Error `code` and `path` are machine compatibility fields; human message wording is not a byte-stable API. Reports also include these fail-closed fields set to `false`:
+Machine reports are deterministic for identical explicit inputs. Every API report includes `tool: "agent-role-contracts"`, `version` equal to the installed package (`"1.0.0"` for this candidate), a stable `kind`, boolean `valid`, sorted `errors` containing `{code,path,message}`. Error `code` and `path` are machine compatibility fields; human message wording is not a byte-stable API. Reports also include these fail-closed fields set to `false`:
 
 `execution_authorized`, `runtime_enforcement`, `identity_verified`, `evidence_verified`, `source_files_checked`, `sensitive_data_scanned`, and `output_schema_validated`.
 
@@ -96,10 +102,10 @@ This map names the evidence actually present; it does not convert a local PASS i
 
 V1-05 also reuses the existing named defensive families: core/accessor and decoded-duplicate-key rejection in tests/core.test.mjs; non-string/accessor, unsafe-integer and duplicate-key cases across tests/action-binding-hardening.test.mjs, tests/filesystem-write-adapter-hardening.test.mjs and tests/task-lifecycle-hardening.test.mjs; portable scope/unsupported action cases in the filesystem adapter suites; Web Crypto absent or failing fails closed; paths, URLs and command-like locators remain inert with global I/O tripwires; and financial input/diagnostic regressions in tests/finance.test.mjs. These are declaration/input checks, not runtime side-effect enforcement.
 
-## Proposed v1 commitment and remaining gates
+## 1.x commitment and remaining gates
 
-For v1, the surface above is proposed as the fixed compatibility floor: existing import paths and identities, sync/async behavior, schema paths and versions, deterministic report structure and typed diagnostics, canonical digest behavior, CLI commands/exit classes, and fail-closed limitations must not be silently weakened or removed. Additive fields or entrypoints must preserve existing consumers; an incompatible change requires an explicit versioned compatibility decision.
+For 1.x, the surface above is the compatibility floor: existing import paths and identities, sync/async behavior, schema paths and versions, deterministic report structure and typed diagnostics, canonical digest behavior, CLI commands/exit classes, and fail-closed limitations must not be silently weakened or removed. Additive fields or entrypoints must preserve existing consumers; an incompatible change requires a new major-version compatibility decision.
 
-The proposed migration keeps existing declaration/profile versions and public call paths unchanged. Compare archived published 0.5.0 consumer fixtures with the candidate's actual packed artifact; compare digests exactly and normalize only specifically documented version/time/message differences. Existing tags and tarballs are immutable. Canonical documentation and conformance evidence remain tracked in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), and publication follows [RELEASE_GATES.md](RELEASE_GATES.md).
+The migration keeps existing declaration/profile versions and public call paths unchanged. The differential compares the archived published 0.5.0 consumer with the candidate's actual packed artifact, requires each report version to equal its own installed metadata, and normalizes only the exact top-level package/report version. It preserves raw CLI bytes and does not recursively strip fields or reserialize JSON. The two previously reviewed help-line substitutions remain explicit; CLI_ERROR stderr is never treated as a report. Existing tags and tarballs are immutable.
 
-Source preparation alone is not v1 acceptance. A v1 candidate still needs an explicit version/release decision, exact-candidate package and lock metadata, packed-artifact verification, the supported OS/Node matrix, all release/security/provenance gates, documentation review, and independent review and acceptance on the exact candidate commit. Publication and downstream production adoption are separate decisions and evidence.
+Source preparation alone is not v1 acceptance. Each release needs packed-artifact verification, the supported OS/Node matrix, all release/security/provenance gates, documentation review, and independent review and acceptance on the exact candidate commit. Publication and downstream production adoption are separate decisions and evidence.

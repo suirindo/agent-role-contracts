@@ -51,6 +51,38 @@ function pass(result, label) {
   return result.stdout;
 }
 
+const versionPlaceholder = '__INSTALLED_PACKAGE_VERSION__';
+function normalizeCliReportVersion(raw, installedVersion, label) {
+  const report = JSON.parse(raw);
+  assert.equal(report.version, installedVersion, `${label}: report version must equal installed metadata`);
+  const prefix = /^((?:[^\n]*\n)*?  "version": )"([^"\n]*)"/;
+  const match = raw.match(prefix);
+  assert.ok(match, `${label}: expected the exact pretty-JSON top-level report prefix`);
+  assert.equal(match[2], installedVersion, `${label}: version lexeme must be the installed version`);
+  return raw.replace(prefix, (_, start) => `${start}"${versionPlaceholder}"`);
+}
+function normalizeCompatibilityObservation(observation, installedVersion, label) {
+  const copy = structuredClone(observation);
+  assert.equal(copy.installedVersion, installedVersion, `${label}: observed installed metadata`);
+  copy.installedVersion = versionPlaceholder;
+  for (const [name, report] of Object.entries(copy.reports)) {
+    assert.equal(report.version, installedVersion, `${label} API ${name}: report version must equal installed metadata`);
+    report.version = versionPlaceholder;
+  }
+  for (const [name, result] of Object.entries(copy.cli.positive)) {
+    result.stdout = normalizeCliReportVersion(result.stdout, installedVersion, `${label} CLI ${name}`);
+  }
+  copy.cli.invalid.stdout = normalizeCliReportVersion(copy.cli.invalid.stdout, installedVersion, `${label} invalid CLI`);
+  return copy;
+}
+function assertVersionOnlyCompatible(baseline, candidate, baselineVersion, candidateVersion) {
+  assert.deepEqual(
+    normalizeCompatibilityObservation(candidate, candidateVersion, 'candidate'),
+    normalizeCompatibilityObservation(baseline, baselineVersion, 'baseline'),
+    'candidate packed observations may differ only in installed/top-level report VERSION',
+  );
+}
+
 // Guard the deliberately small workflow's literal include rows, without adding
 // a YAML dependency to this dependency-free checker.
 test('CI retains all four required compatibility jobs and their checks', () => {
@@ -111,7 +143,7 @@ const reports={
  finance:await finance.validateFinancialIntent(fb,ft,fp,fi,'2030-01-01T00:00:05Z'),
  financeExecution:await finance.validateFinancialExecution(fb,ft,fp,fi,read('examples/onchain-finance/execution.json'),'2030-01-01T00:00:05Z'),
  financeSafe:await finance.validateSafeProposal(fb,ft,fp,fi,read('examples/onchain-finance/safe-proposal.json'),'2030-01-01T00:00:05Z')};
-for(const report of Object.values(reports)){assert.equal(report.execution_authorized,false);assert.equal(typeof report.kind,'string');assert.ok(Array.isArray(report.errors));}
+for(const report of Object.values(reports)){assert.equal(report.version,core.VERSION);assert.equal(report.execution_authorized,false);assert.equal(typeof report.kind,'string');assert.ok(Array.isArray(report.errors));}
 assert.equal(typeof core.validateBundle(b)?.then,'undefined');assert.equal(typeof core.explainTask(b,t)?.then,'undefined');
 assert.equal(typeof core.validateHandoff(read('examples/team.json'),read('examples/task.json'),read('examples/handoff.json'))?.then,'undefined');
 for(const promise of [core.describeTaskAction(b,t,json(action)),core.validateTaskActionBinding(b,t,json(action),json(binding)),core.describeTaskLifecycle(b,t,json(action),json(lifecycle)),core.validateTaskLifecycle(b,t,json(action),json(lifecycle)),adapter.validateFilesystemWriteMapping(b,t,json(writeAction),json(mapping)),finance.validateFinancialIntent(fb,ft,fp,fi,'2030-01-01T00:00:05Z'),finance.describeFinancialIntent(fb,ft,fp,read('examples/onchain-finance/transaction.json')),finance.validateFinancialExecution(fb,ft,fp,fi,read('examples/onchain-finance/execution.json'),'2030-01-01T00:00:05Z'),finance.validateSafeProposal(fb,ft,fp,fi,read('examples/onchain-finance/safe-proposal.json'),'2030-01-01T00:00:05Z')])assert.equal(typeof promise.then,'function');
@@ -131,15 +163,45 @@ const commandArgs={
  'finance-safe':['--bundle',p('examples/onchain-finance/bundle.json'),'--task',p('examples/onchain-finance/task.json'),'--policy',p('examples/onchain-finance/policy.json'),'--intent',p('examples/onchain-finance/intent.json'),'--safe-proposal',p('examples/onchain-finance/safe-proposal.json'),'--at','2030-01-01T00:00:05Z']};
 const kinds={validate:'bundle',explain:'explain',handoff:'handoff','action-subject':'task-action','action-bind':'task-action-binding','adapter-filesystem-write':'filesystem-write-mapping','lifecycle-describe':'task-lifecycle',lifecycle:'task-lifecycle-validation','finance-subject':'financial-subject',finance:'financial-intent','finance-execution':'financial-execution','finance-safe':'safe-proposal'};
 const positive={},missing={};for(const [cmd,args] of Object.entries(commandArgs)){
- const good=cliRun([cmd,...args]);assert.equal(good.status,0,good.stderr);assert.equal(good.stderr,'');const parsed=JSON.parse(good.stdout);assert.equal(parsed.kind,kinds[cmd]);assert.equal(parsed.execution_authorized,false);positive[cmd]=good;
+ const good=cliRun([cmd,...args]);assert.equal(good.status,0,good.stderr);assert.equal(good.stderr,'');const parsed=JSON.parse(good.stdout);assert.equal(parsed.version,metadata.version);assert.equal(parsed.kind,kinds[cmd]);assert.equal(parsed.execution_authorized,false);positive[cmd]=good;
  const absent=cliRun([cmd]);assert.equal(absent.status,2);assert.equal(absent.stdout,'');assert.equal(JSON.parse(absent.stderr).error,'CLI_ERROR');missing[cmd]=absent;
 }
-const invalid=cliRun(['validate','--bundle',p('examples/invalid-authority.json')]);assert.equal(invalid.status,1);assert.equal(JSON.parse(invalid.stdout).valid,false);
+const invalid=cliRun(['validate','--bundle',p('examples/invalid-authority.json')]);assert.equal(invalid.status,1);assert.equal(JSON.parse(invalid.stdout).version,metadata.version);assert.equal(JSON.parse(invalid.stdout).valid,false);
 for(const args of [['unknown'],['validate','--bundle',p('examples/team.json'),'--bundle',p('examples/team.json')],['validate','--bundle',p('examples/team.json'),'--at','2030-01-01T00:00:05Z']]){const r=cliRun(args);assert.equal(r.status,2);assert.equal(r.stdout,'');assert.equal(JSON.parse(r.stderr).error,'CLI_ERROR');}
 const text=cliRun(['adapter-filesystem-write',...commandArgs['adapter-filesystem-write'],'--format','text']);assert.equal(text.status,0);assert.equal(text.stderr,'');assert.match(text.stdout,/mapping PASS supplies no review or approval/);assert.doesNotMatch(text.stdout,/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028-\u202e\u2066-\u2069]/);
 const help=cliRun(['--help']);assert.equal(help.status,0);assert.equal(help.stderr,'');assert.match(help.stdout,/(?:optional finance declaration profile uses schema version 0\.2|Finance is a v0\.2 preview)/i);assert.match(help.stdout,/Exit 0: (?:the invoked declaration check passed|declared contracts consistent)/i);
-console.log(JSON.stringify({exports:{root:Object.keys(root).sort(),core:Object.keys(core).sort(),finance:Object.keys(finance).sort(),adapter:Object.keys(adapter).sort(),lengths:Object.fromEntries(Object.entries({...core,...finance,...adapter}).filter(([,v])=>typeof v==='function').map(([k,v])=>[k,v.length]))},schemas,reports,cli:{positive,missing,invalid,text,help}}));
+console.log(JSON.stringify({installedVersion:metadata.version,exports:{root:Object.keys(root).sort(),core:Object.keys(core).sort(),finance:Object.keys(finance).sort(),adapter:Object.keys(adapter).sort(),lengths:Object.fromEntries(Object.entries({...core,...finance,...adapter}).filter(([,v])=>typeof v==='function').map(([k,v])=>[k,v.length]))},schemas,reports,cli:{positive,missing,invalid,text,help}}));
 `;
+
+test('archived differential comparator permits only installed top-level report versions', () => {
+  const raw = version => `{\n  "tool": "agent-role-contracts",\n  "version": "${version}",\n  "kind": "bundle",\n  "valid": true,\n  "errors": []\n}\n`;
+  const observation = version => ({
+    installedVersion: version,
+    reports: {bundle: {tool: 'agent-role-contracts', version, kind: 'bundle', valid: true, errors: [], subject_digest: 'sha256:abc', nested: {version: 'schema-0.4'}}},
+    cli: {positive: {validate: {status: 0, stdout: raw(version), stderr: ''}}, missing: {validate: {status: 2, stdout: '', stderr: '{"error":"CLI_ERROR"}\n'}}, invalid: {status: 1, stdout: raw(version), stderr: ''}, text: {status: 0, stdout: 'PASS\n', stderr: ''}},
+  });
+  const baseline = observation('0.5.0'), candidate = observation('1.0.0');
+  assert.doesNotThrow(() => assertVersionOnlyCompatible(baseline, candidate, '0.5.0', '1.0.0'));
+  const failures = [
+    ['wrong installed version', value => { value.installedVersion = '1.0.1'; }],
+    ['wrong report version', value => { value.reports.bundle.version = '0.5.0'; }],
+    ['nested version', value => { value.reports.bundle.nested.version = 'schema-1.0'; }],
+    ['digest', value => { value.reports.bundle.subject_digest = 'sha256:def'; }],
+    ['error', value => { value.reports.bundle.errors.push({code: 'X', path: 'x', message: 'x'}); }],
+    ['code', value => { value.cli.missing.validate.stderr = '{"error":"OTHER"}\n'; }],
+    ['path', value => { value.reports.bundle.path = 'changed'; }],
+    ['output', value => { value.cli.text.stdout = 'FAIL\n'; }],
+    ['escaping', value => { value.cli.positive.validate.stdout = value.cli.positive.validate.stdout.replace('"bundle"', '"\\u0062undle"'); }],
+    ['whitespace', value => { value.cli.invalid.stdout = value.cli.invalid.stdout.replace('  "kind"', '   "kind"'); }],
+    ['extra stdout', value => { value.cli.text.stdout += 'extra\n'; }],
+    ['stderr', value => { value.cli.positive.validate.stderr = 'warning\n'; }],
+    ['authority', value => { value.reports.bundle.execution_authorized = true; }],
+  ];
+  for (const [name, mutate] of failures) {
+    const changed = structuredClone(candidate); mutate(changed);
+    assert.throws(() => assertVersionOnlyCompatible(baseline, changed, '0.5.0', '1.0.0'), undefined, name);
+  }
+});
 
 test('packed public consumer corpus and optional published differential', {timeout: 180_000}, t => {
   assert.ok(process.env.npm_execpath, 'Run through npm so npm_execpath identifies the cross-platform npm CLI');
@@ -174,7 +236,7 @@ test('packed public consumer corpus and optional published differential', {timeo
   assert.match(candidate.cli.help.stdout, /Exit 0: the invoked declaration check passed; it does not mean another operation passed/i);
   const supplied = process.env.ARC_COMPATIBILITY_BASELINE_TARBALL;
   if (!supplied) {
-    console.log(JSON.stringify({type: 'ARC_COMPATIBILITY_DIAGNOSTIC', mode: 'NOT_REQUESTED', comparison: 'NOT_REQUESTED', candidateTarballSHA256: candidateSHA256, baselineTarballSHA256: null, fixtureCount: Object.keys(fixtureHashes).length, schemaCount: Object.keys(schemaHashes).length, cliPositiveCount: Object.keys(candidate.cli.positive).length, cliMissingCount: Object.keys(candidate.cli.missing).length}));
+    console.log(JSON.stringify({type: 'ARC_COMPATIBILITY_DIAGNOSTIC', mode: 'NOT_REQUESTED', comparison: 'NOT_REQUESTED', candidateVersion: candidate.installedVersion, baselineVersion: null, candidateTarballSHA256: candidateSHA256, baselineTarballSHA256: null, normalizationPolicy: 'exact installed metadata and top-level API/pretty-JSON report version only; raw non-report output unchanged', fixtureCount: Object.keys(fixtureHashes).length, schemaCount: Object.keys(schemaHashes).length, cliPositiveCount: Object.keys(candidate.cli.positive).length, cliMissingCount: Object.keys(candidate.cli.missing).length}));
     return;
   }
   const suppliedStat = lstatSync(supplied);
@@ -183,10 +245,14 @@ test('packed public consumer corpus and optional published differential', {timeo
   assert.ok(stat.size > 0 && stat.size <= maxTarballBytes, 'baseline tarball must be non-empty and bounded');
   const baselineSHA256 = sha256(readFileSync(baselinePath)); assert.equal(baselineSHA256, publishedTarballSHA256, 'baseline tarball must be the reviewed published 0.5.0 bytes');
   const baseline = installAndObserve('baseline-consumer', baselinePath);
+  assert.equal(baseline.installedVersion, '0.5.0');
+  assert.equal(candidate.installedVersion, '1.0.0');
   const oldHelp = 'Finance is a v0.2 preview. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nExit 0: declared contracts consistent.';
   const newHelp = 'The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nExit 0: the invoked declaration check passed; it does not mean another operation passed.';
   assert.equal(baseline.cli.help.stdout.replace(oldHelp, newHelp), candidate.cli.help.stdout, 'only the reviewed help lines may differ');
-  delete baseline.cli.help; delete candidate.cli.help;
-  assert.deepEqual(candidate, baseline, 'candidate packed observations must match the archived published consumer');
-  console.log(JSON.stringify({type: 'ARC_COMPATIBILITY_DIAGNOSTIC', mode: 'DIFFERENTIAL', comparison: 'PASS', candidateTarballSHA256: candidateSHA256, baselineTarballSHA256: baselineSHA256, fixtureCount: Object.keys(fixtureHashes).length, schemaCount: Object.keys(schemaHashes).length, cliPositiveCount: Object.keys(candidate.cli.positive).length, cliMissingCount: Object.keys(candidate.cli.missing).length}));
+  const {help: baselineHelp, ...baselineCli} = baseline.cli;
+  const {help: candidateHelp, ...candidateCli} = candidate.cli;
+  assert.deepEqual({...baselineHelp, stdout: baselineHelp.stdout.replace(oldHelp, newHelp)}, candidateHelp);
+  assertVersionOnlyCompatible({...baseline, cli: baselineCli}, {...candidate, cli: candidateCli}, '0.5.0', '1.0.0');
+  console.log(JSON.stringify({type: 'ARC_COMPATIBILITY_DIAGNOSTIC', mode: 'DIFFERENTIAL', comparison: 'PASS', candidateVersion: candidate.installedVersion, baselineVersion: baseline.installedVersion, candidateTarballSHA256: candidateSHA256, baselineTarballSHA256: baselineSHA256, normalizationPolicy: 'exact installed metadata and top-level API/pretty-JSON report version only; raw non-report output unchanged', fixtureCount: Object.keys(fixtureHashes).length, schemaCount: Object.keys(schemaHashes).length, cliPositiveCount: Object.keys(candidate.cli.positive).length, cliMissingCount: Object.keys(candidate.cli.missing).length}));
 });

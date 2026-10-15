@@ -30,7 +30,13 @@ Agent Role Contracts turns those contradictions into deterministic, offline pref
 
 No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
 
-**Stable package line: `0.5.0`.** npm stable installs use the `latest` dist-tag. The stable package includes the general core plus G1 task/action binding, the optional G2 `/adapters/filesystem-write` mapping, and G3 lifecycle declarations. Onchain finance remains an optional profile.
+**Release target: `1.0.0`.** The previously published `0.5.0` package is the compatibility baseline. This candidate requires Node.js 22.5 or newer and preserves the same imports, sync/async API shapes, CLI behavior, twelve frozen schema versions and IDs, fail-closed claims, and exact G1 digest behavior. Preparation snapshot (2026-10-15): this version was unpublished when this source was prepared. Current acceptance and registry publication are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), separately from this versioned document.
+
+## Migrating from 0.5.0
+
+No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other observed API/CLI field, schema byte, and fixed digest to remain equal. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
+
+For candidate evaluation, install only a reviewed local `.tgz`, for example `npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`. Run `npm install @netsujo/agent-role-contracts@1.0.0` only if authorized publication has completed and the registry version has been independently verified. See the canonical [compatibility commitment](docs/COMPATIBILITY.md) and [release gates](docs/RELEASE_GATES.md).
 
 ## Quick Start — three minutes
 
@@ -69,9 +75,9 @@ Next: docs/QUICKSTART.md (change the scope and rerun the checker).
 
 The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
 
-### Try the published package instead (no clone)
+### Try the previously published baseline instead (no clone)
 
-To run the stable `0.5.0` package without cloning the repository, start in an empty directory:
+To run the previously published `0.5.0` baseline without cloning the repository, start in an empty directory:
 
 ```sh
 mkdir agent-role-contracts-first-check
@@ -92,7 +98,7 @@ If `npm install` reports `EPERM` about root-owned files in a shared npm cache, d
 NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.5.0
 ```
 
-npm `latest` is the stable install channel. Use `@netsujo/agent-role-contracts@0.5.0` when you need an immutable version.
+This command intentionally pins the historical `0.5.0` baseline; it does not describe the source candidate or assert the current `latest` dist-tag.
 
 ### Why it matters
 
@@ -127,7 +133,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-The stable `0.5.0` release provides `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports. These subpaths are not claimed to exist in an older installed npm version.
+The previously published `0.5.0` baseline and the `1.0.0` source candidate provide `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -246,15 +252,14 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-For the published stable release, use either the exact version or the `latest` channel:
+For the previously published baseline, use the immutable exact version. Check a live dist-tag separately from this versioned source:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
 npm install @netsujo/agent-role-contracts@0.5.0
-# or: npm install @netsujo/agent-role-contracts
 ```
 
-The unversioned package name follows `latest`, which currently resolves to the stable `0.5.0` release.
+For the `1.0.0` candidate, install a reviewed local `.tgz`. The registry command `npm install @netsujo/agent-role-contracts@1.0.0` is valid only after authorized publication and independent registry verification.
 
 ## API
 
