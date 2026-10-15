@@ -1,6 +1,6 @@
 # Historical public preview: 0.5.0-alpha.1
 
-This document records the `0.5.0-alpha.1` public-preview state published on 2026-10-05. Stable `0.5.0` is now the public `latest` release. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
+This document preserves the `0.5.0-alpha.1` public-preview state published on 2026-10-05 and the later `0.5.0` baseline record. The repository prepares a `1.0.0` candidate whose publication state is recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52); this historical page does not assert current registry dist-tags. Registry publication and production runtime adoption remain separate states; publication does not grant runtime authority or imply production use.
 
 ## Architecture at a glance
 
@@ -38,7 +38,7 @@ Verified state:
 - version: `0.5.0-alpha.1`
 - dist-tag: `next`
 - stable `latest` at preview time: `0.1.0`
-- current stable release: `0.5.0`
+- later published compatibility baseline: `0.5.0`
 - release commit: `395ac5d9dfc607590fa2933a0903ecd03445d678`
 - staged package shasum: `0ce7d38a73e9eaaffbca87bd67e5f1fbdab3eae3`
 - GitHub Actions staging run: `37284758073`
@@ -56,4 +56,4 @@ For immutable selection:
 npm install @netsujo/agent-role-contracts@0.5.0-alpha.1
 ```
 
-At preview publication time, the preview channel was `next`; stable releases use `latest`. The current stable release is `0.5.0`. Runtime enforcement, production adoption and HOL Guard integration remain separate work.
+At preview publication time, the preview channel was `next`; the later published compatibility baseline was `0.5.0`. This historical record makes no claim about current dist-tags. Runtime enforcement, production adoption and HOL Guard integration remain separate work.

@@ -6,6 +6,7 @@ import * as core from '../src/core.mjs';
 import * as finance from '../src/finance-profile.mjs';
 import * as adapter from '../src/filesystem-write-adapter.mjs';
 const {validateFilesystemWriteMapping} = adapter;
+const candidateVersion = '1.0.0';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const json = value => JSON.stringify(value);
@@ -14,7 +15,7 @@ const financialFixture = name => read('examples/onchain-finance/' + name + '.jso
 const commonLimitations = ['execution_authorized', 'runtime_enforcement', 'identity_verified', 'evidence_verified', 'source_files_checked', 'sensitive_data_scanned', 'output_schema_validated'];
 const assertReport = (report, {kind, valid}) => {
   assert.equal(report.tool, 'agent-role-contracts');
-  assert.equal(report.version, '0.5.0');
+  assert.equal(report.version, core.VERSION);
   assert.equal(report.kind, kind);
   assert.equal(report.valid, valid);
   for (const field of commonLimitations) assert.equal(report[field], false, field);
@@ -22,9 +23,9 @@ const assertReport = (report, {kind, valid}) => {
   for (const error of report.errors) assert.deepEqual(Object.keys(error).sort(), ['code', 'message', 'path']);
 };
 
-test('package, lockfile and public constants pin the current 0.5.0 release', () => {
+test('package, lockfile and public constants pin the 1.0.0 candidate metadata', () => {
   const pkg = JSON.parse(read('package.json')), lock = JSON.parse(read('package-lock.json'));
-  assert.equal(pkg.version, '0.5.0');
+  assert.equal(pkg.version, candidateVersion);
   assert.equal(pkg.version, core.VERSION);
   assert.equal(lock.version, core.VERSION);
   assert.equal(lock.packages[''].version, core.VERSION);
@@ -176,6 +177,27 @@ test('both README files identify the current public version and demos remain wir
   assert.equal(scripts['demo:filesystem-adapter'], 'node examples/filesystem-write-adapter/demo.mjs');
 });
 
+
+test('packaged 1.0 documentation separates package stability from historical/profile versions', () => {
+  const changelog = read('CHANGELOG.md');
+  const compatibility = read('docs/COMPATIBILITY.md');
+  const filesystem = read('examples/filesystem-write-adapter/README.md');
+  const lifecycle = read('examples/task-lifecycle/README.md');
+  const financeReadme = read('examples/onchain-finance/README.md');
+  const financeDemo = read('examples/onchain-finance/demo.mjs');
+  assert.doesNotMatch(changelog, /permits only the installed top-level report version change/);
+  assert.match(changelog, /two reviewed human CLI-help wording changes/);
+  assert.doesNotMatch(compatibility, /top-level `version` field is the sole approved differential/);
+  assert.match(compatibility, /sole approved machine-report differential/);
+  assert.match(compatibility, /two reviewed human CLI-help lines/);
+  for (const text of [filesystem, lifecycle]) assert.doesNotMatch(text, /Repository source matches the `0\.5\.0` stable package line/);
+  assert.doesNotMatch(filesystem, /published npm release is not claimed to contain this optional subpath/i);
+  assert.match(filesystem, /published `0\.5\.0` baseline contains this optional subpath/);
+  assert.doesNotMatch(financeReadme, /v0\.2 preview/i);
+  assert.match(financeReadme, /optional profile, schema 0\.2/i);
+  assert.doesNotMatch(financeDemo, /v0\.2 preview/i);
+  assert.match(financeDemo, /profile \(schema 0\.2\)/i);
+});
 
 test('lifecycle description is distinct from full semantic validation', async t => {
   const bundle = fixture('starter-bundle'), task = fixture('starter-task');

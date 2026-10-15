@@ -1,6 +1,6 @@
 # CrewAI adapter spike
 
-This source-only spike checks one bounded CrewAI task pair against an existing Agent Role Contracts bundle.
+This experimental source spike checks one bounded CrewAI task pair against an existing Agent Role Contracts bundle.
 
 It deliberately **does not generate authority from CrewAI role text**. The ARC bundle remains the authority source of truth. The adapter only maps explicit framework configuration:
 
@@ -45,4 +45,4 @@ This spike rejects rather than infers when:
 
 A PASS means only that the supplied declarations agree. It does not start CrewAI, authenticate agents, enforce runtime permissions, invoke tools, create directories, or write the output file.
 
-This file describes repository source only. It is not a claim that the `0.5.0` npm release exposes a CrewAI adapter subpath.
+The `1.0.0` tarball includes this directory's seven files and `src/crewai-adapter.mjs` as an unexported experiment. These eight files are additions to the archived `0.5.0` inventory. They are not public API and are outside the [1.x compatibility commitment](../../docs/COMPATIBILITY.md); no CrewAI package subpath or CLI command is supported. Packaging this source does not establish CrewAI runtime execution or enforcement.

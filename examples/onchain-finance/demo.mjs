@@ -19,7 +19,7 @@ try {
     console.log(label + ': ' + (expectedCode ? 'FAIL (expected): ' + expectedCode : 'PASS'));
   };
 
-  console.log('Agent Role Contracts v0.2 preview: inspect an onchain-finance proposal.');
+  console.log('Agent Role Contracts onchain-finance profile (schema 0.2): inspect a proposal.');
   console.log('Fictional token, addresses and evidence; fixture clock ' + at + '.');
   console.log('No wallet, RPC, API key, signing or broadcasting.\n');
   await show('1. Treasury payment within the declared limit', original);

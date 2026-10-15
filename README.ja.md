@@ -10,7 +10,15 @@
 
 **PASS ≠ 実行権限。** PASSは、実行した検査の範囲で供給された宣言が整合していることを示します。本人確認、実際のアクセス権、side effectの強制、証拠検証、実行承認は別の責務です。
 
-**安定版ライン：`0.5.0`。** npmの安定版インストールは`latest`を使います。既存の汎用v0.1 role-contract profileと同期APIを維持し、オンチェーン金融は用途別の拡張として提供します。
+**リリース対象：`1.0.0`。** 既に公開された`0.5.0` packageを互換性baselineとします。このcandidateはNode.js 22.5以上を必要とし、同じimport、同期・非同期API shape、CLI、12個の固定schema versionとID、fail-closedなclaim、G1 digestを維持します。2026年10月15日の準備時点では未公開でした。現在の受入・公開状況は、版を固定した本書とは別に[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)へ記録します。
+
+## 0.5.0からの移行
+
+宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
+
+`1.0.0`の配布物には、`src/crewai-adapter.mjs`と`examples/crewai-adapter-spike/`内の7ファイルを追加しています。これらは未exportの実験用ファイルです。公開APIおよび1.xの互換性保証には含めず、CrewAI用のpackage subpathやCLI commandも提供しません。実験コードの同梱は、CrewAIの実行やruntime権限の強制を意味しません。
+
+candidateを評価する場合は、review済みのlocal `.tgz`だけを、たとえば`npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`で導入してください。`npm install @netsujo/agent-role-contracts@1.0.0`は、権限を持つ担当者による公開が完了し、registry上のversionを独立に確認できた場合に限って実行します。正本は[互換性commitment](docs/COMPATIBILITY.md)と[release gate](docs/RELEASE_GATES.md)です。
 
 ## 3分で体験する Quick Start
 
@@ -33,7 +41,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
-npm安定版`0.5.0`をcloneせず試す手順は、英語正本の[Try the published package instead](README.md#try-the-published-package-instead-no-clone)にあります。npm `latest`は`0.5.0`の安定版チャネルです。
+既に公開された`0.5.0` baselineをcloneせず試す手順は、英語正本の[Try the previously published baseline instead](README.md#try-the-previously-published-baseline-instead-no-clone)にあります。この固定versionの手順はcandidateや現在の`latest`を示すものではありません。
 
 ### 何が変わるか
 
@@ -108,9 +116,9 @@ G3 lifecycleは**repository mainにmerge済み・実装済みで、`0.5.0` stabl
 npm run demo:lifecycle
 ```
 
-`0.5.0`安定版では、rootと`/core`が`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`、G3 PR #19は`d18f867d91ec8abb4038af85f17c7b3d4954b869`です。repository sourceとnpmの`latest` stable releaseは`0.5.0`で揃っています。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3は汎用coreのlifecycle宣言であり、runtime・state machine・authenticatorではありません。npm stable releaseは公開済みです。merge・実装・公開のいずれも、本番採用・runtime権限・deployment・認証済み証拠・実行権限を意味しません。finance・Safeは任意profileです。
+公開済み`0.5.0` baselineと`1.0.0` candidateでは、rootと`/core`が同じ`describeTaskAction`・`describeTaskLifecycle`・`validateTaskLifecycle`を提供します。lifecycleのschema versionは`0.4`、profileは`task-lifecycle/0.4`で、現在のG1 subject digestに結び付きます。G0・G1・G2・G3はrepository mainにmerge済み・実装済みです。G2 PR #17のmerge commitは`2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`、G3 PR #19は`d18f867d91ec8abb4038af85f17c7b3d4954b869`です。G2 filesystem-writeはoptionalな明示的subpath `/adapters/filesystem-write`のままで、root・`/core`から再exportしません。G3は汎用coreのlifecycle宣言であり、runtime・state machine・authenticatorではありません。registry公開の現在の状態はissue #52で確認します。merge・実装・公開のいずれも、本番採用・runtime権限・deployment・認証済み証拠・実行権限を意味しません。finance・Safeは任意profileです。
 
-lifecycle PASSは宣言の整合だけを示し、eventの真実性・認証・artifact bytesの検証・runtime受入を意味しません。外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。packageのstable release公開は完了しています。runtime受入・本番採用・実行権限は別です。
+lifecycle PASSは宣言の整合だけを示し、eventの真実性・認証・artifact bytesの検証・runtime受入を意味しません。外部`run_id`は呼出元が供給する相関IDであり、リプレイ防止ではありません。event decisionは宣言で、認証済みイベントではありません。artifactの`sha256`は宣言された識別情報で、bytesを読込・検証せず、locatorも取得しないmetadataです。lifecycle整合、artifact identity整合、真正性、runtime受入は別の問題です。実行、本人確認、レビュー・承認の真正性検証、timestamp・clock検査・state-machine順序保証は行いません。`1.0.0` candidateの公開、runtime受入、本番採用、実行権限はすべて別です。
 
 ## 詳細な3-role例
 
@@ -132,7 +140,7 @@ node bin/agent-role-contracts.mjs validate --bundle examples/invalid-self-review
 
 CIマトリクスは Ubuntu / Node.js 22.5.0、Ubuntu / Node.js 24、macOS / Node.js 22、Windows / Node.js 22 を対象にします。各候補は必ずそのexact HEADで通過する必要があり、過去候補の成功は現在のbytesへ流用しません。22.5.0は最小互換性確認用で、実運用への導入推奨ではありません。独立した受入は別途必要です。
 
-## 任意のオンチェーン金融プレビュー
+## 任意のオンチェーン金融profile（schema 0.2）
 
 資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
 
@@ -172,15 +180,14 @@ runtime固有宣言の検出は意図的に限定されています。汎用的�
 
 ## インストール
 
-安定版は、live dist-tagsを確認してexact versionまたは`latest`を指定します。
+既に公開されたbaselineを使う場合はimmutableなexact versionを指定し、live dist-tagの現在の状態は別に確認します。
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
 npm install @netsujo/agent-role-contracts@0.5.0
-# または: npm install @netsujo/agent-role-contracts
 ```
 
-versionを省略したpackage名は`latest`に従い、現在は安定版`0.5.0`を取得します。
+`1.0.0` candidateはreview済みlocal `.tgz`から導入します。registryの`npm install @netsujo/agent-role-contracts@1.0.0`は、権限を持つ担当者による公開後にregistryを独立確認できた場合だけ有効です。
 
 ## APIとCLI
 

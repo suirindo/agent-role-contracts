@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0 — compatibility commitment
+
+- Align package, lockfile, and public report metadata at `1.0.0`; at preparation on 2026-10-15 this candidate was unpublished. Current acceptance/publication is tracked in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52); external adoption is not inferred.
+- Commit the existing 0.5 public surface as the 1.x compatibility floor: Node.js `>=22.5`, the same imports and sync/async API shapes, CLI and fail-closed claims, twelve frozen schema versions/IDs, and exact G1 digests.
+- Add an archived-package differential that permits the installed top-level report version change from `0.5.0` to `1.0.0` plus exactly the two reviewed human CLI-help wording changes; all remaining raw API/CLI machine observations, schemas, digests, diagnostics, whitespace, and output bytes remain protected.
+- Document that upgrading from `0.5.0` requires no declaration rewrite. Publication and release-gate acceptance are recorded separately from this versioned changelog.
+
+- Record the package-inventory delta from the immutable `0.5.0` archive: eight added files (`src/crewai-adapter.mjs` and seven files under `examples/crewai-adapter-spike/`), with no removed files. The CrewAI spike ships as an unexported experiment, outside the public API and 1.x compatibility commitment; no CrewAI runtime capability is introduced.
+
 ## 0.5.0 — stable release (npm `latest`)
 
 - Promote the G0 → G3 line from the `0.5.0-alpha.1` public preview to stable without broadening authority semantics.

@@ -1,6 +1,6 @@
 # General-purpose architecture and evolution
 
-G0, G1, G2 and G3 are implemented in the current repository history. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. The public `0.5.0` tarball is a distinct archived artifact; conformance tests compare it with a freshly packed candidate rather than assuming repository-source byte identity. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
+G0, G1, G2 and G3 are implemented in the current repository history. G2 PR #17 merged as `2b20851bdd9b7fd6823f5bd606f3d2f6345459ff`; G3 PR #19 merged as `d18f867d91ec8abb4038af85f17c7b3d4954b869`. The source metadata identifies a `1.0.0` release candidate; current publication status is recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). The public `0.5.0` tarball is its distinct archived compatibility baseline; conformance tests compare it with a freshly packed candidate rather than assuming repository-source byte identity. G2 filesystem-write remains an optional explicit `/adapters/filesystem-write` subpath and is not re-exported from root or `/core`. G3 provides generic core lifecycle declarations, not a runtime, state machine or authenticator. Candidate preparation or publication does not imply production adoption, runtime permission, deployment, authenticated evidence or execution authority.
 
 Design revision: 2026-10-14. This document describes the implemented general-purpose product direction and identifies future work separately. Source acceptance, merge, registry publication and downstream adoption are distinct milestones.
 
@@ -50,7 +50,7 @@ Schema JSON files remain the only authored schema source. The existing generator
 
 **Optional imports are not separate npm packages.** The current distribution ships one package. The compatibility root necessarily imports the existing finance facade; consumers requiring a domain-isolated dependency graph should use `/core`. A future package split or root-export removal would require an explicit compatibility decision, not a silent refactor.
 
-Existing synchronous generic APIs, asynchronous finance APIs, schema versions, diagnostic ordering and CLI command/exit semantics are preserved. New subpaths are additive. The stable package line is `0.5.0`; npm stable installs use `latest`.
+Existing synchronous generic APIs, asynchronous finance APIs, all twelve schema versions/IDs, diagnostic ordering and CLI command/exit semantics are preserved from the published `0.5.0` baseline in the `1.0.0` candidate. Registry publication and dist-tag state are not asserted.
 
 ## 5. Concrete non-financial acceptance examples
 
