@@ -16,6 +16,8 @@
 
 宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
 
+`1.0.0`の配布物には、`src/crewai-adapter.mjs`と`examples/crewai-adapter-spike/`内の7ファイルを追加しています。これらは未exportの実験用ファイルです。公開APIおよび1.xの互換性保証には含めず、CrewAI用のpackage subpathやCLI commandも提供しません。実験コードの同梱は、CrewAIの実行やruntime権限の強制を意味しません。
+
 candidateを評価する場合は、review済みのlocal `.tgz`だけを、たとえば`npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`で導入してください。`npm install @netsujo/agent-role-contracts@1.0.0`は、権限を持つ担当者による公開が完了し、registry上のversionを独立に確認できた場合に限って実行します。正本は[互換性commitment](docs/COMPATIBILITY.md)と[release gate](docs/RELEASE_GATES.md)です。
 
 ## 3分で体験する Quick Start

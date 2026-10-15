@@ -7,6 +7,8 @@
 - Add an archived-package differential that permits the installed top-level report version change from `0.5.0` to `1.0.0` plus exactly the two reviewed human CLI-help wording changes; all remaining raw API/CLI machine observations, schemas, digests, diagnostics, whitespace, and output bytes remain protected.
 - Document that upgrading from `0.5.0` requires no declaration rewrite. Publication and release-gate acceptance are recorded separately from this versioned changelog.
 
+- Record the package-inventory delta from the immutable `0.5.0` archive: eight added files (`src/crewai-adapter.mjs` and seven files under `examples/crewai-adapter-spike/`), with no removed files. The CrewAI spike ships as an unexported experiment, outside the public API and 1.x compatibility commitment; no CrewAI runtime capability is introduced.
+
 ## 0.5.0 — stable release (npm `latest`)
 
 - Promote the G0 → G3 line from the `0.5.0-alpha.1` public preview to stable without broadening authority semantics.

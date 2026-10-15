@@ -28,6 +28,8 @@ The source package candidate is `@netsujo/agent-role-contracts@1.0.0`, requires 
 
 Every core and finance export on the root facade is the identical JavaScript value exported by its explicit subpath. The filesystem adapter is intentionally not exported from root or `/core`.
 
+Physical package contents extend beyond this public API. The `1.0.0` tarball ships `src/crewai-adapter.mjs` and the seven files under `examples/crewai-adapter-spike/` as an unexported experiment. These eight additions to the archived `0.5.0` file inventory are excluded from the 1.x compatibility commitment. There is no supported CrewAI package subpath or CLI command; importing an internal file by its disk path does not make it public API.
+
 `VERSION` identifies the installed package version (`"1.0.0"` in this candidate); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
 
 ## Schema contract

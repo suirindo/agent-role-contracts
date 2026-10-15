@@ -174,9 +174,9 @@ node examples/filesystem-write-adapter/demo.mjs
 
 The stable `0.5.0` release includes the optional adapter subpath. See the [example notes](examples/filesystem-write-adapter/README.md).
 
-## CrewAI adapter spike (source only)
+## CrewAI adapter spike (experimental, no public export)
 
-A source-only CrewAI adapter spike now checks one bounded CrewAI task pair against an existing ARC bundle without deriving authority from role text. CrewAI's current default project format is JSON-first (`crew.jsonc` plus `agents/*.jsonc`); the spike consumes the strict JSON subset of that config and keeps parsing/runtime concerns outside ARC. Classic YAML can later be normalized into the same adapter input without changing the authority boundary.
+The experimental CrewAI adapter spike checks one bounded CrewAI task pair against an existing ARC bundle without deriving authority from role text. CrewAI's current default project format is JSON-first (`crew.jsonc` plus `agents/*.jsonc`); the spike consumes the strict JSON subset of that config and keeps parsing/runtime concerns outside ARC. Classic YAML can later be normalized into the same adapter input without changing the authority boundary.
 
 The adapter maps only explicit framework fields: implementation `agent`, implementation `output_file`, review `agent`, review `context`, and an explicit ARC task type. The ARC bundle remains the source of truth for authority, scope and reviewer separation. Unsupported tool, delegation, directory-creation or extra-project semantics fail closed rather than being inferred.
 
@@ -188,7 +188,7 @@ node examples/crewai-adapter-spike/demo.mjs
 
 The demo proves `PASS -> FAIL -> PASS` by changing only CrewAI's `output_file` from `docs/example.md` to `secrets/production.txt`; the unchanged ARC bundle rejects the drift with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`, then accepts the repaired config. No CrewAI agent is started and no file is written. See [the spike boundary and fixtures](examples/crewai-adapter-spike/README.md).
 
-This is repository-source evidence only. It is **not** part of the published `0.5.0` npm API or a claim of CrewAI runtime enforcement.
+The `1.0.0` tarball includes `src/crewai-adapter.mjs` and the seven files under `examples/crewai-adapter-spike/` as an unexported experiment. They are not public API and are excluded from the 1.x compatibility commitment. No CrewAI package subpath or CLI command is supported. These eight files are additions to the archived `0.5.0` inventory, not a new runtime capability; the demonstration does not establish CrewAI runtime enforcement.
 
 ## G3 lifecycle declarations
 
@@ -200,7 +200,7 @@ npm run demo:lifecycle
 
 The stable `0.5.0` release provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
-Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Stable package publication is complete; runtime adoption and execution remain separate.
+Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. The `0.5.0` baseline was published; publication of the `1.0.0` candidate, runtime adoption and execution remain separate.
 
 ## Full three-role example
 
