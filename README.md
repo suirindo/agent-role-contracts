@@ -34,7 +34,7 @@ No API key, agent runtime, or account is required for the starter. A PASS means 
 
 ## Migrating from 0.5.0
 
-No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other observed API/CLI field, schema byte, and fixed digest to remain equal. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
+No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
 
 For candidate evaluation, install only a reviewed local `.tgz`, for example `npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`. Run `npm install @netsujo/agent-role-contracts@1.0.0` only if authorized publication has completed and the registry version has been independently verified. See the canonical [compatibility commitment](docs/COMPATIBILITY.md) and [release gates](docs/RELEASE_GATES.md).
 
@@ -222,7 +222,7 @@ Use `examples/another-team.json` to see different canonical IDs and `examples/co
 
 The hosted CI matrix covers Ubuntu / Node.js 22.5.0, Ubuntu / Node.js 24, macOS / Node.js 22 and Windows / Node.js 22. Every candidate must pass on its own exact HEAD and still requires independent acceptance; a version range or an older candidate's result is not proof for current bytes. Node 22.5.0 is a minimum-compatibility fixture, not a deployment recommendation.
 
-## Optional onchain finance preview
+## Optional onchain finance profile (schema 0.2)
 
 Check a declared treasury payment or token-allowance proposal against chain, sender, recipient/spender, asset, amount and fee limits. Simulation, independent-role review and human approval bind to a SHA-256 subject covering the complete bundle, task, financial policy and proposal. The optional Safe profile matches the supported fields of a supplied single CALL envelope to an approved intent; it does not verify canonical Safe serialization or a Safe transaction hash.
 

@@ -4,7 +4,7 @@
 
 - Align package, lockfile, and public report metadata at `1.0.0`; at preparation on 2026-10-15 this candidate was unpublished. Current acceptance/publication is tracked in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52); external adoption is not inferred.
 - Commit the existing 0.5 public surface as the 1.x compatibility floor: Node.js `>=22.5`, the same imports and sync/async API shapes, CLI and fail-closed claims, twelve frozen schema versions/IDs, and exact G1 digests.
-- Add an archived-package differential that permits only the installed top-level report version change from `0.5.0` to `1.0.0`; all other raw observations, schemas, digests, diagnostics, whitespace, and output bytes remain protected.
+- Add an archived-package differential that permits the installed top-level report version change from `0.5.0` to `1.0.0` plus exactly the two reviewed human CLI-help wording changes; all remaining raw API/CLI machine observations, schemas, digests, diagnostics, whitespace, and output bytes remain protected.
 - Document that upgrading from `0.5.0` requires no declaration rewrite. Publication and release-gate acceptance are recorded separately from this versioned changelog.
 
 ## 0.5.0 — stable release (npm `latest`)

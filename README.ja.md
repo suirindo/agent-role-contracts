@@ -14,7 +14,7 @@
 
 ## 0.5.0からの移行
 
-宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のAPI・CLI観測値、schema bytes、固定digestが一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
+宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
 
 candidateを評価する場合は、review済みのlocal `.tgz`だけを、たとえば`npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`で導入してください。`npm install @netsujo/agent-role-contracts@1.0.0`は、権限を持つ担当者による公開が完了し、registry上のversionを独立に確認できた場合に限って実行します。正本は[互換性commitment](docs/COMPATIBILITY.md)と[release gate](docs/RELEASE_GATES.md)です。
 
@@ -138,7 +138,7 @@ node bin/agent-role-contracts.mjs validate --bundle examples/invalid-self-review
 
 CIマトリクスは Ubuntu / Node.js 22.5.0、Ubuntu / Node.js 24、macOS / Node.js 22、Windows / Node.js 22 を対象にします。各候補は必ずそのexact HEADで通過する必要があり、過去候補の成功は現在のbytesへ流用しません。22.5.0は最小互換性確認用で、実運用への導入推奨ではありません。独立した受入は別途必要です。
 
-## 任意のオンチェーン金融プレビュー
+## 任意のオンチェーン金融profile（schema 0.2）
 
 資金移動やトークン承認の提案を、チェーン・送信元・送金先/spender・資産・金額・手数料の宣言上の上限と照合します。役割bundle、タスク、金融ポリシー、提案全体のSHA-256に、simulation・独立roleのレビュー・人間承認を結び付けます。alpha.2では実行後receiptについても、同じsubject・chain・nonceとの整合を検査できます。
 

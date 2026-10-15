@@ -178,6 +178,27 @@ test('both README files identify the current public version and demos remain wir
 });
 
 
+test('packaged 1.0 documentation separates package stability from historical/profile versions', () => {
+  const changelog = read('CHANGELOG.md');
+  const compatibility = read('docs/COMPATIBILITY.md');
+  const filesystem = read('examples/filesystem-write-adapter/README.md');
+  const lifecycle = read('examples/task-lifecycle/README.md');
+  const financeReadme = read('examples/onchain-finance/README.md');
+  const financeDemo = read('examples/onchain-finance/demo.mjs');
+  assert.doesNotMatch(changelog, /permits only the installed top-level report version change/);
+  assert.match(changelog, /two reviewed human CLI-help wording changes/);
+  assert.doesNotMatch(compatibility, /top-level `version` field is the sole approved differential/);
+  assert.match(compatibility, /sole approved machine-report differential/);
+  assert.match(compatibility, /two reviewed human CLI-help lines/);
+  for (const text of [filesystem, lifecycle]) assert.doesNotMatch(text, /Repository source matches the `0\.5\.0` stable package line/);
+  assert.doesNotMatch(filesystem, /published npm release is not claimed to contain this optional subpath/i);
+  assert.match(filesystem, /published `0\.5\.0` baseline contains this optional subpath/);
+  assert.doesNotMatch(financeReadme, /v0\.2 preview/i);
+  assert.match(financeReadme, /optional profile, schema 0\.2/i);
+  assert.doesNotMatch(financeDemo, /v0\.2 preview/i);
+  assert.match(financeDemo, /profile \(schema 0\.2\)/i);
+});
+
 test('lifecycle description is distinct from full semantic validation', async t => {
   const bundle = fixture('starter-bundle'), task = fixture('starter-task');
   const action = json({schema_version: '0.3', id: 'compatibility-lifecycle-semantics', kind: 'document', parameters: {revision: 1}});

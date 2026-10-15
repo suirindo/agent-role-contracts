@@ -1,6 +1,6 @@
-# Onchain finance intent checks — v0.2 preview
+# Onchain finance intent checks — optional profile, schema 0.2
 
-Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The `0.5.0` stable package includes this optional profile, and npm stable installs use `latest`. The finance profile remains an optional, separately scoped capability.
+Inspect an AI-generated payment or allowance proposal before a separately controlled execution workflow consumes it. The published `0.5.0` compatibility baseline includes this optional profile, and the `1.0.0` source line preserves its existing schema-0.2/API contract. Package stability and the profile schema version are separate; registry status is tracked in issue #52.
 
 ## Try the demo
 
@@ -90,7 +90,7 @@ The subject digest is SHA-256 over canonical JSON containing the finance-profile
 
 Timestamps must be real UTC calendar times, with optional three-digit milliseconds. The supplied evaluation clock must be at or after the evidence times and within the policy age. Declared order is simulation → review → human approval. The API does not read a clock; callers must supply a trustworthy current evaluation time. Passing an old time can make old declarations pass. The CLI defaults to its local UTC clock, and `--at` is an explicit deterministic-test override.
 
-Simulation declarations must name the proposal's chain and declare success. Standard ERC-20 operations require a declared boolean `true` return, including when no revert is reported. Nonstandard empty-return tokens are outside this preview. Native transfers require a `null` return value. The checker does not perform or authenticate simulation.
+Simulation declarations must name the proposal's chain and declare success. Standard ERC-20 operations require a declared boolean `true` return, including when no revert is reported. Nonstandard empty-return tokens are outside this bounded profile. Native transfers require a `null` return value. The checker does not perform or authenticate simulation.
 
 ## CLI
 
@@ -118,14 +118,14 @@ Exit codes stay 0 consistent declarations, 1 invalid declarations, 2 CLI/file er
 
 PASS establishes only consistency of the supplied declarations. An execution receipt PASS says that the supplied receipt names the approved subject, chain and nonce with internally consistent status/timing; it does not prove that the transaction hash, block or receipt came from a real chain. The package does not authenticate humans/reviewers, verify evidence or blockchain state, inspect arbitrary calldata (the optional Safe profile only matches supported CALL calldata), implement EIP-155 signing/replay protection, prevent repeated spending, verify transaction serialization, or establish financial safety. It has no wallet, private key, RPC, provider, chain write, signing or broadcasting path.
 
-An execution system remains responsible for trusted policy and time, authenticated decisions, live state, exact serialized transaction correspondence, current nonce/fee checks, aggregate budgets, replay prevention, stopping conditions, simulation and actual custody permissions. Bind its immediate pre-execution checks to the same subject and enforce its own controls. Never treat this preview's PASS as permission to move funds.
+An execution system remains responsible for trusted policy and time, authenticated decisions, live state, exact serialized transaction correspondence, current nonce/fee checks, aggregate budgets, replay prevention, stopping conditions, simulation and actual custody permissions. Bind its immediate pre-execution checks to the same subject and enforce its own controls. Never treat this profile's PASS as permission to move funds.
 
 ## Standards used
 
 - [ERC-20](https://eips.ethereum.org/EIPS/eip-20): transfer/approve uint256 amounts and boolean return handling; allowance update considerations. Zero-value transfers remain supported.
 - [EIP-155](https://eips.ethereum.org/EIPS/eip-155): chain identity in signed transactions. This checker compares declared chain IDs; it does not implement signing or replay protection.
 
-The financial policy and finite preview rules are Netsujo's application profile, not Ethereum protocol requirements. Free MIT OSS, with no account, wallet or telemetry requirement. Built by [Netsujo](https://netsujo.jp/en), a Web3 startup.
+The financial policy and finite profile rules are Netsujo's application profile, not Ethereum protocol requirements. Free MIT OSS, with no account, wallet or telemetry requirement. Built by [Netsujo](https://netsujo.jp/en), a Web3 startup.
 
 
 ## Safe wallet-proposal boundary
