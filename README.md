@@ -11,7 +11,7 @@ The video shows the core preflight flow: declare **role**, **permissions**, and 
 **PASS ≠ execution authority.** A passing ARC check means the supplied declarations are internally consistent under the checks that ran. Runtime identity, actual permissions, side-effect enforcement, evidence verification, and execution approval remain separate responsibilities.
 
 - [Try the three-minute quick start](#quick-start--three-minutes)
-- [Read the v0.5.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v0.5.0)
+- [Read the v1.0.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v1.0.0)
 - [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
 
 Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
@@ -30,13 +30,13 @@ Agent Role Contracts turns those contradictions into deterministic, offline pref
 
 No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
 
-**Release target: `1.0.0`.** The previously published `0.5.0` package is the compatibility baseline. This candidate requires Node.js 22.5 or newer and preserves the same imports, sync/async API shapes, CLI behavior, twelve frozen schema versions and IDs, fail-closed claims, and exact G1 digest behavior. Preparation snapshot (2026-10-15): this version was unpublished when this source was prepared. Current acceptance and registry publication are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), separately from this versioned document.
+**Stable release: `1.0.0` (npm `latest`, verified 2026-10-16).** The exact publication is documented in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). Node.js 22.5 or newer is required. The archived `0.5.0` release is the compatibility baseline; `1.0.0` preserves its public imports, synchronous/async API shapes, CLI behavior, twelve schema identities, fail-closed claims and G1 digest behavior. Publication does **not** authenticate an agent, enforce runtime permissions or establish production adoption.
 
 ## Migrating from 0.5.0
 
 No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
 
-For candidate evaluation, install only a reviewed local `.tgz`, for example `npm install --ignore-scripts ./netsujo-agent-role-contracts-1.0.0.tgz`. Run `npm install @netsujo/agent-role-contracts@1.0.0` only if authorized publication has completed and the registry version has been independently verified. See the canonical [compatibility commitment](docs/COMPATIBILITY.md) and [release gates](docs/RELEASE_GATES.md).
+The published `1.0.0` package can be installed from npm using the [current stable instructions](#install) below. A reviewed local `.tgz` can reproduce historical prepublication evidence but is not required for ordinary installation. See the [compatibility commitment](docs/COMPATIBILITY.md), [release gates](docs/RELEASE_GATES.md) and [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52).
 
 ## Quick Start — three minutes
 
@@ -75,15 +75,15 @@ Next: docs/QUICKSTART.md (change the scope and rerun the checker).
 
 The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
 
-### Try the previously published baseline instead (no clone)
+### Try the published stable package (no clone)
 
-To run the previously published `0.5.0` baseline without cloning the repository, start in an empty directory:
+To run the published `1.0.0` stable package without cloning the repository, start in an empty directory:
 
 ```sh
 mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@0.5.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
 npx --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
@@ -95,10 +95,10 @@ The last command prints `PASS: explain`. It checks the bundled two-role declarat
 If `npm install` reports `EPERM` about root-owned files in a shared npm cache, do not use `sudo`. Retry with a cache local to this directory:
 
 ```sh
-NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@0.5.0
+NPM_CONFIG_CACHE="$PWD/.npm-cache" npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
 ```
 
-This command intentionally pins the historical `0.5.0` baseline; it does not describe the source candidate or assert the current `latest` dist-tag.
+These commands pin the published `1.0.0` release instead of relying on the mutable `latest` dist-tag. To reproduce the historical `0.5.0` baseline, install that version explicitly; it is not the current stable recommendation.
 
 ### Why it matters
 
@@ -133,7 +133,7 @@ Run three non-financial examples using the existing contracts:
 npm --prefix agent-role-contracts run demo:general --silent
 ```
 
-The previously published `0.5.0` baseline and the `1.0.0` source candidate provide `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports.
+The published `0.5.0` baseline and `1.0.0` stable release provide `@netsujo/agent-role-contracts/core` and the optional `@netsujo/agent-role-contracts/profiles/onchain-finance` entrypoint. The root import remains backward compatible. `/core` does not load financial modules or schemas; the compatibility root still includes the existing finance exports.
 
 The examples validate declarations about output files; they do not execute business tasks, send messages or verify artifacts. See the [architecture and evolution design](docs/ARCHITECTURE.md).
 
@@ -200,7 +200,7 @@ npm run demo:lifecycle
 
 The stable `0.5.0` release provides root and `/core` exports `describeTaskAction`, `describeTaskLifecycle` and `validateTaskLifecycle`. Lifecycle schema version is `0.4`, profile `task-lifecycle/0.4`; subject binding uses the current G1 digest. G2 filesystem-write is included through its optional subpath. Finance and Safe are optional.
 
-Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. The `0.5.0` baseline was published; publication of the `1.0.0` candidate, runtime adoption and execution remain separate.
+Lifecycle PASS means declaration consistency, not event truth, authentication, artifact byte verification or runtime acceptance. External `run_id` is caller-supplied correlation, not replay protection. Event decisions are declarations, not authenticated events. Artifact `sha256` is declared identity; bytes are not read or verified, and locators are inert. Lifecycle consistency, artifact identity consistency, authenticity and runtime acceptance are separate. No action executes, no identity/review/approval is verified, and no timestamps, clock checks or state-machine ordering are provided. Both `0.5.0` and `1.0.0` were published; publication does not establish runtime adoption, execution or authorization.
 
 ## Full three-role example
 
@@ -252,14 +252,14 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-For the previously published baseline, use the immutable exact version. Check a live dist-tag separately from this versioned source:
+**Published stable: `1.0.0` (npm `latest`, verified 2026-10-16).** Pin the exact version for reproducible installations:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
-npm install @netsujo/agent-role-contracts@0.5.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
 ```
 
-For the `1.0.0` candidate, install a reviewed local `.tgz`. The registry command `npm install @netsujo/agent-role-contracts@1.0.0` is valid only after authorized publication and independent registry verification.
+The registry's `latest` dist-tag may change. Check the current value when needed; this versioned README does not establish live registry state. To reproduce the archived `0.5.0` baseline, install `@netsujo/agent-role-contracts@0.5.0` explicitly. A declaration PASS does not grant runtime permission or execution authority.
 
 ## API
 
