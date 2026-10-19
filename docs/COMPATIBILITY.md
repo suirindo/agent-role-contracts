@@ -1,12 +1,12 @@
 # Public compatibility surface
 
-This document is the canonical compatibility commitment for the `1.0.0` source candidate. Preparation snapshot (2026-10-15): this candidate was unpublished when prepared. Current release-gate acceptance and registry publication are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52), rather than inferred from this versioned document. Downstream adoption is a separate outcome. Its floor is the genuinely published `0.5.0` surface. Machine compatibility changes only installed package/report version metadata; two separately reviewed human CLI-help lines also change wording.
+This document is the canonical compatibility commitment for the published stable `1.0.0` release. The prepublication source snapshot was prepared on 2026-10-15; authorized npm publication and exact artifact verification completed on 2026-10-16 and are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). The compatibility floor is the genuinely published `0.5.0` package. Downstream adoption and runtime authorization are separate outcomes. Machine compatibility changes only installed package/report version metadata; exactly two reviewed human CLI-help lines also change wording.
 
 ## Migrating from 0.5.0
 
 Upgrading requires no declaration rewrite. Node.js `>=22.5`, all public import paths, synchronous and promise-returning API shapes, CLI commands and exit classes, false limitation claims, the twelve schema files and their existing versions/IDs—including lifecycle schema `0.4` and IDs containing their historical lifecycle versions—and exact G1 digest behavior remain unchanged. Machine reports identify the installed package as `1.0.0`; that top-level `version` field is the sole approved machine-report differential from the archived `0.5.0` corpus. Separately, exactly two reviewed human CLI-help lines change wording.
 
-The 1.x line follows semantic versioning. Compatible additions must preserve existing consumers; deprecations remain available with a documented migration period within the applicable major line, and incompatible contract removal requires a new major version. Candidate testing may install a reviewed local `.tgz`. Any `npm install @netsujo/agent-role-contracts@1.0.0` instruction is conditional on authorized publication and independent registry verification. See [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52) and [RELEASE_GATES.md](RELEASE_GATES.md); acceptance of those gates is recorded for the exact candidate in that issue.
+The 1.x line follows semantic versioning. Compatible additions must preserve existing consumers; deprecations remain available with a documented migration period within the applicable major line before removal, and breaking public-contract changes require a new major version. The reviewed local `.tgz` was used for prepublication verification; users can now install `@netsujo/agent-role-contracts@1.0.0` from npm. See the accepted [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52) and [RELEASE_GATES.md](RELEASE_GATES.md).
 
 The package is an offline declaration checker. A `valid: true` report means that the declarations passed the checks performed by the invoked operation; it is not a substitute for a different validation operation. In particular, `describeTaskLifecycle` and `lifecycle-describe` can return `valid: true` with `lifecycle_matches_subject: false` when route or phase semantics fail. Use `validateTaskLifecycle` or `lifecycle` for full lifecycle declaration validation. A valid lifecycle may still declare `blocked`, `denied`, `declared_failure` or `missing`; consistency is not work success. It never means that an action was authorized or executed, an identity or evidence was authenticated, a provider was called, a filesystem or chain was inspected, or a deployment or production adoption occurred.
 
@@ -16,7 +16,7 @@ Agent Role Contracts began as a bounded extraction and generalization of declara
 
 ## Package and API contract
 
-The source package candidate is `@netsujo/agent-role-contracts@1.0.0`, requires Node.js `>=22.5`, and has these unchanged public mappings:
+The published stable package is `@netsujo/agent-role-contracts@1.0.0`, requires Node.js `>=22.5`, and has these unchanged public mappings:
 
 | Import | Target | Exports |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Every core and finance export on the root facade is the identical JavaScript val
 
 Physical package contents extend beyond this public API. The `1.0.0` tarball ships `src/crewai-adapter.mjs` and the seven files under `examples/crewai-adapter-spike/` as an unexported experiment. These eight additions to the archived `0.5.0` file inventory are excluded from the 1.x compatibility commitment. There is no supported CrewAI package subpath or CLI command; importing an internal file by its disk path does not make it public API.
 
-`VERSION` identifies the installed package version (`"1.0.0"` in this candidate); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
+`VERSION` identifies the installed package version (`"1.0.0"` in the published stable release); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
 
 ## Schema contract
 
