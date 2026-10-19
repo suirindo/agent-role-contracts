@@ -2,7 +2,7 @@
 
 Agent Role Contracts validates supplied declarations. A PASS is a preflight consistency result; it grants no permission to run an agent, write files, call an external tool, merge a change, move funds or publish a release.
 
-The repository carries a `1.0.0` release candidate (publication state is recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)); the previously published `0.5.0` package is its compatibility baseline. G0/G1/G2/G3 are implemented with the same public imports and declaration/schema versions. The generic `/core` includes G1 task/action binding and G3 lifecycle declarations; G2 is available only through the explicit optional `/adapters/filesystem-write` subpath. Finance and Safe remain an optional `/profiles/onchain-finance` profile. Keep the checker version and exact inputs with every integration record. Candidate evaluation may use a reviewed local `.tgz`; use an npm `1.0.0` install only after authorized publication is independently verified.
+The repository and npm `latest` carry published stable `1.0.0` ([publication evidence: issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)); `0.5.0` is the archived compatibility baseline. G0/G1/G2/G3 are implemented with the same public imports and declaration/schema versions. The generic `/core` includes G1 task/action binding and G3 lifecycle declarations; G2 is available only through the explicit optional `/adapters/filesystem-write` subpath. Finance and Safe remain an optional `/profiles/onchain-finance` profile. Keep the checker version and exact inputs with every integration record. For reproducible installation, pin `@netsujo/agent-role-contracts@1.0.0` from npm; a reviewed local `.tgz` can reproduce historical prepublication evidence.
 
 ## Bind the check to the proposed work
 
@@ -49,7 +49,7 @@ npm run demo:lifecycle
 node bin/agent-role-contracts.mjs --help
 ```
 
-The demos construct fictional declarations in memory and execute no actions. For your own JSON files, the current source CLI offers `action-subject` (`--bundle`, `--task`, `--action`), `action-bind` (also `--binding`), `adapter-filesystem-write` (also `--mapping`), and `lifecycle-describe` / `lifecycle` (also `--lifecycle`). All accept `--format json|text`; see the help for exact command syntax. These APIs, subpaths and commands exist in the published `0.5.0` baseline and are unchanged in the `1.0.0` source candidate. See the executable [G1 example](../examples/action-binding/demo.mjs), [G2 example](../examples/filesystem-write-adapter/demo.mjs) and [G3 example](../examples/task-lifecycle/demo.mjs).
+The demos construct fictional declarations in memory and execute no actions. For your own JSON files, the current source CLI offers `action-subject` (`--bundle`, `--task`, `--action`), `action-bind` (also `--binding`), `adapter-filesystem-write` (also `--mapping`), and `lifecycle-describe` / `lifecycle` (also `--lifecycle`). All accept `--format json|text`; see the help for exact command syntax. These APIs, subpaths and commands exist in the published stable `1.0.0` release and preserve the supported `0.5.0` compatibility baseline. See the executable [G1 example](../examples/action-binding/demo.mjs), [G2 example](../examples/filesystem-write-adapter/demo.mjs) and [G3 example](../examples/task-lifecycle/demo.mjs).
 
 ## Responsibilities retained by the integration
 

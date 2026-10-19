@@ -4,6 +4,8 @@ Agent Role Contracts is easiest to evaluate against one workflow you already run
 
 The goal is not to replace your IAM, CI, agent runtime, or approval system. The goal is to make the declared role, task scope, review separation, and handoff explicit enough to check before you rely on them.
 
+For a reproducible starting point, use the [pinned v1.0.0 external evaluation kit](../experiments/external-evaluation/README.md) and its [evidence checklist](../experiments/external-evaluation/EVIDENCE_TEMPLATE.md). The helper checks PASS → deliberate contradiction FAIL → repaired PASS and optionally a distinct **second declaration**. Actual second-task use by an outside operator requires separate real-workflow/commit/CI evidence; a synthetic check cannot establish adoption or runtime enforcement.
+
 ## Pick a narrow workflow
 
 Start with one recurring development workflow such as:
@@ -119,7 +121,7 @@ A stronger signal is the same enforcement or evidence gap appearing in at least 
 
 ## What this project currently covers
 
-The public package checks declarations. The published v0.5.0 compatibility baseline and the 1.0.0 source line cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
+The public package checks declarations. The published stable `1.0.0` release and its archived `0.5.0` compatibility baseline cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
 
 It does not authenticate agents, grant runtime permission, verify output bytes, enforce any runtime, filesystem, SaaS or API permission, or prove that a reviewer was independent in the real execution environment. Check the README for the exact boundary of the version you are using.
 

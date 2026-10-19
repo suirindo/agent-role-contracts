@@ -15,7 +15,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
-For a run of the previously published `0.5.0` baseline without cloning, use [the no-clone instructions](../README.md#try-the-previously-published-baseline-instead-no-clone), including recovery from an `EPERM` npm cache error. The repository itself carries a `1.0.0` candidate (publication state is recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)) with the same G1/G2/G3 surface; it makes no claim about the current npm `latest` dist-tag.
+For the published stable `1.0.0` package without cloning, use [the no-clone instructions](../README.md#try-the-published-stable-package-no-clone), including the documented `EPERM` npm-cache recovery. The already published `0.5.0` release is an archived compatibility baseline. The current public release was accepted in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52).
 
 ## Check your own edit
 
@@ -68,12 +68,13 @@ npm run demo:filesystem-adapter
 npm run demo:lifecycle
 ```
 
-The corresponding G1/G2/G3 code, examples, and subpaths are included in the published `0.5.0` baseline and unchanged in the `1.0.0` candidate. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the packaged APIs, CLI, and example files rather than expecting those repository scripts to appear in its own `package.json`.
+The corresponding G1/G2/G3 code, examples, and subpaths are included in published stable `1.0.0`, with the previous `0.5.0` release retained as a compatibility baseline. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the packaged APIs, CLI, and example files rather than expecting those repository scripts to appear in its own `package.json`.
 
 See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 review binding, the explicit optional G2 adapter and G3 lifecycle declarations. These demos neither execute actions nor verify artifact bytes.
 
 ## Next
 
+- [Evaluate a real workflow using the pinned v1.0.0 kit](../experiments/external-evaluation/README.md) and [record reproducible evidence](../experiments/external-evaluation/EVIDENCE_TEMPLATE.md).
 - [Full three-role example](../README.md#full-three-role-example): coordination, conditional inputs and handoffs.
 - [Architecture and extraction boundary](COMPATIBILITY.md): which concepts the public package retains.
 - [Integration guide](INTEGRATION.md): preserve trusted policy, identity, review, approval, evidence and runtime-enforcement boundaries.

@@ -6,6 +6,8 @@ body:
     attributes:
       value: |
         Thanks for testing a concrete workflow. The useful signal is what changed in your process, including cases where your existing controls were already sufficient.
+        For a repeatable check, see https://github.com/suirindo/agent-role-contracts/tree/main/experiments/external-evaluation .
+        Synthetic second-declaration checks are separate from actual external second-task execution; provide a distinct real-task commit/CI link if one exists.
         
         Do not include credentials, customer data, private repository paths, production secrets, or other sensitive material.
   - type: textarea
@@ -21,7 +23,7 @@ body:
     attributes:
       label: Version or commit
       description: Package version, dist-tag resolution, or repository commit used.
-      placeholder: "@netsujo/agent-role-contracts@0.5.0 or commit SHA"
+      placeholder: "@netsujo/agent-role-contracts@1.0.0 or exact commit SHA"
     validations:
       required: true
   - type: textarea
@@ -55,6 +57,14 @@ body:
         - "No"
     validations:
       required: true
+  - type: textarea
+    id: second_real_task
+    attributes:
+      label: Actual second-task reuse evidence (optional)
+      description: If you ran ARC on a different real task, link its commit/CI or reproducible operation. Intentions and synthetic second declarations do not count as executed reuse.
+      placeholder: "Different task ID + exact version/commit + public CI URL, or NOT RUN"
+    validations:
+      required: false
   - type: textarea
     id: existing_controls
     attributes:
