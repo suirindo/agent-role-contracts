@@ -10,6 +10,8 @@
 
 **PASS ≠ 実行権限。** PASSは、実行した検査の範囲で供給された宣言が整合していることを示します。本人確認、実際のアクセス権、side effectの強制、証拠検証、実行承認は別の責務です。
 
+[公開v1.0.0を固定した外部評価キット](experiments/external-evaluation/README.md)では、実ワークフローの宣言と意図的な矛盾を再現し、[証拠記録テンプレート](experiments/external-evaluation/EVIDENCE_TEMPLATE.md)で結果を共有できます。合成例のPASSと第三者による実タスクの利用証拠は分けて扱います。
+
 **現在の安定版は`1.0.0`（npm `latest`、2026年10月16日確認）です。** npm公開と検証の正本は[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)にあります。`0.5.0`は互換性検証用の履歴版です。Node.js 22.5以上が必要で、既存のimport、同期・非同期API、CLI、12個のschema version/ID、fail-closedな宣言、G1 digestを維持します。ただし公開・PASSは実行者の本人確認、runtimeでのアクセス制御、本番導入を証明しません。
 
 ## 0.5.0からの移行
