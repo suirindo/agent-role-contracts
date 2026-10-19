@@ -1,3 +1,4 @@
 # GitHub Sponsors funding link for Agent Role Contracts.
-# Publish only when the recipient is approved and the destination is live.
-github: suirindo
+# Release only after the Netsujo organization (@netsujo-inc) has an
+# approved, verified public GitHub Sponsors profile and merge is authorized.
+github: netsujo-inc
