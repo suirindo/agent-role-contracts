@@ -15,6 +15,8 @@ The video shows the core preflight flow: declare **role**, **permissions**, and 
 - [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
 - [Run the pinned v1.0.0 external evaluation kit](experiments/external-evaluation/README.md)
 
+**One-minute developer question (no installation):** Which mismatch has affected your coding-agent workflow? **A** — a task requests files outside declared scope; **B** — a review or approval is bound to a stale task; **C** — implementer and reviewer resolve to the same declared role; **D** — existing CI/runtime controls already handle these cases. [Reply with A/B/C/D + one real example in issue #37](https://github.com/suirindo/agent-role-contracts/issues/37). Negative findings are welcome. Omit secrets, private paths, and customer data.
+
 Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
 
 Agent Role Contracts turns those contradictions into deterministic, offline preflight checks.
