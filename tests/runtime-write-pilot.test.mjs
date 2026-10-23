@@ -227,3 +227,25 @@ pilotTest('foreign authority record, missing approval, deny declaration and stal
   assert.equal(s.host.stats().executorCalls, 0); assert.deepEqual(snapshot(parent), before);
  }
 });
+pilotTest('mutation specifically after G1/G2 validation still cannot change written path or bytes', async t => {
+ const parent = sandbox(t), s = await setupPilot(parent), expected = Buffer.from(s.request.bytes);
+ const original = fs.lstatSync;
+ let changedAfterChecks = false;
+ try {
+  // destination() is first entered only after both G1/G2 and actor/native checks.
+  // Test-only syscall instrumentation; the host exposes no mutation callback.
+  fs.lstatSync = (...args) => {
+   if (!changedAfterChecks && args[0] === s.workspace.root) {
+    changedAfterChecks = true;
+    s.request.bytes.fill(90); s.request.path = 'src/other.mjs';
+   }
+   return original(...args);
+  };
+  syncBuiltinESMExports();
+  assert.equal((await s.channel.submit(s.request)).outcome, 'committed');
+ } finally { fs.lstatSync = original; syncBuiltinESMExports(); }
+ assert.equal(changedAfterChecks, true);
+ assert.deepEqual(fs.readFileSync(join(s.workspace.root, 'src/example.mjs')), expected);
+ assert.equal(fs.existsSync(join(s.workspace.root, 'src/other.mjs')), false);
+ assert.equal(s.host.stats().executorCalls, 1);
+});
