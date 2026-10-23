@@ -63,3 +63,12 @@ evaluate one real read-only collector integration, establish provenance and obse
 coverage outside self-reported JSON, and measure incremental value/cost against existing
 controls. See [workflow evaluation issue #47](https://github.com/suirindo/agent-role-contracts/issues/47).
 Merge and publication follow existing repository gates; this spike does not advance a release.
+
+## Separate bounded write pilot
+
+[WRITE-PILOT.md](WRITE-PILOT.md) documents a source-only, explicitly selected
+Linux/Node24/overlayfs laboratory host connecting G1/G2 to actual new-file requests.
+Its test-only host authority, restricted worker transport, shadow/native comparison
+and file/readback tests do not change this comparator's unauthenticated report or
+supply production runtime authority. Run `node experiments/runtime-conformance/write-pilot-demo.mjs`
+and `node --test tests/runtime-write-pilot.test.mjs` only on the stated supported host.
