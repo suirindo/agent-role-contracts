@@ -65,6 +65,7 @@ const MESSAGES = {
 };
 const UNKNOWN_CODES = new Set(['REVIEW_DECLARATION_NOT_SUPPLIED', 'TASK_SCOPE_UNAVAILABLE', 'PROTECTED_BLOCK_MOVED', 'PROTECTED_BLOCK_AMBIGUOUS', 'PROTECTED_BLOCK_UNREADABLE', 'TEST_RECEIPT_NOT_SUPPLIED', 'TEST_UNREQUESTED_ID', 'FORGED_TRUST_FIELD_IGNORED', 'SEMANTIC_ACCEPTANCE_UNKNOWN', 'AUTHORITY_NOT_ESTABLISHED', 'RECEIPT_AUTHENTICITY_UNSUPPORTED', 'WORKTREE_UNTRACKED', 'WORKTREE_DIRTY', 'WORKTREE_CONFIG_UNSAFE', 'WORKTREE_STATUS_UNAVAILABLE']);
 
+export function createEvaluator({explainTask,describeTaskAction,validateTaskActionBinding,scopeContains,envelopeVersion,reportKind}) {
 function parseInput(text, code) {
   if (typeof text !== 'string') throw new EvidenceError(code);
   if (Buffer.byteLength(text) > MAX_INPUT_BYTES) throw new EvidenceError('INPUT_TOO_LARGE');
@@ -78,7 +79,7 @@ function parseEnvelope(text) {
   const e = parseInput(text, 'ENVELOPE_INVALID');
   const bad = () => { throw new EvidenceError('ENVELOPE_INVALID'); };
   const allowed = new Set(['schema_version', 'task_id', 'baseline_commit', 'candidate_commit', 'allowed_paths', 'protected', 'required_tests', 'action_id']);
-  if (Object.keys(e).some(k => !allowed.has(k)) || e.schema_version !== 'review-evidence-envelope/0.1') bad();
+  if (Object.keys(e).some(k => !allowed.has(k)) || e.schema_version !== envelopeVersion) bad();
   if (typeof e.task_id !== 'string' || !ID.test(e.task_id) || e.task_id.length > 96) bad();
   if (e.action_id !== undefined && (typeof e.action_id !== 'string' || !ID.test(e.action_id) || e.action_id.length > 96)) bad();
   for (const k of ['baseline_commit', 'candidate_commit']) if (typeof e[k] !== 'string' || !COMMIT.test(e[k])) bad();
@@ -123,7 +124,7 @@ function trustFields(value, prefix = '', depth = 0, out = []) {
 
 const safeLabel = v => (typeof v === 'string' && /^[A-Za-z0-9._:-]{1,64}$/.test(v) ? v : null);
 
-export async function evaluate({ repo, envelope: envelopeText, bundle, task, receipt: receiptText, binding }) {
+async function evaluate({ repo, envelope: envelopeText, bundle, task, receipt: receiptText, binding }) {
   const env = parseEnvelope(envelopeText);
   const receipt = receiptText === undefined ? null : parseReceipt(receiptText);
   for (const text of [bundle, task, binding]) if (text !== undefined && (typeof text !== 'string' || Buffer.byteLength(text) > MAX_INPUT_BYTES)) throw new EvidenceError('INPUT_TOO_LARGE');
@@ -261,7 +262,7 @@ export async function evaluate({ repo, envelope: envelopeText, bundle, task, rec
   const truncated = findings.length > MAX_FINDINGS;
 
   return {
-    report_kind: 'review-evidence/0.1',
+    report_kind: reportKind,
     experimental: true,
     verdict: 'NO_SINGLE_VERDICT',
     subject: {
@@ -320,6 +321,11 @@ function blockStatus(g, p, add) {
   if (at[0] !== p.start_line - 1) { add('PROTECTED_BLOCK_MOVED', 'artifact_binding', p.path); return 'MOVED'; }
   return 'PRESERVED_IN_PLACE';
 }
+
+return evaluate;
+}
+
+export const evaluate=createEvaluator({explainTask,describeTaskAction,validateTaskActionBinding,scopeContains,envelopeVersion:'review-evidence-envelope/0.1',reportKind:'review-evidence/0.1'});
 
 export const exitCodeFor = report => (Object.values(report.dimensions).some(d => d.status === 'INCONSISTENT') ? 1 : 0);
 
