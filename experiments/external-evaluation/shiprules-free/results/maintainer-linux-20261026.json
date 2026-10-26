@@ -1,7 +1,7 @@
 {
   "profile": "ARC_SHIPRULES_FREE_COMPARISON_V1",
   "evidence_class": "MAINTAINER_EXECUTED_PUBLIC_REPOSITORY_SYNTHETIC_COMPARISON",
-  "observed_at_utc": "2026-10-26T12:19:07.975Z",
+  "observed_at_utc": "2026-10-26T13:05:15.323Z",
   "environment": {
     "node": "v24.22.1",
     "platform": "linux",
@@ -26,7 +26,7 @@
         "exit_code": 0,
         "stdout": "No Godot 3 syntax found.",
         "stderr": "",
-        "elapsed_ms": 34.069
+        "elapsed_ms": 29.181
       }
     },
     "outside_scope": {
@@ -42,7 +42,7 @@
         "exit_code": 0,
         "stdout": "No Godot 3 syntax found.",
         "stderr": "",
-        "elapsed_ms": 34.069
+        "elapsed_ms": 29.181
       },
       "note": "The scanner reuses clean baseline content because only the supplied task scope changes."
     },
@@ -57,7 +57,7 @@
         "exit_code": 1,
         "stdout": "Godot 3 syntax (^[[:space:]]*export[[:space:]]*(\\(|var[[:space:]])):\ncases/syntax-regression/player.gd:3:export var speed = 120\n\nGodot 3 syntax (\\byield[[:space:]]*\\():\ncases/syntax-regression/player.gd:6:\tyield(get_tree().create_timer(0.1), \"timeout\")",
         "stderr": "",
-        "elapsed_ms": 38.752
+        "elapsed_ms": 32.242
       }
     },
     "repaired": {
@@ -71,7 +71,7 @@
         "exit_code": 0,
         "stdout": "No Godot 3 syntax found.",
         "stderr": "",
-        "elapsed_ms": 37.932
+        "elapsed_ms": 33.149
       }
     }
   },
@@ -82,7 +82,7 @@
     "repaired": true
   },
   "all_expectations_passed": true,
-  "automated_wall_ms": 426.532,
+  "automated_wall_ms": 421.787,
   "human_setup_minutes": "UNMEASURED",
   "legitimate_fixture_refusals": {
     "arc": {
