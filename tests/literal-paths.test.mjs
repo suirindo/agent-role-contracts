@@ -78,8 +78,10 @@ test('no scope-only permission escalation; G1 reviewer and role authority rules 
  assert.equal(literal.explainTask(json(x.bundle),json(x.task)).valid,false);
 });
 function repository(t){
- const repo=fs.mkdtempSync(join(os.tmpdir(),'arc-literal-'));t.after(()=>fs.rmSync(repo,{recursive:true,force:true}));
- const git=args=>{const r=spawnSync('git',args,{cwd:repo,encoding:'utf8',env:{...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:os.devNull,GIT_TERMINAL_PROMPT:'0'}});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
+ const root=fs.mkdtempSync(join(os.tmpdir(),'arc-literal-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const repo=join(root,'repo'), config=join(root,'empty-git-config');
+ fs.mkdirSync(repo);fs.writeFileSync(config,'');
+ const git=args=>{const r=spawnSync('git',args,{cwd:repo,encoding:'utf8',env:{...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:config,GIT_TERMINAL_PROMPT:'0'}});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
  git(['init','-q']);git(['config','user.name','Synthetic Fixture']);git(['config','user.email','fixture@example.invalid']);
  fs.mkdirSync(join(repo,'src/app/(ja)'),{recursive:true});fs.writeFileSync(join(repo,'src/app/(ja)/page.tsx'),'base\n');
  git(['add','.']);git(['commit','-qm','base']);const base=git(['rev-parse','HEAD']);
