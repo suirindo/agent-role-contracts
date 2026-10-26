@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { lstatSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -12,6 +12,11 @@ const OUTSIDE_SCOPE = 'outside-shiprules-comparison/forbidden.gd';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EVALUATOR = resolve(HERE, '..', 'evaluate.mjs');
 const BUNDLE = join(HERE, 'bundle.json');
+const CASE_FILES = Object.freeze([
+  ['baseline', join(HERE, 'cases', 'baseline', 'player.gd')],
+  ['syntax-regression', join(HERE, 'cases', 'syntax-regression', 'player.gd')],
+  ['repaired', join(HERE, 'cases', 'repaired', 'player.gd')]
+]);
 
 function parseArgs(argv) {
   if (argv.includes('--help')) {
@@ -58,8 +63,16 @@ function git(repo, ...args) {
 function assertPinnedClean(repo, expectedSha, label) {
   const actual = git(repo, 'rev-parse', 'HEAD');
   if (actual !== expectedSha) throw new Error(`${label} commit ${actual} differs from ${expectedSha}`);
-  const tracked = git(repo, 'status', '--porcelain', '--untracked-files=no');
-  if (tracked) throw new Error(`${label} checkout has tracked modifications`);
+  const dirty = git(repo, 'status', '--porcelain', '--untracked-files=all');
+  if (dirty) throw new Error(`${label} checkout is not clean`);
+}
+
+function assertFixtureCases() {
+  for (const [caseName, file] of CASE_FILES) {
+    const stat = lstatSync(file);
+    if (!stat.isFile()) throw new Error(`Fixture case ${caseName} is not a regular file: ${file}`);
+    readFileSync(file);
+  }
 }
 
 function sha256(path) {
@@ -100,6 +113,7 @@ function main() {
   const shiprules = args.get('--shiprules');
   assertPinnedClean(arcV1, ARC_V1_SHA, 'ARC v1.0.0');
   assertPinnedClean(shiprules, SHIPRULES_SHA, 'ShipRules-free');
+  assertFixtureCases();
 
   const scanner = join(shiprules, 'godot4', 'scripts', 'check-godot3.sh');
   const scannerHash = sha256(scanner);
