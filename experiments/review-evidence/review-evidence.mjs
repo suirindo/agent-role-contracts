@@ -301,7 +301,8 @@ export async function evaluate({ repo, envelope: envelopeText, bundle, task, rec
 function blockStatus(g, p, add) {
   const lines = text => { const l = text.split('\n'); if (l[l.length - 1] === '') l.pop(); return l; };
   const base = g.readFile('base', p.path);
-  if (base.state !== 'OK') { add('PROTECTED_BLOCK_BASELINE_MISMATCH', 'artifact_binding', p.path); return 'BASELINE_MISMATCH'; }
+  if (base.state === 'ABSENT') { add('PROTECTED_BLOCK_BASELINE_MISMATCH', 'artifact_binding', p.path); return 'BASELINE_MISMATCH'; }
+  if (base.state !== 'OK') { add('PROTECTED_BLOCK_UNREADABLE', 'artifact_binding', p.path); return 'UNKNOWN'; }
   const bl = lines(base.text);
   const block = bl.slice(p.start_line - 1, p.end_line);
   if (block.length !== p.end_line - p.start_line + 1 || sha256(block.map(l => l + '\n').join('')) !== p.sha256) {

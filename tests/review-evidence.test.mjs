@@ -458,3 +458,39 @@ test('offline demo is runnable and keeps synthetic claims explicit', () => {
  assert.equal(report.scenarios.length, 3);
  assert.ok(report.scenarios.every(s => s.dimensions.authority.status === 'UNKNOWN'));
 });
+
+test('unreadable baseline for a protected block is UNKNOWN; missing or mismatching baseline stays INCONSISTENT', async t => {
+ const first = 'export const KEEP = 2;\n';
+ const block = { id: 'k', type: 'block', path: 'src/example.mjs', start_line: 1, end_line: 1, sha256: sha256(first) };
+ const withBase = (content, mode = '100644') => {
+  const s = scenario(t, {});
+  // Rebuild with a custom baseline file; candidate keeps the ordinary small file.
+  const common = { 'README.md': '# fixture\n', 'src/keep.mjs': 'export const K = 1;\n' };
+  const baseEntries = [...files(s.repo, common), [mode, 'blob', blob(s.repo, content), 'src/example.mjs']];
+  const base = commitEntries(s.repo, baseEntries, null, 'base2');
+  const candidate = commitEntries(s.repo, files(s.repo, { ...common, 'src/example.mjs': first + 'export const A = 10;\n' }), base, 'candidate2');
+  git(s.repo, ['update-ref', 'refs/heads/main', candidate]);
+  git(s.repo, ['reset', '-q', '--hard']);
+  return { repo: s.repo, base, candidate };
+ };
+ const check = async (s, expectedStatus, expectedCode, expectedSeverity) => {
+  const report = await run(s, { envelope: { protected: [block] } });
+  const f = report.findings.filter(x => x.code.startsWith('PROTECTED_BLOCK'));
+  assert.deepEqual(f.map(x => [x.code, x.severity]), [[expectedCode, expectedSeverity]]);
+  assert.equal(report.protected[0].status, expectedStatus);
+  return report;
+ };
+ const big = withBase(first + 'x'.repeat(1024 * 1024 + 1));
+ const r = await check(big, 'UNKNOWN', 'PROTECTED_BLOCK_UNREADABLE', 'unknown');
+ assert.ok(codes(r, 'artifact_binding').includes('SURFACE_FILE_TOO_LARGE'), 'other surface unknown is retained');
+ assert.notEqual(r.dimensions.artifact_binding.status, 'INCONSISTENT');
+ await check(withBase(Buffer.concat([Buffer.from(first), Buffer.from([0, 1, 2])])), 'UNKNOWN', 'PROTECTED_BLOCK_UNREADABLE', 'unknown');
+ await check(withBase(first, '120000'), 'UNKNOWN', 'PROTECTED_BLOCK_UNREADABLE', 'unknown');
+ // Genuinely mismatching baseline text.
+ const mismatch = await check(withBase('export const KEEP = 3;\n'), 'BASELINE_MISMATCH', 'PROTECTED_BLOCK_BASELINE_MISMATCH', 'inconsistent');
+ assert.equal(mismatch.dimensions.artifact_binding.status, 'INCONSISTENT');
+ // Genuinely missing baseline file.
+ const s = scenario(t, {});
+ const missing = await run(s, { envelope: { protected: [{ ...block, path: 'src/none.mjs' }] } });
+ assert.deepEqual(missing.findings.filter(x => x.code.startsWith('PROTECTED_BLOCK')).map(x => [x.code, x.severity]), [['PROTECTED_BLOCK_BASELINE_MISMATCH', 'inconsistent']]);
+});
