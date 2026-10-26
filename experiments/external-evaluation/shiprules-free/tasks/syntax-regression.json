@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-syntax-regression",
+  "type": "code-change",
+  "objective": "Evaluate an in-scope file containing a Godot 3 syntax regression.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/cases/syntax-regression/player.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}
