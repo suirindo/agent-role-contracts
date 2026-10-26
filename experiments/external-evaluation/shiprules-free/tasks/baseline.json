@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-clean-baseline",
+  "type": "code-change",
+  "objective": "Prepare the clean Godot 4 fixture.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/cases/baseline/player.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}

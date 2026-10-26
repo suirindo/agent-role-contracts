@@ -44,6 +44,8 @@ The injected path is **in-memory declaration data**. It must be outside the orig
 
 Use [EVIDENCE_TEMPLATE.md](EVIDENCE_TEMPLATE.md) to record findings and submit via the [existing workflow-feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml) if desired. All submitted data must be scrubbed of credentials, customer content, private paths and production secrets.
 
+For a worked comparison between ARC scope preflight and an independently maintained deterministic syntax scanner, see the [ARC × ShipRules-free fixture](shiprules-free/README.md). It remains a maintainer-executed public-repository synthetic comparison until an external operator reviews or runs it.
+
 ## Exit status and safety
 
 - `0`: expected declaration PASS → scope FAIL → repaired PASS, plus optional second declaration PASS.
