@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createFixtureHost, FIXTURE } from '../experiments/cross-tool-effects/lab/host.mjs';
+import { runLoopbackFaults } from '../experiments/cross-tool-effects/lab/faults.mjs';
+import { startObserver } from '../experiments/cross-tool-effects/lab/run.mjs';
 import { runLoopbackLab } from '../experiments/cross-tool-effects/lab/run.mjs';
 const bundleJson=readFileSync(new URL('../examples/starter-bundle.json',import.meta.url),'utf8');
 const taskJson=readFileSync(new URL('../examples/starter-task.json',import.meta.url),'utf8');
@@ -68,4 +70,16 @@ test('actual loopback receiver paired controls and replay observations',
  {skip:process.env.ARC_CTEI_LOOPBACK_LAB!=='1'},async()=>{
  const r=await runLoopbackLab({loopback:true});assert.equal(r.expected_observations_matched,true);
  assert.equal(r.receiver_total.receipts.length,2);assert.equal(r.receiver_total.connections,2);
+});
+
+test('receiver helper needs explicit opt-in and rejects invalid fault mode before fork',async()=>{
+ await assert.rejects(startObserver(),/LAB_LOOPBACK_OPT_IN_REQUIRED/);
+ await assert.rejects(startObserver({loopback:true,dropResponse:'yes'}),/LAB_LOOPBACK_OPT_IN_REQUIRED/);
+});
+test('fault lab needs explicit opt-in',async()=>{await assert.rejects(runLoopbackFaults(),/LAB_LOOPBACK_OPT_IN_REQUIRED/);});
+test('actual response-loss, parallel attempts and consumed replay controls',
+ {skip:process.env.ARC_CTEI_LOOPBACK_LAB!=='1'},async()=>{
+ const report=await runLoopbackFaults({loopback:true});assert.equal(report.expected_observations_matched,true);
+ assert.equal(report.cases.length,2);
+ for(const c of report.cases){assert.equal(c.receiver_observation.receipts.length,1);assert.equal(c.replay_observation.receipts.length,0);}
 });

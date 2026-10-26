@@ -5,14 +5,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createFixtureHost, FIXTURE } from './host.mjs';
 const J = JSON.stringify;
-function declarations(subject, bundle, task) {
+export function makeSyntheticDeclarations(subject, bundle, task) {
  const route = bundle.routes.find(r => r.task_type === task.type);
  return J({ schema_version:'0.3',subject_digest:subject.subject_digest,
   reviews:[{subject_digest:subject.subject_digest,role_id:route.reviewers[0],decision:'pass'}],
   ...(route.require_human_approval ? {human_approval:{subject_digest:subject.subject_digest,role_id:route.accountable,decision:'approved'}} : {}) });
 }
-async function observer() {
- const child = fork(fileURLToPath(new URL('./observer.mjs',import.meta.url)), ['--loopback-observer'], {
+export async function startObserver({ loopback = false, dropResponse = false } = {}) {
+ if (loopback !== true || typeof dropResponse !== 'boolean') throw new Error('LAB_LOOPBACK_OPT_IN_REQUIRED');
+ const child = fork(fileURLToPath(new URL('./observer.mjs',import.meta.url)), ['--loopback-observer', ...(dropResponse ? ['--drop-response'] : [])], {
   execArgv:[], env:{PATH:process.env.PATH??'',LANG:'C',LC_ALL:'C'}, stdio:['ignore','ignore','ignore','ipc'],
  });
  let sequence=0, readyResolve, readyReject;
@@ -45,7 +46,7 @@ export async function runLoopbackLab({ loopback = false } = {}) {
  if(loopback!==true)throw new Error('LAB_LOOPBACK_OPT_IN_REQUIRED');
  const bundle=JSON.parse(readFileSync(new URL('../../../examples/starter-bundle.json',import.meta.url),'utf8'));
  const task=JSON.parse(readFileSync(new URL('../../../examples/starter-task.json',import.meta.url),'utf8'));
- const receiver=await observer(),cases=[];
+ const receiver=await startObserver({loopback:true}),cases=[];
  let host;
  try {
   for(const spec of [
@@ -59,7 +60,7 @@ export async function runLoopbackLab({ loopback = false } = {}) {
    const subject=await host.owner.describe(source.handle);
    if(!subject.subject_digest)throw new Error('LAB_SUBJECT_UNAVAILABLE');
    // Fictional test-only declarations, supplied by trusted lab setup, not product approval.
-   const bindingJson=declarations(subject,bundle,task);
+   const bindingJson=makeSyntheticDeclarations(subject,bundle,task);
    const before=await receiver.snapshot();
    const result=await host.worker.send_report(J({handle:source.handle,bindingJson}));
    const after=await receiver.snapshot();
