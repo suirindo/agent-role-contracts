@@ -1,0 +1,133 @@
+{
+  "evidence_class": "AUTHOR_OFFLINE_DISPLAY_CHECK",
+  "subject": "e982d4650d8a3512bde46733c4d13dba3130812f",
+  "actual_d1_reports": 4,
+  "unsupported_reports_rejected": 10,
+  "unknown_code_payload_not_echoed": true,
+  "examples": [
+    {
+      "name": "条件成立の記述のみ",
+      "raw_report": {
+        "profile": "cross-tool-effects/d1-report/0.1",
+        "policy_result": "ALLOW",
+        "binding_status": "UNKNOWN",
+        "authority_status": "UNKNOWN",
+        "execution_status": "NOT_PERFORMED",
+        "coverage": "SUPPLIED_SNAPSHOTS_ONLY",
+        "diagnostics": [],
+        "execution_authorized": false,
+        "runtime_enforcement": false,
+        "identity_verified": false,
+        "evidence_verified": false,
+        "action_executed": false,
+        "replay_protection_enforced": false,
+        "source_bytes_observed": false,
+        "receiver_observed": false,
+        "task_digest": "sha256:3960da9923236be8485f3cee5dca93f31a0eaa815c073e677979e0c950ac5bb5",
+        "contract_digest": "sha256:677e22bcf7453449223a47d3844fd55a8537ed11aeadb16079f9b58006381be3",
+        "request_digest": "sha256:ca17f7ec5a816ea6416d7af56e343ed11f9704a5679d2e154ca760b993347173",
+        "provenance_digest": "sha256:27559700f47c209374f089606d2a8c56f50eb123de021815c4e14609051badd1",
+        "action": {
+          "schema_version": "0.3",
+          "id": "cte-request",
+          "kind": "cte-request",
+          "parameters": {
+            "effect": "network.send",
+            "contract_digest": "sha256:677e22bcf7453449223a47d3844fd55a8537ed11aeadb16079f9b58006381be3",
+            "request_digest": "sha256:ca17f7ec5a816ea6416d7af56e343ed11f9704a5679d2e154ca760b993347173",
+            "provenance_digest": "sha256:27559700f47c209374f089606d2a8c56f50eb123de021815c4e14609051badd1"
+          }
+        },
+        "subject_digest": "sha256:112efd81ec3d613cdfa9014d1c95acd8cc2fed7aea4eb8744499b8deec5d959f"
+      },
+      "explanation": "研究用の説明表示（入力レポートの真正性は未検証）\n\n判定：操作条件の計算結果は成立（実行権限は未確認）\n対象の結び付き：未確認\n\n確認範囲：供給されたJSONの比較結果。実際の権限・データ・送信先の観測は含まれない。\n不足する証拠：実行権限の認証、実操作の観測、実行経路での制御。\n操作の実行：このレポートでは未実施。実行許可は確立していない。\n\n次の確認：\n- 実行主体が持つ正規の権限・承認・実行経路を別途確認する。\n"
+    },
+    {
+      "name": "レビュー宣言未供給",
+      "raw_report": {
+        "profile": "cross-tool-effects/d1-report/0.1",
+        "policy_result": "UNKNOWN",
+        "binding_status": "UNKNOWN",
+        "authority_status": "UNKNOWN",
+        "execution_status": "NOT_PERFORMED",
+        "coverage": "SUPPLIED_SNAPSHOTS_ONLY",
+        "diagnostics": [
+          {
+            "code": "CTE_BINDING_REQUIRED"
+          }
+        ],
+        "execution_authorized": false,
+        "runtime_enforcement": false,
+        "identity_verified": false,
+        "evidence_verified": false,
+        "action_executed": false,
+        "replay_protection_enforced": false,
+        "source_bytes_observed": false,
+        "receiver_observed": false,
+        "task_digest": "sha256:3960da9923236be8485f3cee5dca93f31a0eaa815c073e677979e0c950ac5bb5",
+        "contract_digest": "sha256:677e22bcf7453449223a47d3844fd55a8537ed11aeadb16079f9b58006381be3",
+        "request_digest": "sha256:ca17f7ec5a816ea6416d7af56e343ed11f9704a5679d2e154ca760b993347173",
+        "provenance_digest": "sha256:27559700f47c209374f089606d2a8c56f50eb123de021815c4e14609051badd1"
+      },
+      "explanation": "研究用の説明表示（入力レポートの真正性は未検証）\n\n判定：判定に必要な条件が未確認\n対象の結び付き：未確認\n\n確認範囲：供給されたJSONの比較結果。実際の権限・データ・送信先の観測は含まれない。\n不足する証拠：実行権限の認証、実操作の観測、実行経路での制御。\n操作の実行：このレポートでは未実施。実行許可は確立していない。\n\n次の確認：\n- 対象に結び付いたレビュー・承認宣言を確認する。\n"
+    },
+    {
+      "name": "送信がタスク条件にない",
+      "raw_report": {
+        "profile": "cross-tool-effects/d1-report/0.1",
+        "policy_result": "DENY",
+        "binding_status": "UNKNOWN",
+        "authority_status": "UNKNOWN",
+        "execution_status": "NOT_PERFORMED",
+        "coverage": "SUPPLIED_SNAPSHOTS_ONLY",
+        "diagnostics": [
+          {
+            "code": "CTE_EFFECT_NOT_DECLARED"
+          },
+          {
+            "code": "CTE_BINDING_REQUIRED"
+          }
+        ],
+        "execution_authorized": false,
+        "runtime_enforcement": false,
+        "identity_verified": false,
+        "evidence_verified": false,
+        "action_executed": false,
+        "replay_protection_enforced": false,
+        "source_bytes_observed": false,
+        "receiver_observed": false,
+        "task_digest": "sha256:3960da9923236be8485f3cee5dca93f31a0eaa815c073e677979e0c950ac5bb5",
+        "contract_digest": "sha256:9df51744cad921f4d2e4e1269d35c0d14d57ee7ec09443092c4cd280591c65ec",
+        "request_digest": "sha256:ca17f7ec5a816ea6416d7af56e343ed11f9704a5679d2e154ca760b993347173",
+        "provenance_digest": "sha256:27559700f47c209374f089606d2a8c56f50eb123de021815c4e14609051badd1"
+      },
+      "explanation": "研究用の説明表示（入力レポートの真正性は未検証）\n\n判定：供給された記録に禁止条件あり\n対象の結び付き：未確認\n\n確認範囲：供給されたJSONの比較結果。実際の権限・データ・送信先の観測は含まれない。\n不足する証拠：実行権限の認証、実操作の観測、実行経路での制御。\n操作の実行：このレポートでは未実施。実行許可は確立していない。\n\n次の確認：\n- このタスクで要求された操作が明示されているか確認する。\n- 対象に結び付いたレビュー・承認宣言を確認する。\n"
+    },
+    {
+      "name": "不正入力",
+      "raw_report": {
+        "profile": "cross-tool-effects/d1-report/0.1",
+        "policy_result": "REJECT_INPUT",
+        "binding_status": "UNKNOWN",
+        "authority_status": "UNKNOWN",
+        "execution_status": "NOT_PERFORMED",
+        "coverage": "SUPPLIED_SNAPSHOTS_ONLY",
+        "diagnostics": [
+          {
+            "code": "CTE_INPUT_INVALID"
+          }
+        ],
+        "execution_authorized": false,
+        "runtime_enforcement": false,
+        "identity_verified": false,
+        "evidence_verified": false,
+        "action_executed": false,
+        "replay_protection_enforced": false,
+        "source_bytes_observed": false,
+        "receiver_observed": false
+      },
+      "explanation": "研究用の説明表示（入力レポートの真正性は未検証）\n\n判定：入力形式を受理できない\n対象の結び付き：未確認\n\n確認範囲：供給されたJSONの比較結果。実際の権限・データ・送信先の観測は含まれない。\n不足する証拠：実行権限の認証、実操作の観測、実行経路での制御。\n操作の実行：このレポートでは未実施。実行許可は確立していない。\n\n次の確認：\n- 入力を既存D1スキーマと照合する。\n"
+    }
+  ],
+  "limitations": "Fictional inputs; description ALLOW does not validate binding. No approval fabricated, no effects, no user testing, no canonical QC or public API change."
+}

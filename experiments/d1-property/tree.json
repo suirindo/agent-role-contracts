@@ -1,0 +1,145 @@
+{
+  "schema": "arc-d1-property-dependency-tree/1",
+  "dependency_subject": "e982d4650d8a3512bde46733c4d13dba3130812f",
+  "note": "Unchanged copies of Git blobs at dependency_subject, placed under this research-only subtree so relative imports resolve. static_import_closure marks files reached by relative imports from explain-demo.mjs.",
+  "files": [
+    {
+      "path": "examples/starter-bundle.json",
+      "git_blob": "cb3b2447155d85b90268faad2248eb4507f59fa0",
+      "sha256": "80896fdce4b047969954275e659061031b9b5d668b4d66b6a1541d8df4caab6c",
+      "static_import_closure": true
+    },
+    {
+      "path": "examples/starter-task.json",
+      "git_blob": "71f3e1ba6552b10ea6e24cde9206c224cedccb44",
+      "sha256": "86845f79369bd0a5cb06715771505bc4192977d69bf57942405ed1610594cc7c",
+      "static_import_closure": true
+    },
+    {
+      "path": "experiments/cross-tool-effects/contract.mjs",
+      "git_blob": "3b99894db39e9c0238e567d9488ef074ce167578",
+      "sha256": "dc8662b2684224cac1cbf4f09956a552b8fa849c5412907b835385cb3c49b67b",
+      "static_import_closure": true
+    },
+    {
+      "path": "experiments/cross-tool-effects/policy.mjs",
+      "git_blob": "8d00e484da63c47d2491247d1f76df7a55bb99ac",
+      "sha256": "5f3f90fecb3a26679cffbf9270001285a36d4daa2b86ae77494fbaca1aa799ab",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/action-binding.mjs",
+      "git_blob": "182e10dae7d62d35da7a3aa7768b3d7ddcf3c148",
+      "sha256": "a8fe2d62c0ed45d3051781b4194fbfe515908d1370aec11c9556c85432598560",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/contract-checks.mjs",
+      "git_blob": "87d28258fc20824a224b8a6deaa184f5873f09f5",
+      "sha256": "aebc44dd6032b2665546bb5c0df8c9ba6cf53cbbe3e2c8aa4d9f5e0f794a7d6f",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/core.mjs",
+      "git_blob": "8063e4c45b666d44f50b341363d7beaa2c6cfb76",
+      "sha256": "5f2a11f6389aea62ba46d691bde09550e4971bcc921209cd9fe4b9f59e6bbd75",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/crewai-adapter.mjs",
+      "git_blob": "dbb416bd80d6c998fd685877039a452d02037bcb",
+      "sha256": "20875d35807b5fd33ba016dbe0b36396fd68b6e388fcd93bca0d5324b1e1e64f",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/filesystem-write-adapter.mjs",
+      "git_blob": "ac005e4d746f548b73af87266a9293970317e8de",
+      "sha256": "0a14f7e64647688a5ef0d6feb3417da1c0698f1fc07607fee6688105ce6c4d72",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/finance-profile.mjs",
+      "git_blob": "9fb2718e4f8d55729c32437eda54193b5ebd76a0",
+      "sha256": "06cab4b76e6a84e2423e0a9dcdc95273fe3c6e0931d717061451ad198ce9b981",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/finance.mjs",
+      "git_blob": "d26ce328ce4b2f42f33184ff26b036ed1d40532b",
+      "sha256": "e6c99f21f2525a3a5dc51cc8f57e367f8ab288b9466cac7f2d33e9e3b322da4d",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/index.mjs",
+      "git_blob": "1e6512f4b4d58a2f5c88eb12ad8d2d29b16b46d3",
+      "sha256": "139fa222513ae824eb0d61d9bc3edd4af9ce2510b841cd40a0a06b454370c9c6",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/report.mjs",
+      "git_blob": "6939158349e080c3f22865e6bdae93e94c6f7d77",
+      "sha256": "398ba3e730629dd25323640ca28bb643624994a7cc9b5635af28a93ffae10fb9",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/safe.mjs",
+      "git_blob": "064258166f47ac7838f91adfd724c88a57ac09f9",
+      "sha256": "b51d92631262f31046a3cad4aa429f220a676a2f9886b6c86f613f904bafbb6c",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/schema.mjs",
+      "git_blob": "4a581b0bd5f9eb09d5e275f591e5da39e15b3b37",
+      "sha256": "fe62279bda206a4a45c4f7cd5d8c167114daef595dc75f49e07f6fbfcf6e98ea",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/schemas.adapters.generated.mjs",
+      "git_blob": "208c0a0f9a0c77eb2b151fd095ee4645a238b1d1",
+      "sha256": "7dafae8c19367aa5042e91be5af35b4343f8e3204618030d045e381755bced6b",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/schemas.core.generated.mjs",
+      "git_blob": "ad01f10a0a1750c69dae8d0b5629b57b2fdd7c44",
+      "sha256": "8d133a5326d88a655889707ef51f4f9b391d504d22c7844c1f7682a5b6b9fbc2",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/schemas.finance.generated.mjs",
+      "git_blob": "d6066e7f07e2cefb978a50268ee516e3f9867be8",
+      "sha256": "48d5d8bd6c62d2ac4a5b3c3daf180cfeb8fa7a557c61a86f56f6dc46054e2f17",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/schemas.generated.mjs",
+      "git_blob": "93b8c9cf29314be152f9b5c5521d1cbd7568e796",
+      "sha256": "0ccc0804b776ec46e5a80a86bcd468a4b248201e0ee2823b27bf3fd888f233c7",
+      "static_import_closure": false
+    },
+    {
+      "path": "src/strict-json.mjs",
+      "git_blob": "1c9f7d27d718373efeac559a8dfe2172ea859eb7",
+      "sha256": "9fd06503ad5a36833a93d776137e4cb6e1fd803158928ddb0429b2f305a52ce5",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/task-lifecycle.mjs",
+      "git_blob": "a1720bd9ba82e6320d111a3bd8356576d4db1311",
+      "sha256": "f08e41bcf10315aec2f98b7a74babcedb618548901b27d67546494d2621dfe25",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/validation.mjs",
+      "git_blob": "d53cafc904b79e9c3b6c42d7955080cad40a820e",
+      "sha256": "98677ec8d0b43c78eadd083f6dbb852762592befd6e6ca190c1ec5284eb4f9d5",
+      "static_import_closure": true
+    },
+    {
+      "path": "src/version.mjs",
+      "git_blob": "059488afe844edb3279f416aa090c3295587848a",
+      "sha256": "f8448a246bc6ef6717d714e05727c35197845a1869c92c398df972273a06f3a1",
+      "static_import_closure": true
+    }
+  ]
+}
