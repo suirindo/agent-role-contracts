@@ -2,6 +2,8 @@
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 if (process.argv[2] !== '--loopback-observer' || typeof process.send !== 'function') throw new Error('LAB_OBSERVER_EXPLICIT_FORK_REQUIRED');
+if (process.argv.length > 4 || (process.argv[3] !== undefined && process.argv[3] !== '--drop-response')) throw new Error('LAB_OBSERVER_MODE_INVALID');
+const dropResponse = process.argv[3] === '--drop-response';
 const receipts = [];
 let connections = 0, invalid = 0, closing = false;
 const server = createServer((req,res) => {
@@ -20,7 +22,9 @@ const server = createServer((req,res) => {
   const body = Buffer.concat(chunks);
   if (receipts.length >= 16) { invalid++; req.destroy(); return; }
   receipts.push({ byte_length: body.length, content_sha256: 'sha256:' + createHash('sha256').update(body).digest('hex') });
-  res.writeHead(204); res.end();
+  // Deliberate fault only after observing the complete body; never fabricate a no-send.
+  if (dropResponse) req.socket.destroy();
+  else { res.writeHead(204); res.end(); }
  });
  req.on('error', () => { invalid++; });
 });

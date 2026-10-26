@@ -74,3 +74,35 @@ Source hashes and Git commit must accompany an execution receipt. General D2
 partner reproduction and #47's human time/second-task value. No actual mcpgawk,
 Counterseal or incumbent product was run. The paired task-conditioned result can
 also be implemented by an equally informed egress rule; no superiority claimed.
+
+
+## Additional bounded fault observations
+
+Explicit opt-in for the same compiled fictional fixture and local receivers:
+
+    node experiments/cross-tool-effects/lab/faults.mjs --loopback
+
+1. **Response lost after receipt:** the trusted receiver records the complete
+   body and then deliberately closes the socket before sending HTTP headers.
+   The sender must retain REMOTE_EFFECT_UNKNOWN even though this observer sees
+   one exact receipt. A replay must be rejected with zero extra sockets/receipts.
+2. **Parallel submissions:** submit the same handle/binding twice to one host
+   closure. One may dispatch, the other must be denied, and the receiver must
+   observe exactly one body. Later replay adds no socket/receipt.
+
+The receiver's drop-response flag is a trusted test setup option, never a worker
+argument. Normal laboratory behavior stays unchanged. The shared observer
+starter itself requires explicit loopback opt-in; imports/default tests open
+no sockets. Test-only declaration construction remains explicitly synthetic.
+
+These examine limited laboratory slices of CTE-037 and CTE-029. They do not
+complete either broad acceptance case or the full56-case suite. In particular,
+they provide no atomicity across processes, durable nonce recovery, authenticated
+receipt reconciliation, distributed budgets or actual broker integration.
+Response-loss policy ALLOW describes admission; execution uncertainty and
+observer-confirmed receipt remain separate. The absence of a sender response
+must not become an assumption that nothing happened.
+
+A separately admitted host execution receipt and exact source hashes are
+required for actual fault observations. Ordinary CI/offline checks continue
+to skip explicit network tests; an offline refusal must remain respected.
