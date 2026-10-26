@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { evaluate, renderSummary, exitCodeFor } from '../experiments/review-evidence/review-evidence.mjs';
 
 const CLI = fileURLToPath(new URL('../experiments/review-evidence/cli.mjs', import.meta.url));
@@ -509,4 +509,36 @@ test('unreadable baseline for a protected block is UNKNOWN; missing or mismatchi
  const s = scenario(t, {});
  const missing = await run(s, { envelope: { protected: [{ ...block, path: 'src/none.mjs' }] } });
  assert.deepEqual(missing.findings.filter(x => x.code.startsWith('PROTECTED_BLOCK')).map(x => [x.code, x.severity]), [['PROTECTED_BLOCK_BASELINE_MISMATCH', 'inconsistent']]);
+});
+
+test('Git stderr has its own bounded allowance without widening stdout limits', t => {
+ const s = scenario(t), dir = tmp(t);
+ const collector = new URL('../experiments/review-evidence/collect.mjs', import.meta.url).href;
+ for (const mode of ['stderr', 'stdout', 'stderr-overflow']) {
+  const preload = join(dir, 'git-buffer-' + mode + '.mjs');
+  fs.writeFileSync(preload, `
+import cp from 'node:child_process';
+import { syncBuiltinESMExports } from 'node:module';
+const original = cp.spawnSync;
+cp.spawnSync = (file, args, options) => {
+ if (file === 'git' && args.includes('cat-file') && args.includes('-t') && args.at(-1) === '${'f'.repeat(40)}') {
+  const stdout = Buffer.alloc(${mode === 'stdout' ? 65 : 0}, 120);
+  const stderr = Buffer.alloc(${mode === 'stderr-overflow' ? 65537 : mode === 'stderr' ? 512 : 0}, 101);
+  if (stdout.length > options.maxBuffer || stderr.length > options.maxBuffer) {
+   return { error: Object.assign(new Error('synthetic bounded diagnostic'), { code: 'ENOBUFS' }), status: null, stdout: Buffer.alloc(0), stderr: Buffer.alloc(0) };
+  }
+  return { status: ${mode === 'stdout' ? 0 : 128}, stdout, stderr };
+ }
+ return original(file, args, options);
+};
+syncBuiltinESMExports();
+`);
+  const script = `import {collect} from ${JSON.stringify(collector)};
+try { collect(${JSON.stringify(s.repo)}, {base:${JSON.stringify(s.base)},candidate:'${'f'.repeat(40)}'}); process.stdout.write('UNEXPECTED_SUCCESS'); }
+catch (error) { process.stdout.write(error.code ?? 'UNKNOWN'); }`;
+  const r = spawnSync(process.execPath, ['--import', pathToFileURL(preload).href, '--input-type=module', '-e', script], { encoding: 'utf8', timeout: 30000 });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.stdout, mode === 'stderr' ? 'PIN_NOT_FOUND' : 'GIT_OUTPUT_LIMIT', mode);
+  assert.equal(r.stderr, '', 'raw Git diagnostics must not be echoed');
+ }
 });

@@ -48,7 +48,7 @@ const SAFE_FLAGS = ['--no-replace-objects', '--no-optional-locks', '-c', 'core.f
 
 function git(prefix, args, { input, max = LIMITS.treeBytes } = {}) {
   const r = spawnSync('git', [...prefix, ...SAFE_FLAGS, ...args], {
-    env: gitEnv(), cwd: '/', input, maxBuffer: max, timeout: LIMITS.gitTimeoutMs, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'],
+    env: gitEnv(), cwd: '/', input, maxBuffer: Math.max(max, 64 * 1024), timeout: LIMITS.gitTimeoutMs, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'],
   });
   if (r.error) {
     if (r.error.code === 'ENOBUFS') throw new EvidenceError('GIT_OUTPUT_LIMIT');
@@ -56,6 +56,9 @@ function git(prefix, args, { input, max = LIMITS.treeBytes } = {}) {
     throw new EvidenceError(r.error.code === 'ENOENT' ? 'GIT_UNAVAILABLE' : 'GIT_COMMAND_FAILED');
   }
   if (r.signal) throw new EvidenceError(r.signal === 'SIGTERM' ? 'GIT_TIMEOUT' : 'GIT_COMMAND_FAILED');
+  // spawnSync applies maxBuffer to stderr too; retain bounded diagnostic headroom
+  // for older Git while enforcing the original, independent stdout byte cap.
+  if (r.stdout.length > max) throw new EvidenceError('GIT_OUTPUT_LIMIT');
   return { status: r.status, stdout: r.stdout };
 }
 const must = (prefix, args, opts, code = 'GIT_COMMAND_FAILED') => {
