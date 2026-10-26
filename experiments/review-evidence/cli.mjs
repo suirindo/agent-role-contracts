@@ -14,11 +14,17 @@ function fail(code) {
 function readInput(file) {
   let fd;
   try {
-    fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
-    const st = fs.fstatSync(fd);
+    const observed = fs.lstatSync(file, { bigint: true });
+    if (!observed.isFile()) throw new EvidenceError('INPUT_NOT_REGULAR_FILE');
+    // Native no-follow is unavailable on some platforms (including Windows).
+    // Compare descriptor identity with the observed leaf before reading bytes.
+    fd = fs.openSync(file, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0));
+    const st = fs.fstatSync(fd, { bigint: true });
     if (!st.isFile()) throw new EvidenceError('INPUT_NOT_REGULAR_FILE');
-    if (st.size > MAX_INPUT_BYTES) throw new EvidenceError('INPUT_TOO_LARGE');
-    const buf = Buffer.alloc(st.size);
+    if (observed.ino === 0n || st.ino === 0n) throw new EvidenceError('INPUT_IDENTITY_UNAVAILABLE');
+    if (observed.dev !== st.dev || observed.ino !== st.ino) throw new EvidenceError('INPUT_CHANGED_DURING_READ');
+    if (st.size > BigInt(MAX_INPUT_BYTES)) throw new EvidenceError('INPUT_TOO_LARGE');
+    const buf = Buffer.alloc(Number(st.size));
     let at = 0;
     while (at < buf.length) {
       const n = fs.readSync(fd, buf, at, buf.length - at, at);

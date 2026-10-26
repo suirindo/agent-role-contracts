@@ -403,6 +403,22 @@ test('CLI: JSON, summary, exit codes and sanitized errors', async t => {
  assert.match(cli(base.map(v => v === envPath ? join(dir, 'link.json') : v)).stderr, /INPUT_NOT_REGULAR_FILE/);
  assert.equal(cli(['--help']).status, 0);
  assert.equal(cli([...base, '--repo', s.repo]).status, 2, 'duplicate option');
+ const preload = code => 'data:text/javascript;base64,' + Buffer.from(code).toString('base64');
+ const noFollowUnavailable = `import fs from 'node:fs'; const original = fs.openSync; const flag = fs.constants.O_NOFOLLOW ?? 0; fs.openSync = (path, flags, ...rest) => original(path, typeof flags === 'number' ? flags & ~flag : flags, ...rest);`;
+ const portable = args => spawnSync(process.execPath, ['--import', preload(noFollowUnavailable), CLI, ...args], { encoding: 'utf8', env: { ...GIT_ENV } });
+ assert.equal(portable(base).status, 0, 'regular inputs work without native no-follow');
+ const portableLink = portable(base.map(v => v === envPath ? join(dir, 'link.json') : v));
+ assert.equal(portableLink.status, 2);
+ assert.match(portableLink.stderr, /INPUT_NOT_REGULAR_FILE/, 'symlinks are refused without native no-follow');
+ // Replace the originally observed regular file immediately before opening it.
+ // The descriptor must still match that observed file before any content is read.
+ const replacement = write('replacement.json', fs.readFileSync(envPath));
+ const swap = noFollowUnavailable + `const open = fs.openSync; let swapped = false; fs.openSync = (path, flags, ...rest) => { if (!swapped && path === process.env.ARC_TEST_INPUT_TARGET) { swapped = true; fs.renameSync(path, path + '.original'); fs.copyFileSync(process.env.ARC_TEST_INPUT_REPLACEMENT, path); } return open(path, flags, ...rest); };`;
+ const raced = spawnSync(process.execPath, ['--import', preload(swap), CLI, ...base], { encoding: 'utf8', env: { ...GIT_ENV, ARC_TEST_INPUT_TARGET: envPath, ARC_TEST_INPUT_REPLACEMENT: replacement } });
+ assert.equal(raced.status, 2);
+ assert.match(raced.stderr, /INPUT_CHANGED_DURING_READ/);
+ assert.equal(raced.stdout, '');
+
 });
 
 test('required test sets with embedded newlines cannot reuse an old G1 binding', async t => {
