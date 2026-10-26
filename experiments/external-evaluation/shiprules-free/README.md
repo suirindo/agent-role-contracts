@@ -28,9 +28,6 @@ Requires Git, Bash and Node.js 22.5+. Use clean, separate checkouts:
 
 ```sh
 git clone https://github.com/suirindo/agent-role-contracts.git arc-kit
-# During Draft PR #76 review only; after merge, keep arc-kit on main.
-git -C arc-kit fetch origin pull/76/head:arc75-shiprules-comparison
-git -C arc-kit checkout arc75-shiprules-comparison
 git clone --branch v1.0.0 --depth 1 https://github.com/suirindo/agent-role-contracts.git arc-v1
 git clone https://github.com/otctrading101/shiprules-free.git shiprules-free
 git -C shiprules-free checkout 8b8302e9551fb8784d7cbe7fa61eeecf127bf247
