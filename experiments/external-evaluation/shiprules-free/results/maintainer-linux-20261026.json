@@ -1,0 +1,101 @@
+{
+  "profile": "ARC_SHIPRULES_FREE_COMPARISON_V1",
+  "evidence_class": "MAINTAINER_EXECUTED_PUBLIC_REPOSITORY_SYNTHETIC_COMPARISON",
+  "observed_at_utc": "2026-10-26T12:19:07.975Z",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "invocation": "node experiments/external-evaluation/shiprules-free/run-comparison.mjs --arc-v1 ../arc-v1 --shiprules ../shiprules-free",
+  "process_exit_code": 0,
+  "pinned_sources": {
+    "arc_v1_commit": "9f6771056c47de971202360952af6d41941f7625",
+    "shiprules_free_commit": "8b8302e9551fb8784d7cbe7fa61eeecf127bf247",
+    "shiprules_scanner_sha256": "58b650402c321d69cdeddc3b71abcb55ad882585a9bdad00929b1f545c61b8d7"
+  },
+  "cases": {
+    "baseline": {
+      "arc": {
+        "valid": true,
+        "diagnostic_codes": [],
+        "execution_authorized": false,
+        "runtime_enforcement": false
+      },
+      "scanner": {
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.",
+        "stderr": "",
+        "elapsed_ms": 34.069
+      }
+    },
+    "outside_scope": {
+      "arc": {
+        "valid": false,
+        "diagnostic_codes": [
+          "TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY"
+        ],
+        "execution_authorized": false,
+        "runtime_enforcement": false
+      },
+      "scanner": {
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.",
+        "stderr": "",
+        "elapsed_ms": 34.069
+      },
+      "note": "The scanner reuses clean baseline content because only the supplied task scope changes."
+    },
+    "syntax_regression": {
+      "arc": {
+        "valid": true,
+        "diagnostic_codes": [],
+        "execution_authorized": false,
+        "runtime_enforcement": false
+      },
+      "scanner": {
+        "exit_code": 1,
+        "stdout": "Godot 3 syntax (^[[:space:]]*export[[:space:]]*(\\(|var[[:space:]])):\ncases/syntax-regression/player.gd:3:export var speed = 120\n\nGodot 3 syntax (\\byield[[:space:]]*\\():\ncases/syntax-regression/player.gd:6:\tyield(get_tree().create_timer(0.1), \"timeout\")",
+        "stderr": "",
+        "elapsed_ms": 38.752
+      }
+    },
+    "repaired": {
+      "arc": {
+        "valid": true,
+        "diagnostic_codes": [],
+        "execution_authorized": false,
+        "runtime_enforcement": false
+      },
+      "scanner": {
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.",
+        "stderr": "",
+        "elapsed_ms": 37.932
+      }
+    }
+  },
+  "expectations": {
+    "baseline": true,
+    "outside_scope": true,
+    "syntax_regression": true,
+    "repaired": true
+  },
+  "all_expectations_passed": true,
+  "automated_wall_ms": 426.532,
+  "human_setup_minutes": "UNMEASURED",
+  "legitimate_fixture_refusals": {
+    "arc": {
+      "count": 0,
+      "denominator": 3
+    },
+    "shiprules_scanner": {
+      "count": 0,
+      "denominator": 2
+    },
+    "note": "All three tasks are legitimate for ARC scope. Baseline and repaired syntax are the scanner-positive controls; the syntax-regression rejection is expected."
+  },
+  "external_operator_reviewed_or_executed": false,
+  "completed_external_hands_on_evaluations_added": 0,
+  "paid_shiprules_controls_evaluated": false
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-repaired",
+  "type": "code-change",
+  "objective": "Evaluate the repaired in-scope Godot 4 fixture.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/cases/repaired/player.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}
