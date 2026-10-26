@@ -95,8 +95,11 @@ test('APIs do not implicitly read clock, network or runtime I/O',async t => {
  t.after(()=>{for(const [n,d] of saved) if(d)Object.defineProperty(globalThis,n,d); else delete globalThis[n];});
  for(const n of names) Object.defineProperty(globalThis,n,{configurable:true,get(){throw Error('implicit '+n);}});
  assert.equal((await describe(s)).valid,true); assert.equal((await validate(s,b)).valid,true);
- const source=readFileSync(new URL('../src/action-binding.mjs',import.meta.url),'utf8');
- assert.doesNotMatch(source,/node:|\bfetch\s*\(|\bDate\b|\bprocess\b|\bimport\s*\(/);
+ // Inspect extracted implementation as well as the stable entry module.
+ for(const file of ["action-binding.mjs", "action-binding-factory.mjs", "validation.mjs", "validation-factory.mjs"]) {
+  const source=readFileSync(new URL('../src/'+file,import.meta.url),'utf8');
+  assert.doesNotMatch(source,/node:|\bfetch\s*\(|\bDate\b|\bprocess\b|\bimport\s*\(/,file);
+ }
 });
 
 test('task input objects and invalid binding text are rejected',async () => {
