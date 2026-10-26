@@ -2,7 +2,7 @@
   "evidence_class": "AUTHOR_OFFLINE_DISPLAY_CHECK",
   "subject": "e982d4650d8a3512bde46733c4d13dba3130812f",
   "actual_d1_reports": 4,
-  "unsupported_reports_rejected": 10,
+  "unsupported_reports_rejected": 12,
   "unknown_code_payload_not_echoed": true,
   "examples": [
     {
