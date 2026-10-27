@@ -31,9 +31,9 @@ schema/regression gate.
 
 `results/maintainer-linux-20261027.json` retains resolved original inputs,
 expected values, raw G0/G1/G3 outputs, worksheet results, source SHA-256s,
-checkout HEAD, environment and machine duration. The uncommitted candidate
-source is identified by HEAD **plus the listed file hashes**, rather than
-pretending the checkout HEAD alone includes the new runner. Machine durations
+checkout HEAD, environment and machine duration. That run used the then
+uncommitted candidate, so its `checkout_head` is the base commit and the
+source is identified by HEAD **plus the listed file hashes**. Machine durations
 are not human setup/recheck time. Human setup/maintenance fields remain null.
 Regeneration changes machine duration, environment and checkout identity;
 compare case outcomes and source identities rather than whole-file byte equality.
@@ -92,6 +92,24 @@ there is no authenticated observer. RE-01 is not evidence that an action ran,
 and RE-04 is not an executed late-approval prevention test. The worksheet is
 post-hoc and supplies no permission or retry mechanism.
 
+### Known worksheet limits
+
+These helpers are fixture calculations, not reusable checkers. Review found
+edges that the frozen 18 cases do not exercise:
+
+- `compareInventory` and the modeled baseline compare host/session/revision
+  by equality only. A context and inventory that both omit them can reach
+  MATCH. The frozen context always supplies all three.
+- The modeled baseline shares the comparator's shape, so their agreement is
+  weak evidence.
+- PD-03/PD-04 assert only `UNKNOWN`, not its reason. The `STALE_OR_FOREIGN`
+  value is visible in the raw JSON but not asserted.
+- AB-05's absent issuer/current-scope proofs are descriptive. Its API input
+  equals AB-01. AB-03's `hidden_resolution` and the `authority` expectations
+  are fixed labels, not measured results.
+- The trace worksheet reads only the first dispatch and does not read the
+  response outcome. Its cancellation label is not gated on a complete trace.
+
 ## Verification, value and remaining work
 
 The focused regression includes corrupt expected outcomes, missing/foreign
@@ -125,6 +143,6 @@ disposable environment. These files do not release any existing HOLD.
 The separately reproduced external AWL tests remain distinct: see the
 [maintainer reproduction report](https://github.com/suirindo/agent-role-contracts/issues/69#issuecomment-6408121908)
 and [public results reply](https://dev.to/suirindo/comment/3j4bn). They ran a real
-local fake receiver process, but neither constitute ARC adoption nor fill this
+local fake receiver process, but neither constitutes ARC adoption nor fill this
 pack's remaining runtime cases. Independent source/factual QC and source
 publication are separate delivery gates; an author-run green result is not QC.

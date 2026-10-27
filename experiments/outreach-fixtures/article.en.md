@@ -81,7 +81,7 @@ power-loss durability was tested.
 ## Settling an outcome and permitting another attempt
 
 [Issue #45](https://github.com/probita-ai/agent-work-layer/issues/45) proposed
-letting a manager settle an unknown effect after checking the receiver.
+letting someone settle an unknown effect after checking the receiver.
 
 That introduces two decisions worth recording separately:
 
