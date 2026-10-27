@@ -218,7 +218,7 @@ and operator evidence.
 
 ## 8. Feedback-driven integration and recovery decisions
 
-[Integration decisions](INTEGRATION.md) refine the next consumer experiment:
+[Integration decisions](FEEDBACK_INTEGRATION_DESIGN.md) refine the next consumer experiment:
 project existing canonical policy rather than maintain duplicate declarations;
 authenticate task-grant issuance; bind the pending request instance/revision
 at the authoritative gate; and keep native inventory, actual effects and

@@ -147,7 +147,7 @@ current scope; writing this design does not upgrade them to formal proof.
 
 ## 11. Feedback-driven integration decisions
 
-The [integration design](INTEGRATION.md) applies external engineering feedback
+The [integration design](FEEDBACK_INTEGRATION_DESIGN.md) applies external engineering feedback
 to the next optional consumer boundary: canonical-policy projection, authentic
 task-grant provenance, current request-instance binding and separate outcome/
 retry decisions. It preserves the assurance targets above and existing schemas.
