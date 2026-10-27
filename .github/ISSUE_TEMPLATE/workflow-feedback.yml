@@ -21,11 +21,19 @@ body:
   - type: input
     id: version
     attributes:
-      label: Version or commit
-      description: Package version, dist-tag resolution, or repository commit used.
+      label: ARC core version or commit
+      description: Package version, dist-tag resolution, or repository commit of the ARC core under evaluation. Record the evaluation helper separately below.
       placeholder: "@netsujo/agent-role-contracts@1.0.0 or exact commit SHA"
     validations:
       required: true
+  - type: input
+    id: helper_revision
+    attributes:
+      label: Evaluation helper revision (if used)
+      description: Record the exact arc-kit commit from git -C arc-kit rev-parse HEAD, separately from the ARC core version. Enter NOT USED if you did not use the helper. For an existing report, provide only the missing revision or NOT USED; do not resubmit evidence.
+      placeholder: "Exact arc-kit commit SHA, or NOT USED"
+    validations:
+      required: false
   - type: textarea
     id: result
     attributes:
