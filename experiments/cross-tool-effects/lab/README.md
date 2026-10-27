@@ -106,3 +106,27 @@ must not become an assumption that nothing happened.
 A separately admitted host execution receipt and exact source hashes are
 required for actual fault observations. Ordinary CI/offline checks continue
 to skip explicit network tests; an offline refusal must remain respected.
+
+## HTTP 404 after a recorded effect (fictional, unverified-feedback slice)
+
+Explicit opt-in, same compiled 50-byte fictional fixture and loopback receiver:
+
+    node experiments/cross-tool-effects/lab/faults.mjs --loopback-http404
+
+Inspired by unverified public DEV feedback; this lab neither confirms that
+report nor claims ARC adoption. Three isolated cases run in order:
+
+1. **healthy-204-control:** one start, one socket, one exact receipt, sender sees
+   HTTP 204; replay is DENY with zero extra sockets/receipts.
+2. **http-404-after-effect:** the trusted receiver records the complete 50-byte
+   body and then returns HTTP 404. The sender observes RESPONSE_OBSERVED with
+   status 404 and must **not** treat it as a successful remote effect, while the
+   separate observer shows one exact receipt. Replay is DENY with zero additional
+   sockets or receipts, so a 404 does not invite a blind retry.
+3. **no-send-control:** read-only contract against a 404 receiver: DENY, zero
+   starts, zero sockets/receipts, so a dead or merely 404ing receiver cannot pass
+   as a successful rejection.
+
+The 404 flag is receiver setup, not a worker argument. Existing response-loss and
+concurrent cases are unchanged. No remote exactly-once, atomicity, durable
+recovery or receipt reconciliation is established; replay denial is in-process only.

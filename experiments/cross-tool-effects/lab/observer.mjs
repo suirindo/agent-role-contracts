@@ -2,8 +2,9 @@
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 if (process.argv[2] !== '--loopback-observer' || typeof process.send !== 'function') throw new Error('LAB_OBSERVER_EXPLICIT_FORK_REQUIRED');
-if (process.argv.length > 4 || (process.argv[3] !== undefined && process.argv[3] !== '--drop-response')) throw new Error('LAB_OBSERVER_MODE_INVALID');
+if (process.argv.length > 4 || (process.argv[3] !== undefined && !['--drop-response','--respond-404'].includes(process.argv[3]))) throw new Error('LAB_OBSERVER_MODE_INVALID');
 const dropResponse = process.argv[3] === '--drop-response';
+const respondNotFound = process.argv[3] === '--respond-404';
 const receipts = [];
 let connections = 0, invalid = 0, closing = false;
 const server = createServer((req,res) => {
@@ -24,6 +25,7 @@ const server = createServer((req,res) => {
   receipts.push({ byte_length: body.length, content_sha256: 'sha256:' + createHash('sha256').update(body).digest('hex') });
   // Deliberate fault only after observing the complete body; never fabricate a no-send.
   if (dropResponse) req.socket.destroy();
+  else if (respondNotFound) { res.writeHead(404); res.end(); } // Receipt is already recorded; status says nothing about it.
   else { res.writeHead(204); res.end(); }
  });
  req.on('error', () => { invalid++; });
