@@ -121,3 +121,26 @@ Keep exact source identity, deterministic regression evidence, package inspectio
 For G0, acceptance includes all existing tests, public-export identity, disjoint generated schema sets, optional-profile compatibility, real execution of the core-only CLI/quickstart copy, and the three non-financial examples. The isolation test omits financial modules from a temporary test copy; it never deletes source files from the repository.
 
 General-purpose adoption should later be measured by independent teams successfully using their own contracts, the variety of non-financial tasks, useful diagnostics, successful integrations and maintenance cost. No usage, safety, speed or revenue outcome is inferred from synthetic fixtures or a merged PR.
+
+## 10. Optional task-authority assurance design
+
+Design integration: 2026-10-27. **Proposed; no formal theorem or runtime guarantee
+is established by this document.** The [task-authority assurance design](ASSURANCE.md)
+connects the existing G0 role/task declarations, G1 complete-subject binding,
+G2 concrete-operation mappings and G3 evidence declarations to #69's D1/D2/D3/D4
+stages and #47's real-work evaluation. The core remains offline and provider-neutral.
+
+The target is conditional task-authority preservation: every supported dispatch
+in a specified mediated trace must have a valid task-specific admission at its
+serialized gate. Supporting targets address delegation attenuation, current
+subject/byte fidelity and one-use local dispatch. The first model is bounded
+read/send; delegation, durable/distributed state and deployment mediation remain
+separate work. At-most-one local start does not establish exactly-once remote
+delivery, semantic completion or universal information non-leakage.
+
+The design reuses canonical schemas and existing sidecar/profile boundaries.
+It introduces no new stable API, schema, permission, approval authority, runtime
+or proof-tool dependency. Future model proofs, executable correspondence and
+actual deployment acceptance must carry separate exact-subject evidence and
+explicit trust assumptions. Existing synthetic tests and receipts keep their
+current scope; writing this design does not upgrade them to formal proof.

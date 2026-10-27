@@ -88,3 +88,12 @@ The ordinary rule can make the same decision; no unique detection or superiority
 is established. Potential value is reusable contract/binding/evidence structure,
 subject to #47's real-work cost and second-task evaluation. The unmodified #69
 D2/D3/D4 and independent review/delivery gates remain separate.
+
+## Optional assurance design
+
+The [task-authority assurance design](../../docs/ASSURANCE.md) maps this D1
+snapshot evaluator and the bounded D2 laboratory to proposed trace-safety
+properties, trusted host obligations and #69's existing stages. It preserves the
+stable core/profile boundaries and #47's human-value gates. The design is not a
+formal proof or new admission authority; current reports retain
+SUPPLIED_SNAPSHOTS_ONLY, UNKNOWN authority and NOT_PERFORMED execution.
