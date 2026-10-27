@@ -144,3 +144,19 @@ or proof-tool dependency. Future model proofs, executable correspondence and
 actual deployment acceptance must carry separate exact-subject evidence and
 explicit trust assumptions. Existing synthetic tests and receipts keep their
 current scope; writing this design does not upgrade them to formal proof.
+
+## 11. Feedback-driven integration decisions
+
+The [integration design](FEEDBACK_INTEGRATION_DESIGN.md) applies external engineering feedback
+to the next optional consumer boundary: canonical-policy projection, authentic
+task-grant provenance, current request-instance binding and separate outcome/
+retry decisions. It preserves the assurance targets above and existing schemas.
+The equal-information host-policy overlap is retained; ARC-specific enforcement
+advantage and reduced operator cost remain hypotheses.
+
+A single opted-in native harness must establish its issuer, effective inventory,
+exact request and independent observations before native acceptance. Core PASS,
+MCP transport and synthetic receipts are insufficient substitutes. Work
+completion remains a separate evidence/human-review question. The proposed
+N0–N6 gates connect this work to #47 without starting a runtime implementation,
+formal proof, public API expansion or release.

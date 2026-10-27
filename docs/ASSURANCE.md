@@ -215,3 +215,27 @@ Formal authorization/information-flow guarantees have prior research, including
 No world-first, novel-theorem, universal safety or competitive-superiority claim
 is established. Novelty and usefulness require their own literature/comparison
 and operator evidence.
+
+## 8. Feedback-driven integration and recovery decisions
+
+[Integration decisions](FEEDBACK_INTEGRATION_DESIGN.md) refine the next consumer experiment:
+project existing canonical policy rather than maintain duplicate declarations;
+authenticate task-grant issuance; bind the pending request instance/revision
+at the authoritative gate; and keep native inventory, actual effects and
+semantic work completion separate. These are proposed integration obligations,
+not properties established by existing core PASS or MCP transport tests.
+
+T4 applies per one-use grant. A later explicitly admitted retry needs a fresh
+grant/current authority check and separate attempt identity while retaining the
+logical operation identity and applicable receiver deduplication key. Settlement
+of evidence never executes, refunds consumption or grants retry authority.
+An uncertain effect needs independently sufficient no-effect evidence or a
+verified receiver reconciliation/idempotency contract before a retry can be
+considered safe. Permission alone cannot prove absence of an earlier effect.
+
+The first native acceptance is provenance of the approved policy, issuer and
+effective host permissions (N0), followed by positive, denial, stale-request,
+fault and reconciliation observations (N1–N5). Equal-information comparison and
+two genuine task measurements remain N6/#47. These gates supplement the
+model-proof and implementation-correspondence obligations; they do not replace
+them or widen the initial bounded read/send theorem scope.
