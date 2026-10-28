@@ -22,7 +22,9 @@ def snapshot(path):
         return {"exists": True, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                 "bytes": st.st_size, "dev": st.st_dev, "inode": st.st_ino,
                 "mode": st.st_mode, "mtime_ns": st.st_mtime_ns, "ctime_ns": st.st_ctime_ns,
-                "parent_dev": parent.st_dev, "parent_inode": parent.st_ino}
+                "parent_dev": parent.st_dev, "parent_inode": parent.st_ino,
+                "parent_mode": parent.st_mode, "parent_mtime_ns": parent.st_mtime_ns,
+                "parent_ctime_ns": parent.st_ctime_ns}
     except OSError as exc:
         return {"exists": False, "error": type(exc).__name__}
 

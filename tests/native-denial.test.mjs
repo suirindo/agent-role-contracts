@@ -28,7 +28,8 @@ test('actual cloud observations retain route differences and unknown native acce
   const log = evidence('observer.jsonl');
   const events = log.toString().trim().split('\n').map(line => JSON.parse(line));
   assert.equal(createHash('sha256').update(log).digest('hex'), summary.observer.published_sha256);
-  assert.equal(createHash('sha256').update(readFileSync(new URL('../experiments/native-denial/observe.py', import.meta.url))).digest('hex'), summary.observer.source_sha256);
+  assert.equal(createHash('sha256').update(evidence('observe.py')).digest('hex'), summary.observer.source_sha256);
+  assert.equal(events[0].observer_source_sha256, summary.observer.source_sha256);
   assert.equal(summary.strict_acceptance, 'UNKNOWN');
   assert.equal(events.at(-1).healthy, true);
   assert.equal(events.at(-1).reason, 'requested_stop');
@@ -88,6 +89,29 @@ test('file metadata and parent replacement are observed changes even when conten
   for (const part of ['file', 'parent']) {
     const r = fixture(); r.observer.after[part].ino = '999';
     assert.equal(run(r).classification, 'CONTRADICTION');
+  }
+});
+test('parent-only mode and timestamp changes contradict denial with an unchanged sentinel', () => {
+  for (const field of ['mode', 'mtime_ns', 'ctime_ns']) {
+    const r = fixture(); r.observer.after.parent[field] = '999';
+    assert.deepEqual(r.observer.before.file, r.observer.after.file);
+    assert.equal(run(r).classification, 'CONTRADICTION');
+    assert.equal(run(r).observed_mutation, true);
+    r.native.decision = 'allow'; assert.equal(run(r).classification, 'NOT_ENFORCED');
+  }
+  const r = fixture();
+  r.observer.events.push({ kind: 'metadata', path: r.subject.parent, at_ms: 150 });
+  assert.deepEqual(r.observer.before, r.observer.after);
+  assert.equal(run(r).classification, 'CONTRADICTION');
+});
+test('missing parent mode or timestamps cannot support bounded denial', () => {
+  for (const boundary of ['before', 'after']) {
+    for (const field of ['mode', 'mtime_ns', 'ctime_ns']) {
+      const r = fixture(); delete r.observer[boundary].parent[field];
+      const result = run(r);
+      assert.equal(result.classification, 'UNKNOWN');
+      assert.deepEqual(result.reasons, ['FILE_OR_PARENT_SNAPSHOT_INCOMPLETE']);
+    }
   }
 });
 test('missing, stale, unhealthy, overflowing or incomplete observer remains unknown', () => {

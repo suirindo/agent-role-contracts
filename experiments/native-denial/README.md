@@ -44,6 +44,7 @@ files or hosts merely to increase a count.
 - `summary.json`: window references, observed outcomes, limitations and decision.
 - `classification-inputs.json`: actual missing identities preserved as null;
   both incomplete inputs remain `UNKNOWN` in the classifier.
+- `observe.py`: the exact original observer source used for this trial.
 
 The summary records the as-run observer source SHA-256 and the original and
 published log hashes. Auxiliary fixture-directory entry names are redacted to
@@ -52,8 +53,12 @@ sentinel events are retained. Nanosecond integers are normalized to decimal
 strings with Python before JavaScript parsing, retaining their exact precision.
 The original log remains unchanged. No key, credential or user-file content is stored.
 
-`observe.py` is the as-run Linux-only observer. It never writes the fixture. To
-reproduce its mechanism with a newly authorized synthetic fixture:
+The as-run Linux-only source is preserved byte-for-byte at
+`evidence/20261028-cloud/observe.py`. The current `observe.py` additionally records
+parent mode, modification time and change time for future observations. It does
+not fill in the missing historical fields or change either actual result from
+`UNKNOWN`. Neither version writes the fixture. To exercise the revised observer
+with a newly authorized synthetic fixture:
 
 ```sh
 python3 experiments/native-denial/observe.py \
@@ -96,6 +101,19 @@ Run the deterministic author checks with:
 ```sh
 node --test tests/native-denial.test.mjs
 ```
+
+The collector has separate Python standard-library regressions:
+
+```sh
+python3 tests/native-observer.test.py
+```
+
+They check real parent-only `chmod`/`utime` changes with an unchanged sentinel
+and, on Linux, parent metadata in ready/barrier/terminal records from the actual
+inotify process. These are observer regressions, not another native permission
+trial. The Python tests are standalone; `npm run check` does not run them. The
+non-Linux run explicitly skips the inotify lifecycle case. Raw nanosecond values
+must still be normalized to decimal strings in Python before JavaScript parsing.
 
 ## Native-only / ARC comparison
 

@@ -56,3 +56,32 @@ Untested/unclaimed: a crash during marker write/fsync, power loss and filesystem
 kernel compromise, network/distributed arbitration, authenticated reconciliation, aggregate budgets, native N0/T4 mediation,
 revocation ordering at a dispatch gate, executor starts, semantic completion, and real workflow adoption. Retention and safe
 backup/restore remain external obligations. There is no deletion/refund/retry API.
+
+## Observed owned payload bytes (`owned-payload.mjs`)
+
+`createOwnedPayloadConsumptionStore(root)` builds its own pinned private store with the unchanged `createReceiptConsumptionStore`
+(same root rules) and returns a frozen `consume({ approvalInput, payloadBytes })`. It accepts no caller store, verifier result or
+observation flag. Before the first await it captures the two fields (own data properties only; proxies, accessors, symbols,
+unknown keys and foreign prototypes are rejected without invoking getters), requires a real `Buffer`/`Uint8Array` (no strings,
+arrays, `DataView`, subclasses or proxies), reads backing buffer/offset/length through intrinsics captured at load, rejects
+shared, resizable, detached and over-1 MiB input, and copies exactly that subview. The copy is the observation snapshot; later
+caller mutation cannot change it.
+
+The raw copied bytes are hashed with plain sha256 (no decoding, normalization or domain prefix) and compared with the
+`content_sha256` and `byte_length` of the strictly parsed `network.send` request. Only on an exact match is the unchanged store
+called, with the same captured approval strings. A mismatch, malformed request or other effect never calls the ledger, so no
+marker is written and a valid grant is not burned. Reports separate `payload_observation`, `payload_binding`
+(`MATCH`, `MISMATCH`, `NOT_OBSERVED`, or `UNEVALUATED` when bytes were observed but the declaration was unusable) and the
+ledger's own `consumption_status`/`verification_result` (`ledger_called` says whether it ran). `source_bytes_observed` means only
+that this call copied a buffer; digest and length are reported, never the bytes, paths, signatures or keys. Authority stays
+`UNKNOWN` and the execution, runtime-enforcement, actor/reviewer, global-replay, `payload_sent`, source-classification,
+destination and later-operation flags stay false, even when `CONSUMED`. Bytes are only inspected: nothing is sent, returned or
+executed. Windows is explicitly `UNSUPPORTED` with no filesystem access.
+
+Byte equality does not prove source classification, provenance authenticity, destination resolution or actor authority, and says
+nothing about a later, separately executed operation. Store provisioning and registry/context/time authenticity remain host
+assumptions. This is not a broker or native N0 admission and does not solve current registry/policy provenance, request-revision
+CAS, dispatch-time revocation, T4 executor at-most-once, crashes during writes, global budgets or operation mediation.
+
+    node --test tests/task-owned-payload.test.mjs
+    node experiments/task-consumption/owned-payload-demo.mjs
