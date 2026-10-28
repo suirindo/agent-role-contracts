@@ -101,6 +101,9 @@ const cases = [
  ['redirect even if the final looks approved', { final: APPROVED, hops: [{ kind: 'redirect', target: APPROVED }], verified: true }, 'DENY', 'DTB_REDIRECT_NOT_APPROVED'],
  ['proxy with verified wrong final', { final: OTHER, hops: [{ kind: 'proxy', target: OTHER }], verified: true }, 'DENY', 'DTB_TARGET_MISMATCH'],
  ['proxy peer only, final unverified', { final: APPROVED, hops: [{ kind: 'proxy', target: APPROVED }], verified: false }, 'UNKNOWN_HELD', 'DTB_PROXY_FINAL_UNVERIFIED'],
+ ['direct final unverified', { final: APPROVED, hops: [], verified: false }, 'UNKNOWN_HELD', 'DTB_FINAL_HOP_UNVERIFIED'],
+ ['dns final unverified', { final: APPROVED, hops: [{ kind: 'dns', target: APPROVED }], verified: false }, 'UNKNOWN_HELD', 'DTB_FINAL_HOP_UNVERIFIED'],
+ ['alias final unverified', { final: APPROVED, hops: [{ kind: 'alias', target: APPROVED }], verified: false }, 'UNKNOWN_HELD', 'DTB_FINAL_HOP_UNVERIFIED'],
 ];
 for (const [name, route, decision, code] of cases) {
  test('negative: ' + name, { skip: !POSIX }, () => refused({ route: withDigest(() => route) }, decision, code));

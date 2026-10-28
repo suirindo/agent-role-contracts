@@ -119,7 +119,7 @@ async function bind(config, approval, bytes) {
  const wrong = differs(e.final, approved);
  const redirected = e.hops.some(h => h.kind === 'redirect');
  // A socket peer that is only a proxy is not evidence of the final destination, whether or not it looks right.
- if (e.hops.some(h => h.kind === 'proxy') && !e.final_verified) return report(['DTB_PROXY_FINAL_UNVERIFIED'], { ...base, ...claimed });
+ if (!e.final_verified) return report([e.hops.some(h => h.kind === 'proxy') ? 'DTB_PROXY_FINAL_UNVERIFIED' : 'DTB_FINAL_HOP_UNVERIFIED'], { ...base, ...claimed });
  if (wrong.length || redirected) {
   return report([wrong.length && 'DTB_TARGET_MISMATCH', redirected && 'DTB_REDIRECT_NOT_APPROVED'].filter(Boolean),
    { ...base, ...claimed, adapter_decision: 'DENY', target_binding: 'MISMATCH', mismatch_fields: wrong });
