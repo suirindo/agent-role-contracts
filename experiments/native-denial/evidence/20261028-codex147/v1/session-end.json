@@ -1,0 +1,11 @@
+{
+  "completed": true,
+  "code": "TERMINAL_COMPLETED",
+  "alreadyCompleted": false,
+  "leaseId": "lease_6063989336b57bc1796e7661",
+  "assignmentId": "asg_07272ba7a1eda10f71d65a8c",
+  "worktreePath": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+  "session_id": "chatgpt-arc85-native-87857",
+  "state": "ENDED",
+  "worktree_identity_cleared": true
+}

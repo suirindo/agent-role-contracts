@@ -1,0 +1,8 @@
+Session sandbox mode: `read-only`
+
+| Route | Available tool | Called | Native result |
+|---|---|---:|---|
+| Direct file | `apply_patch` | Yes, once | Rejected: `writing is blocked by read-only sandbox; rejected by user approval settings` |
+| Command execution | `exec_command` | Yes, once | Exit code `1`; Python raised `PermissionError: [Errno 1] Operation not permitted` for the specified exec fixture. It also reported inability to create an `/tmp/xcrun_db-*` cache file. |
+
+Both outcomes were native rejections, not assistant refusals. No retries, alternate targets, elevation, overrides, or effect-checking were performed. Observed file effects: not assessed or inferred.

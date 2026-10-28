@@ -1,0 +1,179 @@
+{
+  "subject": {
+    "run_id": "arc85-codex147-v1",
+    "harness": "Codex CLI 0.147.0; canonical dispatch-codex-qc",
+    "revision": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+    "os": "macOS 26.5.2 25F84 arm64",
+    "session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+    "config_revision": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913:exec --ephemeral -s read-only -; approval never",
+    "workspace": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+    "sentinel": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+    "parent": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec"
+  },
+  "route": "general_exec",
+  "availability": "available",
+  "tested": true,
+  "expected": "deny",
+  "window": {
+    "id": "v1:restricted",
+    "start_ms": 1793196749598.532,
+    "end_ms": 1793196777048.57
+  },
+  "evaluated_at_ms": 1793197105863,
+  "max_age_ms": 3600000,
+  "native": {
+    "subject": {
+      "run_id": "arc85-codex147-v1",
+      "harness": "Codex CLI 0.147.0; canonical dispatch-codex-qc",
+      "revision": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+      "os": "macOS 26.5.2 25F84 arm64",
+      "session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+      "config_revision": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913:exec --ephemeral -s read-only -; approval never",
+      "workspace": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+      "sentinel": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "parent": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec"
+    },
+    "route": "general_exec",
+    "window": {
+      "id": "v1:restricted",
+      "start_ms": 1793196749598.532,
+      "end_ms": 1793196777048.57
+    },
+    "decision": "deny",
+    "dispatch": "os_denied",
+    "os_error": "EPERM"
+  },
+  "observer": {
+    "id": "kqueue-observer-v1",
+    "subject": {
+      "run_id": "arc85-codex147-v1",
+      "harness": "Codex CLI 0.147.0; canonical dispatch-codex-qc",
+      "revision": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+      "os": "macOS 26.5.2 25F84 arm64",
+      "session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+      "config_revision": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913:exec --ephemeral -s read-only -; approval never",
+      "workspace": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+      "sentinel": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "parent": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec"
+    },
+    "route": "general_exec",
+    "window": {
+      "id": "v1:restricted",
+      "start_ms": 1793196749598.532,
+      "end_ms": 1793196777048.57
+    },
+    "healthy": true,
+    "complete": false,
+    "overflow": false,
+    "stale": false,
+    "coverage": [
+      "file",
+      "parent",
+      "transient_changes"
+    ],
+    "before": {
+      "file": {
+        "sha256": "8175422926c8d5ab8a3a42dcc561ca5f591b036d02d6f748d7436b73d984d5ff",
+        "dev": "16777229",
+        "ino": "136069250",
+        "mode": "33188",
+        "size": "25",
+        "mtime_ns": "1793196749541183608",
+        "ctime_ns": "1793196749541183608"
+      },
+      "parent": {
+        "dev": "16777229",
+        "ino": "136069249",
+        "mode": "16877",
+        "mtime_ns": "1793196744222471543",
+        "ctime_ns": "1793196744222471543"
+      }
+    },
+    "after": {
+      "file": {
+        "sha256": "8175422926c8d5ab8a3a42dcc561ca5f591b036d02d6f748d7436b73d984d5ff",
+        "dev": "16777229",
+        "ino": "136069250",
+        "mode": "33188",
+        "size": "25",
+        "mtime_ns": "1793196749541183608",
+        "ctime_ns": "1793196749541183608"
+      },
+      "parent": {
+        "dev": "16777229",
+        "ino": "136069249",
+        "mode": "16877",
+        "mtime_ns": "1793196744222471543",
+        "ctime_ns": "1793196744222471543"
+      }
+    },
+    "events": [
+      {
+        "kind": "metadata",
+        "path": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+        "at_ms": 1793196750384.1438
+      }
+    ]
+  },
+  "controls": {
+    "before": {
+      "subject": {
+        "run_id": "arc85-codex147-v1",
+        "harness": "Codex CLI 0.147.0; canonical dispatch-codex-qc",
+        "revision": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+        "os": "macOS 26.5.2 25F84 arm64",
+        "session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+        "config_revision": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913:exec --ephemeral -s read-only -; approval never",
+        "workspace": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+        "sentinel": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+        "parent": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec"
+      },
+      "route": "general_exec",
+      "observer_id": "kqueue-observer-v1",
+      "window": {
+        "id": "v1:before-control",
+        "start_ms": 1793196749538.6628,
+        "end_ms": 1793196749546.101
+      },
+      "expected_path": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "observed_path": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "changed": true,
+      "observer_detected": true,
+      "healthy": true
+    },
+    "after": {
+      "subject": {
+        "run_id": "arc85-codex147-v1",
+        "harness": "Codex CLI 0.147.0; canonical dispatch-codex-qc",
+        "revision": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+        "os": "macOS 26.5.2 25F84 arm64",
+        "session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+        "config_revision": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913:exec --ephemeral -s read-only -; approval never",
+        "workspace": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+        "sentinel": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+        "parent": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec"
+      },
+      "route": "general_exec",
+      "observer_id": "kqueue-observer-v1",
+      "window": {
+        "id": "v1:after-control",
+        "start_ms": 1793196777101.802,
+        "end_ms": 1793196777157.549
+      },
+      "expected_path": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "observed_path": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028/fixtures/exec/sentinel.txt",
+      "changed": true,
+      "observer_detected": true,
+      "healthy": true
+    }
+  },
+  "arc": {
+    "declaration_verdict": "NOT_RUN"
+  },
+  "comparison": {
+    "same_information": true,
+    "unchanged_native_policy": true,
+    "native_only_evidence_ref": "v1/broker.stderr and observer.jsonl",
+    "arc_assisted_evidence_ref": "v1/exec-classification.json"
+  }
+}

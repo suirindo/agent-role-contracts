@@ -1,0 +1,102 @@
+{
+  "v1/subject.json": {
+    "original_sha256": "9f4cbf2c254cf3aa1b5a59f6cc47eb15a0b16fbbe7d6865f4cb0b501d2b5968d",
+    "published_sha256": "481580188bbf38cbcc0c580f7107c1dd5ccf087b6c066d010de463201c1f552e",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/session-receipt.json": {
+    "original_sha256": "255c738a9268bd6171fd18059b948421878f230b0e229edadcd7cdaa8b34cbc4",
+    "published_sha256": "443ace5c7e959b17f800dcdcfe3b86a7f7c0cf6317666655f4d6691b95e7a31d",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/session-end.json": {
+    "original_sha256": "53c7a02ac483531ed992f5a28253b8d47dcc2a5abb90c19151980f870ab1cbf6",
+    "published_sha256": "af57876e5337dbcad02335a8e10be2345789df9016c1a9574c2389a8cffa27bb",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/observer.jsonl": {
+    "original_sha256": "3f97b7e02db2bddf8b2a9e61aaac0038af731e947d78f59969a8ef5cfa73e2e7",
+    "published_sha256": "3f97b7e02db2bddf8b2a9e61aaac0038af731e947d78f59969a8ef5cfa73e2e7",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/processes.json": {
+    "original_sha256": "f46a9a43a07ce4a483c0bf6aa3a51cee516b16bdd0e3803372b42257c05946f8",
+    "published_sha256": "11151ec0f974be4bb8ecbcdd2af43c3b0b7ebf3aa2a0518e73bca6925d35ca1f",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/prompt.txt": {
+    "original_sha256": "2948797d97ef1f5d24865f3f2ed69d05dc966c8214b9488bf33fdd9baf200be4",
+    "published_sha256": "97b721492b8f4be42c184c4bbea5d2741c938f7a5706c8a9f6dd24ef651ca3aa",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/broker.stderr": {
+    "original_sha256": "ff0b2a206c20069746c46529f49a06fbd9c37f6697817066e9b3a309ac371d8a",
+    "published_sha256": "d3c73ce84862efc8c9245bcbb8493da70cc8e1d25a699a29b89b0e0ab5a0d98a",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/native-final.txt": {
+    "original_sha256": "d19c3a2d756cfc0807da332159fa18b3a868451d8053ba4b3423ce785aecba25",
+    "published_sha256": "d19c3a2d756cfc0807da332159fa18b3a868451d8053ba4b3423ce785aecba25",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/exit.json": {
+    "original_sha256": "124fd50cb6d223cdd18fedc166d00af7254199b6e6dedf9be82f71db87af6d01",
+    "published_sha256": "124fd50cb6d223cdd18fedc166d00af7254199b6e6dedf9be82f71db87af6d01",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v1/driver.py.txt": {
+    "original_sha256": "a9d3d4fa15b4e321c530e3a59bf4f4ffbafb6cc9c3f8759848d54f0da1c9577e",
+    "published_sha256": "9e86146c3305500adfff184d374c6c6dead6c3de8086323d5153284709f276f3",
+    "transformation": "home path alias only; archival source, not executable as published"
+  },
+  "v2/subject.json": {
+    "original_sha256": "161fcbe7dfb19d950320280c3492c1ba2f7bd2ead381fd1a7132cf542a7be468",
+    "published_sha256": "9f47f249db8130bd25bbb8d15ad361105762dc154e72bf8f6612a7148ace9049",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/session-receipt.json": {
+    "original_sha256": "f80a580696766880b6b3bf6a73eaa2f2859a4b8caf56927493c8df278f6b0abc",
+    "published_sha256": "e26a4ed58a26aafff7cbba1555cb6e9428f5bdf89ce28b42ab74ace028bea037",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/session-end.json": {
+    "original_sha256": "5d773d53a90091a0e6ab891f5f96e6ac4c1696f29155d045f4322428420ad809",
+    "published_sha256": "1bf20a98ff20875bcdd62e8c5ebad8d542d1c36b8d92f12772463393d35439d2",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/observer.jsonl": {
+    "original_sha256": "6eccca571f4dd9eb614a48100810bd3da7fb19bd8ec155e607dbccc4c78b7b23",
+    "published_sha256": "6eccca571f4dd9eb614a48100810bd3da7fb19bd8ec155e607dbccc4c78b7b23",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/processes.json": {
+    "original_sha256": "b752a9e35da543fee410d67d4ff3cdead023d8ad3fa05d7a100dd683b569d5c3",
+    "published_sha256": "9234bd3df2af79d23ce15cd1506e34ed91dbef99be276a1fd1d066968bcec59a",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/prompt.txt": {
+    "original_sha256": "9a966d2a5b915fa436ceb93d0ac5d14a8542b816559d58ee0dc9d9d3736ca768",
+    "published_sha256": "0bfdba3feb9e686f743f17e4bc2125098aaff996d15e1e1e2bdb1f26d3d3dee0",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/broker.stderr": {
+    "original_sha256": "cc2614cadced90afd195ac3fbd1403eedac663083c9d49d2333688ab24479061",
+    "published_sha256": "d541d35dd4b813cd156e3960b97883c106df88c43958c703c037c4a62531e3cd",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/native-final.txt": {
+    "original_sha256": "a5e5fc0aa051ecf8bb23b3125b267c71efa95b5496affee5f2f80f193dc3c65c",
+    "published_sha256": "a5e5fc0aa051ecf8bb23b3125b267c71efa95b5496affee5f2f80f193dc3c65c",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/exit.json": {
+    "original_sha256": "124fd50cb6d223cdd18fedc166d00af7254199b6e6dedf9be82f71db87af6d01",
+    "published_sha256": "124fd50cb6d223cdd18fedc166d00af7254199b6e6dedf9be82f71db87af6d01",
+    "transformation": "home path alias; unrelated MCP startup error line omitted only from broker.stderr"
+  },
+  "v2/driver.py.txt": {
+    "original_sha256": "c38e09d1e25e5d56c81e872925b0f60205929262d463295d55b8f75fb977f9ce",
+    "published_sha256": "aa385222e3e854d0fc7daa96fafe669bd5fd647bcc6cef8598d335ee73cc8ad2",
+    "transformation": "home path alias only; archival source, not executable as published"
+  }
+}

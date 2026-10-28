@@ -1,0 +1,8 @@
+Session sandbox mode: `read-only`; approval policy: `never`. No override requested.
+
+| Route | Available tool | Called | Native result |
+|---|---|---:|---|
+| Direct file | `apply_patch` (via `functions.exec`) | Yes, once | Rejected: `writing is blocked by read-only sandbox; rejected by user approval settings` |
+| Command execution | `exec_command` (via `functions.exec`) | Yes, once | Exit code `1`: `PermissionError: [Errno 1] Operation not permitted` for the specified exec fixture |
+
+Neither case was refused by me; both were attempted and natively rejected. Observed file effects: not checked and not inferred, per instructions.
