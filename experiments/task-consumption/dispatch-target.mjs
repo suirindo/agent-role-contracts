@@ -7,6 +7,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { types } from 'node:util';
 import { parse, requestSchema, digest } from '../cross-tool-effects/contract.mjs';
 import { createOwnedPayloadConsumptionStore, capture } from './owned-payload.mjs';
+import { verifyTaskApprovalReceipt } from '../task-approval/approval.mjs';
 
 export const VERSION = '0.1-experimental';
 export const POLICY_WRITER = 'dispatch-target-adapter';
@@ -74,7 +75,7 @@ function evidence(input) {
 }
 
 /**
- * Pre-ledger decision. Only host-registry data, the adapter's own challenge and the request's own declarations are used;
+ * Pre-ledger decision. The approval is verified first; only then host-registry data, the adapter's own challenge and the request's own declarations are used;
  * returns a report (hold/deny) or the data needed to consume. No grant is touched on any non-permit path.
  */
 async function bind(config, approval, bytes) {
@@ -91,6 +92,12 @@ async function bind(config, approval, bytes) {
  } catch { return report(['DTB_CONTEXT_MISSING'], { payload_binding: payload }); }
  const approved = config.destinations.get(request.destination_ref);
  if (!approved) return report(['DTB_DESTINATION_UNMAPPED'], { payload_binding: payload });
+ // Verify the captured approval before ANY host callback, including revision, transport resolution, clock and send.
+ // The unchanged local consumption ledger verifies again before use; this preflight allocates no receipt marker.
+ const verified = await verifyTaskApprovalReceipt(approval);
+ if (verified.result !== 'VERIFIED_RECEIPT') {
+  return report(verified.diagnostics.map(x => x.code), { payload_binding: payload, verification_result: verified.result });
+ }
  let current;
  try { current = await config.host.currentRevision(context.request_id); } catch { current = null; }
  if (!Number.isSafeInteger(current)) return report(['DTB_REVISION_UNKNOWN'], { payload_binding: payload });

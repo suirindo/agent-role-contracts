@@ -61,6 +61,13 @@ function limits(r) {
  return r;
 }
 const codes = r => r.diagnostics.map(d => d.code);
+// Mutate an actual signature byte, avoiding a replacement that can accidentally leave the signature unchanged.
+function forgedApproval(input) {
+ const receipt = JSON.parse(input.receiptJson);
+ const signature = Buffer.from(receipt.signature, 'base64'); signature[0] ^= 1;
+ receipt.signature = signature.toString('base64');
+ return { ...input, receiptJson: j(receipt) };
+}
 /** Case must be refused with zero receiver effect, no marker, and leave the grant usable by a clean positive control. */
 async function refused(mk, expectDecision, expectCode, { revisionAtStart } = {}) {
  const net = network(mk);
@@ -180,10 +187,66 @@ test('negative: unmapped destination, effect other than send, bad approval and c
   }
   const noContext = { ...good }; delete noContext.contextJson;
   assert.ok(codes(await adapter.dispatch({ approvalInput: noContext, payloadBytes: BODY })).includes('DTB_CONTEXT_MISSING'));
-  const forged = { ...good, receiptJson: good.receiptJson.replace(/"signature":"./, '"signature":"A') };
+  const forged = forgedApproval(good);
   const f = await adapter.dispatch({ approvalInput: forged, payloadBytes: BODY });
-  assert.notEqual(f.adapter_decision, 'PERMIT_SOURCE_ONLY'); assert.equal(net.sends, 0);   // verifier denies after resolution but before any send
+  assert.notEqual(f.adapter_decision, 'PERMIT_SOURCE_ONLY'); assert.equal(net.sends, 0);   // verifier denies before any host callback
   assert.equal(net.receiver.length, 0); assert.equal((await markers(root)).length, 0);
+ });
+});
+
+/** Count actual host callbacks; an invalid approval must never invoke any of them. */
+function counted(net) {
+ const calls = { revision: 0, resolve: 0, now: 0, send: 0 };
+ const { now, currentRevision, transport } = net.host;
+ net.host = { now: () => { calls.now++; return now(); }, currentRevision: async id => { calls.revision++; return currentRevision(id); },
+  transport: { resolve: async (op, ch) => { calls.resolve++; return transport.resolve(op, ch); }, send: async (op, b) => { calls.send++; return transport.send(op, b); } } };
+ return calls;
+}
+async function signedApproval(mutate) {
+ const s = await scenario(f => {
+  f.request.content_sha256 = sha(BODY); f.request.byte_length = BODY.length; f.request.destination_ref = 'lab.receiver';
+  f.contract.destinations = ['lab.receiver']; f.contract.flows[0].destination_ref = 'lab.receiver';
+  for (const x of f.provenance.sources) x.content_sha256 = sha(BODY);
+ });
+ mutate(s);
+ return render(s);
+}
+const invalidApprovals = [
+ ['forged signature', async () => { const a = await approval(); return forgedApproval(a); }, 'ATR_SIGNATURE_INVALID'],
+ ['revoked key', () => signedApproval(s => { s.registry.keys[0].status = 'revoked'; }), 'ATR_KEY_NOT_ACTIVE'],
+ ['expired receipt', () => signedApproval(s => { s.payload.issued_at_ms = NOW - 2000; s.payload.expires_at_ms = NOW - 1; }), 'ATR_EXPIRED'],
+ ['wrong subject', () => signedApproval(s => { s.context.expected_subject_digest = 'sha256:' + 'd'.repeat(64); }), 'ATR_SUBJECT_STALE'],
+ ['wrong context', () => signedApproval(s => { s.context.actor_role = 'nobody'; }), 'ATR_CONTEXT_CONFLICT'],
+ ['malformed receipt', async () => ({ ...(await approval()), receiptJson: '{}' }), null],
+ ['missing registry', async () => { const { registryJson, ...rest } = await approval(); return { ...rest, registryJson: '{}' }; }, null],
+];
+for (const [name, make, code] of invalidApprovals) {
+ test('approval verified before any host callback: ' + name, { skip: !POSIX }, async () => {
+  const net = network({ route: withDigest(() => ({ final: APPROVED, hops: [], verified: true })) });
+  const calls = counted(net);
+  await withAdapter(net, async (adapter, root) => {
+   const r = limits(await adapter.dispatch({ approvalInput: await make(), payloadBytes: BODY }));
+   assert.notEqual(r.adapter_decision, 'PERMIT_SOURCE_ONLY', j(r)); assert.notEqual(r.verification_result, 'VERIFIED_RECEIPT', j(r));
+   if (code) assert.ok(codes(r).includes(code), j(r));
+   assert.equal(r.send_outcome, 'NOT_INVOKED'); assert.equal(r.ledger_called, false); assert.equal(r.consumption_status, 'NOT_CONSUMED');
+   assert.deepEqual(calls, { revision: 0, resolve: 0, now: 0, send: 0 }, j(calls));
+   assert.equal(net.receiver.length, 0); assert.equal((await markers(root)).length, 0);
+  });
+ });
+}
+test('approval verified before any host callback: valid control resolves and sends once; refusals before it burned nothing', { skip: !POSIX }, async () => {
+ const net = network({ route: withDigest(() => ({ final: APPROVED, hops: [], verified: true })) });
+ const calls = counted(net);
+ await withAdapter(net, async (adapter, root) => {
+  const good = await approval();
+  const forged = forgedApproval(good);
+  assert.notEqual((await adapter.dispatch({ approvalInput: forged, payloadBytes: BODY })).adapter_decision, 'PERMIT_SOURCE_ONLY');
+  assert.equal(calls.revision + calls.resolve + calls.now + calls.send, 0); assert.equal((await markers(root)).length, 0);
+  const r = await adapter.dispatch({ approvalInput: good, payloadBytes: BODY });
+  assert.equal(r.adapter_decision, 'PERMIT_SOURCE_ONLY'); assert.equal(r.consumption_status, 'CONSUMED');
+  assert.equal(calls.resolve, 1); assert.equal(calls.send, 1); assert.equal(net.receiver.length, 1); assert.equal((await markers(root)).length, 1);
+  const again = await adapter.dispatch({ approvalInput: good, payloadBytes: BODY });
+  assert.equal(again.consumption_status, 'REPLAY_OR_UNCERTAIN'); assert.equal(calls.send, 1);
  });
 });
 

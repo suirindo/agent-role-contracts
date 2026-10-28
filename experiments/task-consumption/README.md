@@ -93,6 +93,9 @@ ledger is touched it compares the exact approved destination (from a host-suppli
 `destination_ref`) with the destination the host transport reports it resolved for this very send. It binds actor, action,
 payload digest and request revision into one operation digest, issues a fresh challenge per call, and accepts resolution
 evidence only if it echoes that challenge and digest, is fresh, is single-valued, and is not produced by the policy writer.
+Approval verification via the unchanged `verifyTaskApprovalReceipt` happens before any host callback (`currentRevision`,
+`resolve`, clock, `send`); only `VERIFIED_RECEIPT` proceeds. Forged, revoked, expired and mismatched
+subject/context approvals reach no host code and consume no grant (the ledger still re-verifies before consuming).
 Anything missing, ambiguous, stale, unbound or self-attested is `UNKNOWN_HELD`; a different target, an unapproved redirect
 or a changed payload or stale revision is `DENY`. Callers cannot supply a target or evidence. Nothing is sent or burned on
 any refusal; after the ledger consumes, a stale gate holds without a refund and without sending.
