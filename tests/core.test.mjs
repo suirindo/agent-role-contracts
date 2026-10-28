@@ -106,3 +106,38 @@ test('minLength counts Unicode code points',()=>{assert.equal(validateSchema('ðŸ
 test('unknown schema keyword fails loudly rather than being ignored',()=>assert.throws(()=>assertSupportedSchema({type:'object',allOf:[]}),/SCHEMA_UNSUPPORTED_KEYWORD/));
 test('unsupported schema dialect rejected',()=>assert.throws(()=>assertSupportedSchema({$schema:'https://json-schema.org/draft/2020-12/schema'}),/UNSUPPORTED_DIALECT/));
 test('unsafe integers rejected rather than rounded into policy',()=>{const s=json(bundle()).replace('"version":1','"version":9007199254740993');assert.equal(validateBundle(s).errors[0].code,'UNSAFE_INTEGER');});
+
+
+test('real GitHub issue-template path accepts exact authority, not unrelated files',()=>{
+  const target='.github/ISSUE_TEMPLATE/workflow-feedback.yml';
+  const b=load('starter-bundle');
+  const scopes=[target,'README.ja.md','README.md','docs/EVALUATE-WORKFLOW.md','docs/INTEGRATION.md','docs/QUICKSTART.md'];
+  b.roles.find(r=>r.contract.id==='implementer').contract.authority.allowed_write_scopes=scopes;
+  assert.equal(validateBundle(json(b)).valid,true);
+  for(const s of scopes){const t=load('starter-task');t.inputs.scope=s;assert.equal(explainTask(json(b),json(t)).valid,true,s);}
+  for(const s of ['.github/ISSUE_TEMPLATE/other.yml','.github/workflows/release.yml','src/other.mjs']){
+    const t=load('starter-task');t.inputs.scope=s;
+    const out=explainTask(json(b),json(t));
+    assert.ok(out.errors.some(x=>x.code==='TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY'),s+': '+json(out.errors));
+  }
+});
+test('explicit issue-template subtree is contained but cannot escape',()=>{
+  const b=load('starter-bundle');
+  b.roles.find(r=>r.contract.id==='implementer').contract.authority.allowed_write_scopes=['.github/ISSUE_TEMPLATE/**'];
+  assert.equal(validateBundle(json(b)).valid,true);
+  const t=load('starter-task');
+  for(const s of ['.github/ISSUE_TEMPLATE/workflow-feedback.yml','.github/ISSUE_TEMPLATE/deeper/report.yml']){
+    t.inputs.scope=s;assert.equal(explainTask(json(b),json(t)).valid,true,s);
+  }
+  for(const s of ['.github/workflows/release.yml','.github/ISSUE_TEMPLATEish/evil.yml','.git/config','../../outside','src/other.mjs']){
+    t.inputs.scope=s;assert.equal(explainTask(json(b),json(t)).valid,false,s);
+  }
+});
+test('other dot directories, traversal, absolute paths and nonportable syntax stay invalid',()=>{
+  const b=load('starter-bundle');
+  for(const s of ['.git/config','.env','.githubish/x','src/.github/file','/.github/file','../.github/file','./.github/file','.github/../file','.github//file','.github/.hidden','.github/x/**/file','.GITHUB/file']){
+    b.roles.find(r=>r.contract.id==='implementer').contract.authority.allowed_write_scopes=[s];
+    const out=validateBundle(json(b));
+    assert.ok(out.errors.some(x=>x.code==='WRITE_SCOPE_SYNTAX'),s+': '+json(out.errors));
+  }
+});
