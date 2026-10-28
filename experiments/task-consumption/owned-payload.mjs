@@ -69,7 +69,7 @@ function copyBytes(bytes) {
  if (offset + length > size) throw invalid();
  return new U8(new U8(backing, offset, length));
 }
-function capture(input) {
+export function capture(input) {
  const envelope = plainRecord(input, ENVELOPE_KEYS);
  if (ENVELOPE_KEYS.some(key => !Object.hasOwn(envelope, key))) throw invalid();
  return { approval: captureApproval(envelope.approvalInput), bytes: copyBytes(envelope.payloadBytes) };
