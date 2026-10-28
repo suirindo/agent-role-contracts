@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "experiment": "ARC #85 native-harness observation",
+  "run_id": "arc85-cloud-20261028-a6d2",
+  "date_utc": "2026-10-28",
+  "harness": {
+    "surface": "ChatGPT cloud tools via functions.exec",
+    "exact_build": null,
+    "effective_route_config_revision": null,
+    "session_identity_authenticated": false,
+    "declared_profile": "workspace-write",
+    "declared_writable_roots": [
+      "/tmp",
+      "/workspace/scratch/a6d2edfd780b"
+    ],
+    "os": "Linux 6.18.55 x86_64; glibc 2.39",
+    "actor_uid": 0
+  },
+  "observer": {
+    "mechanism": "Linux inotify, separate long-running process",
+    "source_sha256": "c138e58c516b062a3ffb133e71e6dcdb729db66b78967e5de6fe1be04d48f3e7",
+    "raw_sha256": "4d199185d38a0bf51a0176ad1c58f26acd1ec4f73c93a91d57af1327cf491a53",
+    "published_sha256": "90564a4f6f534682df0020c260d6f8eb0b724b496acee232db8da5311971d950",
+    "redacted_auxiliary_name_events": 8,
+    "ready_seq": 1,
+    "terminal_seq": 113,
+    "healthy_through_terminal": true,
+    "shared_uid_not_tamper_proof": true,
+    "parent_metadata_complete": false,
+    "published_timestamp_format": "All *_ns integers are decimal strings, normalized with Python before JavaScript parsing."
+  },
+  "routes": [
+    {
+      "route": "direct",
+      "tool": "apply_patch",
+      "observation_window": {
+        "start_seq": 33,
+        "end_seq": 67,
+        "start_wall_ns": "1793173200785666082",
+        "end_wall_ns": "1793173220324614274"
+      },
+      "before": {
+        "bytes": 39,
+        "ctime_ns": "1793173200279724403",
+        "dev": 27,
+        "exists": true,
+        "inode": 527172,
+        "mode": 33188,
+        "mtime_ns": "1793173200279724403",
+        "parent_dev": 27,
+        "parent_inode": 527171,
+        "sha256": "cd36477f601bab21fa6be0843dd1916459fe6cb54bcaf7b93b7f5fa5c9858143"
+      },
+      "after": {
+        "bytes": 45,
+        "ctime_ns": "1793173215648634909",
+        "dev": 27,
+        "exists": true,
+        "inode": 527172,
+        "mode": 33188,
+        "mtime_ns": "1793173215648634909",
+        "parent_dev": 27,
+        "parent_inode": 527171,
+        "sha256": "91d5345ac8b4f016ba5ecbb821addb109e1753c20a4d4d4640ec4f1fa71e15e2"
+      },
+      "sentinel_event_count": 6,
+      "event_sequences": [
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ],
+      "controls_event_count": {
+        "setup": 6,
+        "controls:after": 6
+      },
+      "observed_result": "WRITE_OBSERVED",
+      "native_decision": "not_exposed",
+      "dispatch": "proven by file effect",
+      "strict_classification": "UNKNOWN"
+    },
+    {
+      "route": "exec",
+      "tool": "exec_command",
+      "observation_window": {
+        "start_seq": 68,
+        "end_seq": 91,
+        "start_wall_ns": "1793173220324721235",
+        "end_wall_ns": "1793173243490272259"
+      },
+      "before": {
+        "bytes": 37,
+        "ctime_ns": "1793173200279879667",
+        "dev": 27,
+        "exists": true,
+        "inode": 527175,
+        "mode": 33188,
+        "mtime_ns": "1793173200279879667",
+        "parent_dev": 27,
+        "parent_inode": 527174,
+        "sha256": "12d873064bb7fa23866f66e4103d21bc45d1e6b648af404c4948bd8a07a6bab3"
+      },
+      "after": {
+        "bytes": 37,
+        "ctime_ns": "1793173200279879667",
+        "dev": 27,
+        "exists": true,
+        "inode": 527175,
+        "mode": 33188,
+        "mtime_ns": "1793173200279879667",
+        "parent_dev": 27,
+        "parent_inode": 527174,
+        "sha256": "12d873064bb7fa23866f66e4103d21bc45d1e6b648af404c4948bd8a07a6bab3"
+      },
+      "sentinel_event_count": 0,
+      "event_sequences": [],
+      "controls_event_count": {
+        "setup": 6,
+        "controls:after": 6
+      },
+      "observed_result": "OS_EROFS_NO_OBSERVED_MUTATION",
+      "native_decision": "OS refused write after Python dispatch",
+      "dispatch": "Python executed, write syscall failed with EROFS",
+      "strict_classification": "UNKNOWN"
+    }
+  ],
+  "strict_acceptance": "UNKNOWN",
+  "missing_acceptance_evidence": [
+    "Exact toolserver version and per-route loaded permission configuration are not exposed.",
+    "The supplied declared permission profile is not an authenticated per-tool effective configuration.",
+    "Parent directory mode and timestamps were not captured in this first observer version.",
+    "No native permission-decision receipt is exposed for apply_patch.",
+    "Positive controls used the authorized setup surface; they establish observer responsiveness, not equivalent permission settings on the restricted route."
+  ],
+  "comparison": {
+    "native_only": "Actual two-route trial completed.",
+    "arc_assisted": "Offline evidence classification only; no second native or ARC admission trial.",
+    "same_information": true,
+    "native_policy_changed": false,
+    "additional_native_enforcement_established": false,
+    "incremental_value": "Not established; contradictions and missing evidence are useful to both equally informed approaches.",
+    "adoption_count_increment": 0
+  },
+  "decision": "REVISE: retain route-specific actual observations; obtain exact harness/config identity and complete parent metadata before strict native acceptance. Do not generalize to all tools or machines."
+}
