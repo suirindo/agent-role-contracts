@@ -103,11 +103,12 @@ async function bind(config, approval, bytes) {
  const operation_digest = digest('arc-dtb-operation/0.1', operation);
  const challenge = randomBytes(16).toString('hex');
  const base = { payload_binding: payload, operation_digest };
- let raw;
+ let raw, timeout;
  try {
   raw = await Promise.race([config.host.transport.resolve(structuredClone(operation), challenge),
-   new Promise((_, reject) => setTimeout(reject, config.timeoutMs, new Error('timeout')).unref())]);
+   new Promise((_, reject) => { timeout = setTimeout(reject, config.timeoutMs, new Error('timeout')); })]);
  } catch { return report(['DTB_RESOLUTION_MISSING'], base); }
+ finally { clearTimeout(timeout); }
  let e;
  try { e = evidence(raw); } catch { return report(['DTB_EVIDENCE_INVALID'], base); }
  const claimed = { evidence_producer_claimed: e.producer };
