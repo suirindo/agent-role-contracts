@@ -1,0 +1,13 @@
+{
+  "status": "ACQUIRED",
+  "session_id": "chatgpt-arc85-native-93209",
+  "work_item_id": "https://github.com/suirindo/agent-role-contracts/issues/85",
+  "assignment_id": "asg_2588bc668ccc6ff0874e03d4",
+  "lease_id": "lease_5e7f3a2a7a74c838dd9c1bbf",
+  "subject_key": "suirindo/agent-role-contracts#work:https://github.com/suirindo/agent-role-contracts/issues/85",
+  "worktree_path": "<HOST_HOME>/NetsujoCompute/workspaces/arc85-native-codex-20261028",
+  "branch": "HEAD",
+  "candidate_epoch": 1,
+  "worktree_identity_stamped": true,
+  "mode": "guard"
+}

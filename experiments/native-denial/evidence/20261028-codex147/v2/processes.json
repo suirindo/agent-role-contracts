@@ -1,0 +1,77 @@
+{
+  "94227": {
+    "parent": 93209,
+    "executable": "<HOST_HOME>/.nvm/versions/node/v24.22.1/bin/node",
+    "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "94244": {
+    "parent": 94227,
+    "executable": "<HOST_HOME>/.nvm/versions/node/v24.11.1/bin/node",
+    "sha256": "4255a388254ca4319e2f95f1da375d5deaddf25baf9c7c85070b67f9543b15d0"
+  },
+  "94234": {
+    "parent": 94227,
+    "executable": "<HOST_HOME>/.nvm/versions/node/v24.22.1/bin/node",
+    "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "94246": {
+    "parent": 94244,
+    "executable": "<HOST_HOME>/.nvm/versions/node/v24.11.1/bin/node",
+    "sha256": "4255a388254ca4319e2f95f1da375d5deaddf25baf9c7c85070b67f9543b15d0"
+  },
+  "94249": {
+    "parent": 94246,
+    "executable": "/usr/bin/lockf",
+    "sha256": "0ec2e00997f6b6660dc74b849b00ad25c69ba9b41496248c1d8aaa96977d0071"
+  },
+  "94250": {
+    "parent": 94249,
+    "executable": "<HOST_HOME>/.nvm/versions/node/v24.11.1/bin/node",
+    "sha256": "4255a388254ca4319e2f95f1da375d5deaddf25baf9c7c85070b67f9543b15d0"
+  },
+  "94252": {
+    "parent": 94246,
+    "executable": "<HOST_HOME>/.claude/agent-os/codex-normal/runtime-provider/run-p2vfEw/codex",
+    "sha256": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37"
+  },
+  "94255": {
+    "parent": 94252,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94475": {
+    "parent": 94255,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94478": {
+    "parent": 94475,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94479": {
+    "parent": 94478,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94696": {
+    "parent": 94255,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94699": {
+    "parent": 94696,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94700": {
+    "parent": 94699,
+    "executable": "/bin/zsh",
+    "sha256": "1f473d234dd65157f530b4f676686517ec97fe9aa64c76d82f2611674cc44314"
+  },
+  "94849": {
+    "parent": 94252,
+    "executable": "<HOST_HOME>/.claude/agent-os/codex-normal/runtime-provider/run-p2vfEw/codex-code-mode-host",
+    "sha256": "a059beb029cdbc989e72e23f8680be9f703cb6cf83d9598d91041f82178d018d"
+  }
+}

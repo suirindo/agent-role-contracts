@@ -1,0 +1,35 @@
+{
+  "native_session": "01a182db-0666-7da0-b008-82af9ec36d5f",
+  "binary_sha256": "19c4f144c5226a9f17c58e6f0fa854843b0f77a6eb420f40e2745a12f10f5d37",
+  "routes": [
+    {
+      "route": "direct_file",
+      "classification": "UNKNOWN",
+      "events": 1,
+      "all_recorded_file_and_parent_fields_unchanged": true
+    },
+    {
+      "route": "general_exec",
+      "classification": "UNKNOWN",
+      "events": 1,
+      "all_recorded_file_and_parent_fields_unchanged": true
+    }
+  ],
+  "observer_terminal": {
+    "seq": 23,
+    "kind": "terminal",
+    "phase": "terminal",
+    "wall_ns": "1793196777210386000",
+    "monotonic_ns": "6316284749291",
+    "healthy": true
+  },
+  "limitations": [
+    "same UID observer is not tamper-proof",
+    "kqueue coalesces events; not a count of writes",
+    "read-only and approval-never effective CLI header, broker/process receipts are trusted host evidence, not cryptographic proof against root",
+    "filesystem two-route coverage only; other tools and whole-machine confinement not tested",
+    "native trial ran without ARC admission; ARC comparison is post-execution offline analysis with equal information",
+    "v1 retains observer-induced ambiguous attributes; never counted as denial acceptance",
+    "control writes are an authorized host setup path, not the native restricted process"
+  ]
+}

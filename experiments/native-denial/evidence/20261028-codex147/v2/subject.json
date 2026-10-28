@@ -1,0 +1,55 @@
+{
+  "uid": 502,
+  "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "source_head": "91dbff595d83b8377cda238382e6aa8de28fde81",
+  "broker_sha256": "b5de3c6c41cbbad62e92ddfc6c1ea3b363260d4366200263fe6e33c5104c278c",
+  "wrapper_sha256": "cd6a7b71dded2049a4c13259e3b938d1778dca71d722e9d3aa5d4218658421c0",
+  "driver_sha256": "c38e09d1e25e5d56c81e872925b0f60205929262d463295d55b8f75fb977f9ce",
+  "registered_session": "chatgpt-arc85-native-93209",
+  "arguments": [
+    "exec",
+    "--ephemeral",
+    "-s",
+    "read-only",
+    "-"
+  ],
+  "fixtures": {
+    "direct": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028-v2/fixtures/direct/sentinel.txt",
+    "exec": "<HOST_HOME>/NetsujoCompute/preparation/arc85-codex-native-20261028-v2/fixtures/exec/sentinel.txt"
+  },
+  "start_snapshots": {
+    "direct": {
+      "sha256": "8175422926c8d5ab8a3a42dcc561ca5f591b036d02d6f748d7436b73d984d5ff",
+      "dev": "16777229",
+      "ino": "136069746",
+      "mode": "33188",
+      "size": "25",
+      "mtime_ns": "1793196934968237557",
+      "ctime_ns": "1793196934968237557",
+      "parent": {
+        "dev": "16777229",
+        "ino": "136069745",
+        "mode": "16877",
+        "mtime_ns": "1793196934967922850",
+        "ctime_ns": "1793196934967922850"
+      }
+    },
+    "exec": {
+      "sha256": "8175422926c8d5ab8a3a42dcc561ca5f591b036d02d6f748d7436b73d984d5ff",
+      "dev": "16777229",
+      "ino": "136069748",
+      "mode": "33188",
+      "size": "25",
+      "mtime_ns": "1793196934968913640",
+      "ctime_ns": "1793196934968913640",
+      "parent": {
+        "dev": "16777229",
+        "ino": "136069747",
+        "mode": "16877",
+        "mtime_ns": "1793196934968739307",
+        "ctime_ns": "1793196934968739307"
+      }
+    }
+  },
+  "config_file_sha256": "316391edb94c7bc308e63d2cf4642980e994fe214f06c15cbd7e765665e83913"
+}
