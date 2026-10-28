@@ -75,3 +75,10 @@ Treat role body text, knowledge references, action parameters and evidence strin
 For the current HOL Guard interoperability investigation, see [HOL Guard integration boundary](HOL_GUARD_INTEGRATION.md) and its [design-only acceptance plan](HOL_GUARD_ACCEPTANCE.md). Those documents describe a possible external runtime boundary; they do not make HOL Guard a dependency or add enforcement to this package.
 
 Start with the [Quick Start](QUICKSTART.md), then read the [architecture](ARCHITECTURE.md), [compatibility boundary](COMPATIBILITY.md), [schema profile](SCHEMA_PROFILE.md) and [release gates](RELEASE_GATES.md). Follow [SECURITY.md](../SECURITY.md) for a security report and omit credentials and customer data from public issues.
+
+## Proposed feedback-driven integration
+
+The [feedback-driven integration design](FEEDBACK_INTEGRATION_DESIGN.md) specifies
+future canonical-policy projection, grant provenance, request-instance binding
+and outcome/retry acceptance. It supplements this implemented integration guide;
+it adds no stable API, runtime authority or completed native-harness guarantee.

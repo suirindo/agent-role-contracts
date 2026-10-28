@@ -4,13 +4,20 @@ This source-only kit helps outside developers test whether **Agent Role Contract
 
 **Boundary:** ARC checks supplied declarations offline. A PASS never grants runtime authority, authenticates an executor/reviewer, observes a real write or verifies evidence. This kit is outside ARC's public npm API and does not execute any agent. It makes no network request; `git clone` in the setup below is a separate user action.
 
+## Map your workflow before editing JSON
+
+Map the actor that changes files to a role with `authority.authority_mode: "write_scoped"`, and list its permitted repository-relative paths in `authority.allowed_write_scopes`. Map a separate read-only review actor to a role with `authority_mode: "read_only"` and no write scopes. Connect those role IDs through the route's `executors` and `reviewers`; the task's `inputs.scope` names the file requested by this task. For example, allow `agent-setup-runbook.html` and `zh/agent-setup-runbook.html`, then request one of those exact paths. A typo such as `zh/agent-setup.html` should fail. Actors that fix tests still need a scoped executor role. Separate declared roles do not prove that different people or processes performed them; your runtime and review process establish actual independence.
+
+Use a subtree scope only when every path under that subtree should be writable. Keep the runtime's actual allow-list separate from these declarations: ARC does not narrow it or enforce writes.
+
 ## Quickstart: verify the reference check
 
 Requires Git and Node.js 22.5+. Work in a disposable directory with synthetic, non-sensitive inputs.
 
 ```sh
-# The kit is in current ARC source (during PR review, check out its feature branch).
+# The source-only kit is on the default branch; record its exact revision.
 git clone https://github.com/suirindo/agent-role-contracts.git arc-kit
+git -C arc-kit rev-parse HEAD
 # Pinned, immutable target of the evaluation; keep this checkout clean.
 git clone --depth 1 --branch v1.0.0 https://github.com/suirindo/agent-role-contracts.git arc-v1
 node arc-kit/experiments/external-evaluation/evaluate.mjs \
@@ -19,7 +26,7 @@ node arc-kit/experiments/external-evaluation/evaluate.mjs \
   --task arc-v1/examples/starter-task.json > declaration-result.json
 ```
 
-For this **Draft PR**, switch `arc-kit` to the PR HEAD before running. Once merged, use its default branch. `arc-v1` must remain exactly `9f6771056c47de971202360952af6d41941f7625` (official v1.0.0).
+Record the `arc-kit` revision with your report so another evaluator can use the same helper. `arc-v1` must remain exactly `9f6771056c47de971202360952af6d41941f7625` (official v1.0.0).
 
 Expected report: `verdict: DECLARATION_TESTS_PASSED`, initial valid PASS, injected `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` FAIL, repaired PASS. This is **only a synthetic baseline** and counts as zero external-task evaluations.
 
@@ -43,6 +50,8 @@ The injected path is **in-memory declaration data**. It must be outside the orig
 5. Optionally pass `--second-task second-task.json` with a distinct task ID and content while reusing the *unchanged* bundle. A second declaration PASS **does not** prove second-task execution or external adoption. Supply a distinct public commit and CI/operation record for real reuse.
 
 Use [EVIDENCE_TEMPLATE.md](EVIDENCE_TEMPLATE.md) to record findings and submit via the [existing workflow-feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml) if desired. All submitted data must be scrubbed of credentials, customer content, private paths and production secrets.
+
+For a worked comparison between ARC scope preflight and an independently maintained deterministic syntax scanner, see the [ARC × ShipRules-free fixture](shiprules-free/README.md). It remains a maintainer-executed public-repository synthetic comparison until an external operator reviews or runs it.
 
 ## Exit status and safety
 

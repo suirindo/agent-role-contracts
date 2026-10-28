@@ -1,0 +1,175 @@
+{
+  "schema_version": "0.1",
+  "policy_version": "shiprules-free-comparison-v1",
+  "policy": {
+    "capabilities": [
+      "filesystem.read",
+      "filesystem.write.scoped",
+      "review.perform"
+    ],
+    "read_only_forbids": [
+      "filesystem.write.scoped"
+    ]
+  },
+  "roles": [
+    {
+      "contract": {
+        "id": "fixture-implementer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Prepare a scoped Godot fixture change.",
+          "responsibilities": [
+            "Work only inside the declared comparison fixture."
+          ],
+          "out_of_scope": [
+            "Runtime execution and ShipRules paid controls are outside this declaration check."
+          ],
+          "success_criteria": [
+            "Report the declaration and scanner results separately."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The task stays inside the comparison fixture authority."
+          ],
+          "escalation_conditions": [
+            "Escalate when a task leaves the declared fixture authority."
+          ]
+        },
+        "authority": {
+          "authority_mode": "write_scoped",
+          "capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "prohibited_capabilities": [
+            "review.perform"
+          ],
+          "allowed_write_scopes": [
+            "experiments/external-evaluation/shiprules-free/cases/**"
+          ],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [
+            "fixture-reviewer"
+          ],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role reviews the fixture."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [],
+          "optional_knowledge": [],
+          "repository_context": [],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": false
+        }
+      },
+      "body": "# fixture-implementer\n\nPrepare only the declared synthetic fixture and report uncertainty.\n"
+    },
+    {
+      "contract": {
+        "id": "fixture-reviewer",
+        "version": 1,
+        "scope": "repository",
+        "status": "active",
+        "aliases": [],
+        "mission": {
+          "objective": "Review fixture evidence without changing it.",
+          "responsibilities": [
+            "Review the ARC and scanner results as separate controls."
+          ],
+          "out_of_scope": [
+            "Do not modify the comparison fixture."
+          ],
+          "success_criteria": [
+            "Record overlap, differences and evidence limits."
+          ]
+        },
+        "contract": {
+          "required_inputs": [
+            "scope"
+          ],
+          "optional_inputs": [],
+          "outputs": [
+            "handoff"
+          ],
+          "output_schema": null,
+          "acceptance_criteria": [
+            "The review remains independent from fixture preparation."
+          ],
+          "escalation_conditions": [
+            "Escalate when the evidence cannot support the claimed result."
+          ]
+        },
+        "authority": {
+          "authority_mode": "read_only",
+          "capabilities": [
+            "filesystem.read",
+            "review.perform"
+          ],
+          "prohibited_capabilities": [
+            "filesystem.write.scoped"
+          ],
+          "allowed_write_scopes": [],
+          "cannot": [
+            "approve_own_implementation"
+          ],
+          "may_delegate_to": [],
+          "reports_to": null,
+          "independence_requirements": [
+            "A different declared role prepares the fixture."
+          ]
+        },
+        "knowledge": {
+          "required_knowledge": [],
+          "optional_knowledge": [],
+          "repository_context": [],
+          "data_classification": [
+            "public"
+          ],
+          "retention_policy": "No runtime memory is created by this checker."
+        },
+        "reasoning": {
+          "reasoning_tier": "standard",
+          "max_turn_class": "normal",
+          "requires_independent_context": true
+        }
+      },
+      "body": "# fixture-reviewer\n\nReview the supplied synthetic fixture without modifying it.\n"
+    }
+  ],
+  "knowledge": [],
+  "routes": [
+    {
+      "task_type": "code-change",
+      "accountable": "fixture-implementer",
+      "executors": [
+        "fixture-implementer"
+      ],
+      "reviewers": [
+        "fixture-reviewer"
+      ],
+      "require_human_approval": true
+    }
+  ]
+}

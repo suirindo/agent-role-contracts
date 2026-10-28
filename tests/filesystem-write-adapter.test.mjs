@@ -79,8 +79,11 @@ test('no implicit I/O, clock or network; adapter imports no finance or Safe',asy
  t.after(()=>{for(const [n,d] of saved)if(d)Object.defineProperty(globalThis,n,d);else delete globalThis[n];});
  for(const n of names)Object.defineProperty(globalThis,n,{configurable:true,get(){throw Error(n);}});
  assert.equal((await validate(...a)).valid,true);
- const source=readFileSync(new URL('../src/filesystem-write-adapter.mjs',import.meta.url),'utf8');
- assert.doesNotMatch(source,/node:|\bfetch\s*\(|\bDate\b|\bprocess\b|\bimport\s*\(|finance|safe/i);
+ // Inspect extracted implementation as well as the stable entry module.
+ for(const file of ["filesystem-write-adapter.mjs", "filesystem-write-factory.mjs"]) {
+  const source=readFileSync(new URL('../src/'+file,import.meta.url),'utf8');
+  assert.doesNotMatch(source,/node:|\bfetch\s*\(|\bDate\b|\bprocess\b|\bimport\s*\(|finance|safe/i,file);
+ }
 });
 test('existing core schemas and finance bytes are unchanged and schema groups disjoint',()=>{
  const {['task-lifecycle']: lifecycle,...existingCore}=core;
