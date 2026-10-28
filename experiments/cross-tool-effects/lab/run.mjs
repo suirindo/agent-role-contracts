@@ -11,9 +11,9 @@ export function makeSyntheticDeclarations(subject, bundle, task) {
   reviews:[{subject_digest:subject.subject_digest,role_id:route.reviewers[0],decision:'pass'}],
   ...(route.require_human_approval ? {human_approval:{subject_digest:subject.subject_digest,role_id:route.accountable,decision:'approved'}} : {}) });
 }
-export async function startObserver({ loopback = false, dropResponse = false } = {}) {
- if (loopback !== true || typeof dropResponse !== 'boolean') throw new Error('LAB_LOOPBACK_OPT_IN_REQUIRED');
- const child = fork(fileURLToPath(new URL('./observer.mjs',import.meta.url)), ['--loopback-observer', ...(dropResponse ? ['--drop-response'] : [])], {
+export async function startObserver({ loopback = false, dropResponse = false, respondNotFound = false } = {}) {
+ if (loopback !== true || typeof dropResponse !== 'boolean' || typeof respondNotFound !== 'boolean' || (dropResponse && respondNotFound)) throw new Error('LAB_LOOPBACK_OPT_IN_REQUIRED');
+ const child = fork(fileURLToPath(new URL('./observer.mjs',import.meta.url)), ['--loopback-observer', ...(dropResponse ? ['--drop-response'] : respondNotFound ? ['--respond-404'] : [])], {
   execArgv:[], env:{PATH:process.env.PATH??'',LANG:'C',LC_ALL:'C'}, stdio:['ignore','ignore','ignore','ipc'],
  });
  let sequence=0, readyResolve, readyReject;
