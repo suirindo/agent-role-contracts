@@ -111,3 +111,10 @@ For 1.x, the surface above is the compatibility floor: existing import paths and
 The migration keeps existing declaration/profile versions and public call paths unchanged. The differential compares the archived published 0.5.0 consumer with the candidate's actual packed artifact, requires each report version to equal its own installed metadata, and normalizes only the exact top-level package/report version. It preserves raw CLI bytes and does not recursively strip fields or reserialize JSON. The two previously reviewed help-line substitutions remain explicit; CLI_ERROR stderr is never treated as a report. Existing tags and tarballs are immutable.
 
 Source preparation alone is not v1 acceptance. Each release needs packed-artifact verification, the supported OS/Node matrix, all release/security/provenance gates, documentation review, and independent review and acceptance on the exact candidate commit. Publication and downstream production adoption are separate decisions and evidence.
+
+
+## Unreleased source candidate: explicitly scoped root .github paths
+
+A real evaluation-onboarding task included `.github/ISSUE_TEMPLATE/workflow-feedback.yml`. The stable 1.0.0 grammar rejects that exact legitimate repository path as `WRITE_SCOPE_SYNTAX`. This source-only fix permits an explicitly declared **root** `.github` segment, for example that exact file or `.github/ISSUE_TEMPLATE/**`, while retaining the original exact/subtree containment rules. No runtime permission is granted.
+
+Other dot-prefixed segments including `.git`, `.env` and nested hidden paths, relative traversal, absolute paths and malformed separators remain unsupported. This is not present in the immutable npm v1.0.0 tarball. It does not authenticate reviewers, verify writes or enforce agent actions.

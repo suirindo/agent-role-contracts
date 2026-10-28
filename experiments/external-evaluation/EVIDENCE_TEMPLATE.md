@@ -2,7 +2,8 @@
 
 - Evaluator / public repository:
 - Date, OS, Node.js version:
-- ARC source: `@netsujo/agent-role-contracts@1.0.0`, exact commit `9f6771056c47de971202360952af6d41941f7625`
+- ARC core under evaluation: `@netsujo/agent-role-contracts@1.0.0`, exact commit `9f6771056c47de971202360952af6d41941f7625`
+- Evaluation helper revision: exact `arc-kit` commit from `git -C arc-kit rev-parse HEAD`, or `NOT USED` if no helper was used (separate from the ARC core version above):
 - Workflow and operational problem:
 - Original trusted role/task/authority source:
 - How source roles were mapped to ARC (including discrepancies):
