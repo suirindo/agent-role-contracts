@@ -85,3 +85,31 @@ CAS, dispatch-time revocation, T4 executor at-most-once, crashes during writes, 
 
     node --test tests/task-owned-payload.test.mjs
     node experiments/task-consumption/owned-payload-demo.mjs
+
+## Dispatch-target binding adapter (experimental, SOURCE_ONLY)
+
+`dispatch-target.mjs` is a bounded, opt-in adapter for the "actual dispatch destination" feedback on #69. Before the one-use
+ledger is touched it compares the exact approved destination (from a host-supplied registry keyed by the receipt's
+`destination_ref`) with the destination the host transport reports it resolved for this very send. It binds actor, action,
+payload digest and request revision into one operation digest, issues a fresh challenge per call, and accepts resolution
+evidence only if it echoes that challenge and digest, is fresh, is single-valued, and is not produced by the policy writer.
+Anything missing, ambiguous, stale, unbound or self-attested is `UNKNOWN_HELD`; a different target, an unapproved redirect
+or a changed payload or stale revision is `DENY`. Callers cannot supply a target or evidence. Nothing is sent or burned on
+any refusal; after the ledger consumes, a stale gate holds without a refund and without sending.
+
+**What this is not.** There is no native host enforcement and no production routing attestation. `PERMIT_SOURCE_ONLY` means
+only that the fixture-level policy matched; `acceptance` stays `UNKNOWN` and `resolution_independence` stays `UNPROVEN` on
+every report. #47 gates remain open.
+
+**Trust assumptions (all host-supplied, unauthenticated):** the destination registry, the host clock, `currentRevision`, and
+the transport. A transport that lies about where it routes passes this adapter. `KNOWN GAP` in
+`tests/task-dispatch-target.test.mjs` demonstrates this: only the independent receiver log exposes it.
+
+**Incremental value versus native controls.** A native host allowlist or egress proxy already sees the true destination and
+is the real enforcement point. This adapter adds only the binding of that observation to the approved actor, revision and
+payload, plus explicit fail-closed UNKNOWN handling. It is not a substitute and does not widen the scope into a broker.
+
+Limits: https only, single send effect, at most 8 hops, POSIX only (other hosts return `DTB_UNSUPPORTED_HOST` without I/O),
+local per-root replay protection only.
+
+Reproduce: `node --test tests/task-dispatch-target.test.mjs`
