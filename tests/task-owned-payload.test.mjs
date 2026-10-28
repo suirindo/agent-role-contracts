@@ -89,11 +89,19 @@ test('empty body is valid only when the declaration says empty', { skip: !POSIX 
  assert.equal(r.observed_byte_length, 0); assert.equal(r.observed_content_sha256, sha(empty));
 }));
 
-test('matching bytes cannot consume expired, revoked, foreign, missing or D1-denied approvals', { skip: !POSIX }, async () => {
+test('matching bytes cannot consume expired, revoked, disabled, foreign, forged, missing, D1-denied or context-conflicting approvals', { skip: !POSIX }, async () => {
  const mutations = {
   expired: s => { s.context.evaluated_at_ms += 120000; },
-  revoked: s => { s.registry.keys[0].status = 'disabled'; },
+  revoked: s => { s.registry.keys[0].status = 'revoked'; },
+  disabled: s => { s.registry.keys[0].status = 'disabled'; },
   foreign: s => { s.registry.keys[0].public_key = generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'der' }).toString('base64'); },
+  foreignContext: s => { s.context.tenant = 'tenant-foreign'; },
+ };
+ // expected verification_result and the exact diagnostic codes (or, for multi-code cases, codes that must be present)
+ const expected = {
+  expired: ['DENY', ['ATR_EXPIRED']], revoked: ['DENY', ['ATR_KEY_NOT_ACTIVE']], disabled: ['DENY', ['ATR_KEY_NOT_ACTIVE']],
+  foreign: ['DENY', ['ATR_SIGNATURE_INVALID']], forged: ['DENY', ['ATR_SIGNATURE_INVALID']], missing: ['UNKNOWN', ['ATR_RECEIPT_MISSING']],
+  d1: ['DENY', ['ATR_D1_DENY'], true], foreignContext: ['DENY', ['ATR_CONTEXT_CONFLICT'], true],
  };
  await withRoot(async (p, store) => check(await store.consume({ approvalInput: await valid(), payloadBytes: BODY }), 'CONSUMED', 'MATCH'));
  await withRoot(async (p, store) => {
@@ -101,12 +109,23 @@ test('matching bytes cannot consume expired, revoked, foreign, missing or D1-den
   for (const [name, mutate] of Object.entries(mutations)) { const s = await bound(BODY); mutate(s); inputs[name] = render(s); }
   inputs.missing = { ...await valid() }; delete inputs.missing.receiptJson;
   const denied = await valid(); inputs.d1 = { ...denied, requestJson: j({ ...JSON.parse(denied.requestJson), destination_ref: 'evil.receiver' }) };
+  // same valid body, request, hashes and length; only one signature bit differs, re-encoded as canonical base64
+  const intact = await valid(), receipt = JSON.parse(intact.receiptJson), sig = Buffer.from(receipt.signature, 'base64');
+  assert.equal(sig.length, 64); sig[0] ^= 1; receipt.signature = sig.toString('base64');
+  assert.equal(Buffer.from(receipt.signature, 'base64').toString('base64'), receipt.signature);
+  inputs.forged = { ...intact, receiptJson: j(receipt) };
+  assert.deepEqual(Object.keys(inputs).sort(), Object.keys(expected).sort());
   for (const [name, approvalInput] of Object.entries(inputs)) {
    const r = check(await store.consume({ approvalInput, payloadBytes: BODY }), 'NOT_CONSUMED', 'MATCH');
-   assert.equal(r.ledger_called, true, name); assert.notEqual(r.verification_result, 'VERIFIED_RECEIPT', name);
-   assert.equal(r.marker_persisted, false); assert.equal((await markers(p)).length, 0, name);
+   const [result, codes, subset] = expected[name], got = r.diagnostics.map(x => x.code);
+   assert.equal(r.source_bytes_observed, true, name); assert.equal(r.ledger_called, true, name);
+   assert.equal(r.verification_result, result, name);
+   if (subset) for (const c of codes) assert.ok(got.includes(c), name + ' ' + c); else assert.deepEqual(got, codes, name);
+   assert.notEqual(r.verification_result, 'VERIFIED_RECEIPT', name);
+   assert.equal(r.marker_persisted, false, name); assert.equal((await markers(p)).length, 0, name);
   }
   check(await store.consume({ approvalInput: await valid(), payloadBytes: BODY }), 'CONSUMED', 'MATCH');
+  assert.equal((await markers(p)).length, 1);
  });
 });
 
