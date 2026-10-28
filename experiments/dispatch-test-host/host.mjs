@@ -5,7 +5,7 @@
  * means only that this test host's own fixture policy matched. All sockets are 127.0.0.1.
  */
 import { spawn } from 'node:child_process';
-import { chmod, mkdtemp, readFile, realpath, rm } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, realpath, rm } from 'node:fs/promises';
 import http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -23,18 +23,48 @@ const LOOPBACK = '127.0.0.1';
 const sha = bytes => 'sha256:' + createHash('sha256').update(bytes).digest('hex');
 const RECEIVER_SCRIPT = new URL('./receiver.mjs', import.meta.url).pathname;
 
-/** Spawn one receiver child process; returns { id, port, logPath, stop() }. */
-async function startReceiver(dir, id, delayMs = 0) {
+export const RECEIVER_PROCESS_IDENTITY = Object.freeze({
+ same_uid_as_test_host: true, separation: 'separate process only (same UID, same machine, same filesystem permissions)',
+ receiver_independence: 'UNPROVEN', effect_independence: 'UNPROVEN: the test host can signal, read and rewrite the receiver and its log' });
+const STARTUP_TIMEOUT_MS = 5000, STOP_TIMEOUT_MS = 2000, KILL_TIMEOUT_MS = 2000;
+const within = (promise, ms) => new Promise(resolve => { const t = setTimeout(() => resolve(null), ms); promise.then(v => { clearTimeout(t); resolve(v); }); });
+
+/** Terminate a child: SIGTERM, bounded wait, then SIGKILL, bounded wait. Returns the exit record, or { unreaped: true } if it never exited. */
+async function terminate(child, exited, stopMs = STOP_TIMEOUT_MS, killMs = KILL_TIMEOUT_MS) {
+ let done = await within(exited, 0);
+ if (done) return done;
+ try { child.kill('SIGTERM'); } catch { /* already gone */ }
+ done = await within(exited, stopMs);
+ if (done) return done;
+ try { child.kill('SIGKILL'); } catch { /* already gone */ }
+ return (await within(exited, killMs)) ?? { code: null, signal: null, unreaped: true };
+}
+
+/**
+ * Spawn one receiver child process; returns { id, port, logPath, stop() }. Any startup failure (spawn error, early exit, no
+ * handshake before the deadline, malformed handshake) kills and reaps the child before the error is thrown.
+ */
+async function startReceiver(dir, id, delayMs = 0, { script = RECEIVER_SCRIPT, startupTimeoutMs = STARTUP_TIMEOUT_MS, stopTimeoutMs = STOP_TIMEOUT_MS, killTimeoutMs = KILL_TIMEOUT_MS } = {}) {
  const logPath = join(dir, id + '.log.jsonl');
- const child = spawn(process.execPath, [RECEIVER_SCRIPT, id, logPath, String(delayMs)], { stdio: ['ignore', 'pipe', 'inherit'] });
- const exited = new Promise(r => child.once('exit', (code, signal) => r({ code, signal })));
- const line = await new Promise((resolve, reject) => {
-  let buf = '';
-  child.stdout.on('data', d => { buf += d; if (buf.includes('\n')) resolve(buf.split('\n')[0]); });
-  child.once('exit', () => reject(new Error('receiver exited early')));
- });
- const { port } = JSON.parse(line);
- return { id, port, logPath, pid: child.pid, async stop() { child.kill('SIGTERM'); return exited; } };
+ const child = spawn(process.execPath, [script, id, logPath, String(delayMs)], { stdio: ['ignore', 'pipe', 'inherit'] });
+ const exited = new Promise(r => { child.once('exit', (code, signal) => r({ code, signal })); child.once('error', e => r({ code: null, signal: null, error: e.message })); });
+ const stop = () => terminate(child, exited, stopTimeoutMs, killTimeoutMs);
+ let timer;
+ try {
+  const line = await new Promise((resolve, reject) => {
+   let buf = '';
+   timer = setTimeout(() => reject(new Error('receiver ' + id + ' startup timeout')), startupTimeoutMs);
+   child.stdout.on('data', d => { buf += d; if (buf.includes('\n')) resolve(buf.split('\n')[0]); });
+   exited.then(() => reject(new Error('receiver ' + id + ' exited early')));
+  });
+  const { port } = JSON.parse(line);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('receiver ' + id + ' bad handshake');
+  return { id, port, logPath, pid: child.pid, stop };
+ } catch (e) {
+  const exit = await stop();
+  if (exit.unreaped) e.message += ' (child ' + child.pid + ' could not be reaped)';
+  throw e;
+ } finally { clearTimeout(timer); }
 }
 async function readLog(r) {
  try { return (await readFile(r.logPath, 'utf8')).split('\n').filter(Boolean).map(x => JSON.parse(x)); } catch { return []; }
@@ -54,18 +84,29 @@ function request(opts, body, timeoutMs) {
  * Create a test host. `receivers` is a map of receiver_id -> { logical target, delayMs }. The host-owned identity table maps a
  * receiver identity to the logical target it stands for; `route` says which receiver a logical send actually reaches.
  */
-export async function createTestHost({ sendTimeoutMs = 1000 } = {}) {
- const dir = await realpath(await mkdtemp(join(tmpdir(), 'arc69-test-host-')));
- await chmod(dir, 0o700);
- const store = join(dir, 'store'); await (await import('node:fs/promises')).mkdir(store, { mode: 0o700 });
+export async function createTestHost({ sendTimeoutMs = 1000, receiverOptions = {} } = {}) {
+ const created = await mkdtemp(join(tmpdir(), 'arc69-test-host-'));
+ let dir = created;
  const receivers = {};
  const identities = new Map();     // receiver_id -> logical target (host-owned test table)
  const revisions = new Map();      // request_id -> current revision
  const resolved = new Map();       // operation digest -> receiver port/id pinned at resolve time
  const state = { route: 'recv-a', resolves: 0, sends: 0, sendOutcomes: [], hostCalls: 0 };
- const add = async (id, target, delayMs = 0) => { receivers[id] = await startReceiver(dir, id, delayMs); identities.set(id, target); return receivers[id]; };
+ const optsFor = id => ({ ...receiverOptions, ...(receiverOptions.byId?.[id] ?? {}) });
+ const add = async (id, target, delayMs = 0) => { receivers[id] = await startReceiver(dir, id, delayMs, optsFor(id)); identities.set(id, target); return receivers[id]; };
+ let adapter, closing, store;
+ // Idempotent teardown: every receiver is stopped (each bounded) and the tempdir removed even if some step fails.
+ const teardown = () => closing ??= (async () => {
+  const stops = await Promise.allSettled(Object.values(receivers).map(r => r.stop()));
+  const removed = await Promise.allSettled([rm(dir, { recursive: true, force: true })]);
+  const failures = [...stops, ...removed].filter(x => x.status === 'rejected').map(x => x.reason);
+  if (failures.length) throw new AggregateError(failures, 'test host teardown incomplete');
+  return stops.map(x => x.value);
+ })();
+ try {
+ dir = await realpath(created); await chmod(dir, 0o700);
+ store = join(dir, 'store'); await mkdir(store, { mode: 0o700 });
  await add('recv-a', APPROVED); await add('recv-b', OTHER);
- let adapter;
  const host = {
   now: () => NOW,
   currentRevision: async id => { state.hostCalls++; return revisions.get(id) ?? null; },
@@ -117,10 +158,11 @@ export async function createTestHost({ sendTimeoutMs = 1000 } = {}) {
   dir, state, receivers, issue, dispatch, adapter, revisions, add,
   setRoute: id => { state.route = id; },
   effects: async () => Object.fromEntries(await Promise.all(Object.values(receivers).map(async r => [r.id, await readLog(r)]))),
-  async close() {
-   const exits = await Promise.all(Object.values(receivers).map(r => r.stop()));
-   await rm(dir, { recursive: true, force: true });
-   return exits;
-  },
+  close: teardown,
  };
+ } catch (e) {
+  // Transactional construction: any partial failure releases everything acquired so far, then the original error propagates.
+  try { await teardown(); } catch (c) { e.cleanup_error = c; }
+  throw e;
+ }
 }

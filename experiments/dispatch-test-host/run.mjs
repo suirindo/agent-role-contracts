@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createTestHost, PAYLOAD, APPROVED, TEST_AUTHORITY } from './host.mjs';
+import { createTestHost, PAYLOAD, APPROVED, TEST_AUTHORITY, RECEIVER_PROCESS_IDENTITY } from './host.mjs';
 
 const out = resolve(process.argv[2] ?? '');
 if (!process.argv[2]) { console.error('usage: run.mjs <out_dir>'); process.exit(2); }
@@ -32,6 +32,8 @@ const cases = [
 const results = [];
 for (const [name, issueOpts, pre, payload, hostOpts] of cases) {
  const h = await createTestHost(hostOpts);
+ const entry = { name };
+ results.push(entry);
  try {
   const approval = await h.issue(issueOpts);
   const retry = {};
@@ -42,11 +44,11 @@ for (const [name, issueOpts, pre, payload, hostOpts] of cases) {
   const brief = x => x && ({ adapter_decision: x.adapter_decision, consumption_status: x.consumption_status, verification_result: x.verification_result,
    send_outcome: x.send_outcome, target_binding: x.target_binding, payload_binding: x.payload_binding, codes: x.diagnostics.map(d => d.code), ledger_called: x.ledger_called });
   const effects = await h.effects();
-  results.push({ name, report: brief(r), second_report: brief(second), host_sends: h.state.sends, host_callbacks: h.state.hostCalls,
+  Object.assign(entry, { report: brief(r), second_report: brief(second), host_sends: h.state.sends, host_callbacks: h.state.hostCalls,
    receiver_effects: Object.fromEntries(Object.entries(effects).map(([k, v]) => [k, v])),
    markers: (await readdir(join(h.dir, 'store'))).filter(x => x.endsWith('.consumed')).length,
    receiver_pids: Object.values(h.receivers).map(x => x.pid) });
- } finally { const exits = await h.close(); results.at(-1).receiver_exits = exits; }
+ } finally { entry.receiver_exits = await h.close(); }
 }
 const files = ['host.mjs', 'receiver.mjs', 'run.mjs'].map(f => 'experiments/dispatch-test-host/' + f)
  .concat(['experiments/task-consumption/dispatch-target.mjs', 'experiments/task-consumption/owned-payload.mjs', 'experiments/task-consumption/ledger.mjs', 'experiments/task-approval/approval.mjs']);
@@ -57,7 +59,8 @@ const evidence = {
  payload: { synthetic: true, byte_length: PAYLOAD.length, sha256: 'sha256:' + createHash('sha256').update(PAYLOAD).digest('hex') },
  key_material: 'ephemeral in-memory only; never written to disk', source_sha256: Object.fromEntries(await Promise.all(files.map(async f =>
   [f, 'sha256:' + createHash('sha256').update(await readFile(join(root, f))).digest('hex')]))),
- limitations: { production_authority: false, native_host_enforcement: false, resolution_independence: 'UNPROVEN: test host resolves and sends; only the receiver log is independent',
+ receiver_process_identity: { ...RECEIVER_PROCESS_IDENTITY, host_uid: process.getuid() },
+ limitations: { production_authority: false, native_host_enforcement: false, receiver_independence: 'UNPROVEN: receivers run under the same UID as the test host (process separation only)', resolution_independence: 'UNPROVEN: test host resolves and sends; only the receiver log is independent',
   clock: 'fixed synthetic test clock', acceptance: 'UNKNOWN; independent QC separate and mandatory' },
  results,
 };

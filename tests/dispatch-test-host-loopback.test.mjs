@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request } from 'node:http';
-import { createTestHost, PAYLOAD, TEST_AUTHORITY, APPROVED } from '../experiments/dispatch-test-host/host.mjs';
+import { createTestHost, RECEIVER_PROCESS_IDENTITY, PAYLOAD, TEST_AUTHORITY, APPROVED } from '../experiments/dispatch-test-host/host.mjs';
 
 const POSIX = ['linux', 'darwin'].includes(process.platform);
 const opts = { skip: !POSIX && 'POSIX only' };
@@ -108,4 +109,83 @@ test('receivers are separate processes bound to loopback only and are gone after
  const exits = await h.close();
  assert.equal(exits.length, pids.length);
  for (const p of pids) assert.throws(() => process.kill(p, 0), { code: 'ESRCH' });
+});
+
+test('trial evidence and README state same-UID process separation only, independence UNPROVEN', opts, async () => {
+ assert.equal(RECEIVER_PROCESS_IDENTITY.same_uid_as_test_host, true);
+ assert.match(RECEIVER_PROCESS_IDENTITY.receiver_independence, /^UNPROVEN/); assert.match(RECEIVER_PROCESS_IDENTITY.effect_independence, /^UNPROVEN/);
+ const readme = await readFile(new URL('../experiments/dispatch-test-host/README.md', import.meta.url), 'utf8');
+ assert.match(readme, /same UID as the test host/); assert.match(readme, /process separation only/); assert.match(readme, /UNPROVEN/);
+ const run = await readFile(new URL('../experiments/dispatch-test-host/run.mjs', import.meta.url), 'utf8');
+ assert.match(run, /receiver_process_identity/); assert.match(run, /receiver_independence/);
+});
+
+// ---- lifecycle: construction cleanup, startup deadline, bounded stop ----
+const alive = pid => { try { process.kill(pid, 0); return true; } catch { return false; } };
+const tmpScripts = [];
+async function script(body) {
+ const dir = await mkdtemp(join(tmpdir(), 'arc69-fake-recv-')); tmpScripts.push(dir);
+ const p = join(dir, 'r.mjs'); await writeFile(p, body); return p;
+}
+test.after(() => Promise.all(tmpScripts.map(d => rm(d, { recursive: true, force: true }))));
+const leftovers = async () => (await readdir(tmpdir())).filter(x => x.startsWith('arc69-test-host-'));
+const pidWriter = (file, tail) => script('import { appendFileSync } from "node:fs"; appendFileSync(' + JSON.stringify(file) + ', process.pid + "\\n");\n' + tail);
+
+for (const [name, tail, match] of [
+ ['second receiver exits immediately', 'process.exit(3);', /exited early/],
+ ['second receiver hangs without handshake (startup deadline)', 'process.on("SIGTERM", () => {}); setInterval(() => {}, 1000);', /startup timeout/],
+ ['second receiver prints a malformed handshake then hangs', 'process.stdout.write("garbage\\n"); setInterval(() => {}, 1000);', /./],
+ ['second receiver prints an out-of-range port', 'process.stdout.write(JSON.stringify({ port: 0 }) + "\\n"); setInterval(() => {}, 1000);', /bad handshake/],
+]) {
+ test('construction cleanup: ' + name + ' leaks neither the first child nor the tempdir', opts, async () => {
+  const pidsDir = await mkdtemp(join(tmpdir(), 'arc69-pids-')); tmpScripts.push(pidsDir);
+  const file = join(pidsDir, 'pids');
+  const real = new URL('../experiments/dispatch-test-host/receiver.mjs', import.meta.url).pathname;
+  // first receiver: the real one wrapped to record its pid; second: the failing fake.
+  const first = await script('import { appendFileSync } from "node:fs"; appendFileSync(' + JSON.stringify(file) + ', process.pid + "\\n"); await import(' + JSON.stringify(real) + ');');
+  const second = await pidWriter(file, tail);
+  const before = new Set(await leftovers());
+  const t0 = Date.now();
+  await assert.rejects(createTestHost({ receiverOptions: { startupTimeoutMs: 400, stopTimeoutMs: 200, killTimeoutMs: 1000, byId: { 'recv-a': { script: first }, 'recv-b': { script: second } } } }), match);
+  assert.ok(Date.now() - t0 < 5000, 'bounded');
+  const pids = (await readFile(file, 'utf8')).split('\n').filter(Boolean).map(Number);
+  assert.equal(pids.length, 2);
+  for (const p of pids) assert.equal(alive(p), false, 'child ' + p + ' reaped');
+  assert.deepEqual((await leftovers()).filter(x => !before.has(x)), [], 'tempdir removed');
+ });
+}
+
+test('construction cleanup: first receiver startup timeout leaves nothing behind', opts, async () => {
+ const pidsDir = await mkdtemp(join(tmpdir(), 'arc69-pids-')); tmpScripts.push(pidsDir);
+ const file = join(pidsDir, 'pids');
+ const hang = await pidWriter(file, 'setInterval(() => {}, 1000);');
+ const before = new Set(await leftovers());
+ await assert.rejects(createTestHost({ receiverOptions: { startupTimeoutMs: 300, stopTimeoutMs: 200, killTimeoutMs: 1000, byId: { 'recv-a': { script: hang } } } }), /startup timeout/);
+ for (const p of (await readFile(file, 'utf8')).split('\n').filter(Boolean).map(Number)) assert.equal(alive(p), false);
+ assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
+});
+
+test('stop escalates to SIGKILL for a receiver that ignores SIGTERM, within bounds', opts, async () => {
+ const pidsDir = await mkdtemp(join(tmpdir(), 'arc69-pids-')); tmpScripts.push(pidsDir);
+ const file = join(pidsDir, 'pids');
+ const real = new URL('../experiments/dispatch-test-host/receiver.mjs', import.meta.url).pathname;
+ const stubborn = await script('import { appendFileSync } from "node:fs"; appendFileSync(' + JSON.stringify(file) + ', process.pid + "\\n"); await import(' + JSON.stringify(real) + '); process.removeAllListeners("SIGTERM"); process.on("SIGTERM", () => {});');
+ const h = await createTestHost({ receiverOptions: { stopTimeoutMs: 200, killTimeoutMs: 1000, byId: { 'recv-a': { script: stubborn } } } });
+ const pid = Number((await readFile(file, 'utf8')).trim());
+ const t0 = Date.now();
+ const exits = await h.close();
+ assert.ok(Date.now() - t0 < 3000);
+ assert.equal(alive(pid), false);
+ assert.ok(exits.some(e => e.signal === 'SIGKILL'), JSON.stringify(exits));
+ assert.deepEqual(await h.close(), exits);   // idempotent
+});
+
+test('positive control: normal construction and close still work with lifecycle options set', opts, async () => {
+ const before = new Set(await leftovers());
+ const h = await createTestHost({ receiverOptions: { startupTimeoutMs: 5000 } });
+ const pids = Object.values(h.receivers).map(r => r.pid);
+ assert.equal((await h.dispatch(await h.issue())).adapter_decision, 'PERMIT_SOURCE_ONLY');
+ await h.close();
+ for (const p of pids) assert.equal(alive(p), false);
+ assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
 });
