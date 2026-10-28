@@ -1,0 +1,31 @@
+{
+  "profile": "outreach-fixtures/0.1",
+  "source_base": "a91217006de821d97e5540859ffe422053d7e57e",
+  "classification": "OFFLINE_SYNTHETIC_DECLARATIONS",
+  "mapping": {
+    "file-reader": ["filesystem.read"],
+    "evidence-review": ["review.perform"],
+    "general-exec": ["process.execute"]
+  },
+  "context": {"host": "fictional-host", "session": "fictional-session-2", "config_revision": "config-2"},
+  "cases": [
+    {"id":"PD-01","description":"Matching supplied read/review inventory","tools":["file-reader","evidence-review"],"provenance":"fixture","revision":"config-2","session":"fictional-session-2","expected":{"comparison":"MATCH","gaps":[]}},
+    {"id":"PD-02","description":"Add prohibited shell execution","tools":["file-reader","evidence-review","general-exec"],"provenance":"fixture","revision":"config-2","session":"fictional-session-2","expected":{"comparison":"MISMATCH","excess":["process.execute"]}},
+    {"id":"PD-03","description":"Missing inventory, provenance, or mapping","variants":["no-inventory","no-provenance","no-mapping"],"expected":{"comparison":"UNKNOWN"}},
+    {"id":"PD-04","description":"Old config or foreign session cannot establish current inventory","variants":["old-config","foreign-session"],"expected":{"comparison":"UNKNOWN"}},
+    {"id":"PD-05","description":"Friendly name does not classify an unmapped execution route","tools":["file-reader","helpful-assistant"],"provenance":"fixture","revision":"config-2","session":"fictional-session-2","expected":{"comparison":"UNKNOWN","gaps":["helpful-assistant"]}},
+    {"id":"PD-06","description":"Fresh repaired inventory; old inventory stays stale","tools":["file-reader","evidence-review"],"provenance":"fixture","revision":"config-2","session":"fictional-session-2","old_revision":"config-1","expected":{"comparison":"MATCH"}},
+    {"id":"AB-01","description":"Matching fictional G1 subject and decision","mutation":"none","expected":{"binding_valid":true,"authority":"UNKNOWN"}},
+    {"id":"AB-02","description":"Payload digest changes while decision stays old","mutation":"payload","expected":{"binding_valid":false,"code":"G1_SUBJECT_MISMATCH"}},
+    {"id":"AB-03","description":"Actual target changes, business scope version stays fixed","mutation":"target","hidden_target":"fictional-b@example.invalid","expected":{"binding_valid":false,"code":"G1_SUBJECT_MISMATCH","hidden_resolution":"UNKNOWN"}},
+    {"id":"AB-04","description":"Task or bundle policy changes while decision stays old","mutation":"policy","variants":["task","bundle"],"expected":{"binding_valid":false,"code":"G1_SUBJECT_MISMATCH"}},
+    {"id":"AB-05","description":"Matching declarations have no authenticated issuer/current scope","mutation":"none","issuer_proof":null,"current_scope_proof":null,"expected":{"binding_valid":true,"authority":"UNKNOWN"}},
+    {"id":"AB-06","description":"Repair plus old decision fails; distinct fictional new decision matches","mutation":"payload","fictional_new_decision_supplied":true,"expected":{"binding_valid":false,"code":"G1_SUBJECT_MISMATCH","new_binding_valid":true}},
+    {"id":"RE-01","description":"Distinct supplied gate, dispatch, receiver and response observations","events":[{"id":"e1","type":"admitted"},{"id":"e2","type":"dispatch"},{"id":"e3","type":"receiver","count":1},{"id":"e4","type":"response","outcome":"ok"}],"complete":true,"expected":{"trace":"RECEIVED_AND_RESPONSE_RECORDED"}},
+    {"id":"RE-02","description":"Supplied pre-dispatch failure, zero effect, retry lacks current authority","events":[{"id":"e1","type":"failed-before-dispatch"},{"id":"e2","type":"receiver","count":0},{"id":"e3","type":"retry-requested","current_authority":null}],"complete":true,"expected":{"trace":"NO_DISPATCH_RETRY_AUTHORITY_UNKNOWN"}},
+    {"id":"RE-03","description":"Supplied receiver effect with no sender response","events":[{"id":"e1","type":"admitted"},{"id":"e2","type":"dispatch"},{"id":"e3","type":"receiver","count":1}],"complete":true,"expected":{"trace":"RECEIVER_RECORDED_RESPONSE_UNKNOWN"}},
+    {"id":"RE-04","description":"Cancellation before a late affirmative does not supply new authority","events":[{"id":"e1","type":"approval-pending"},{"id":"e2","type":"cancelled"},{"id":"e3","type":"approved"},{"id":"e4","type":"receiver","count":0}],"complete":true,"expected":{"trace":"CANCELLED_LATE_APPROVAL_NOT_AUTHORITY"}},
+    {"id":"RE-05","description":"Resume with missing durable consumption/result is unresolved","events":[{"id":"e1","type":"resume","durable_consumption":null,"durable_result":null}],"complete":false,"expected":{"trace":"UNRESOLVED_MISSING_EVIDENCE"}},
+    {"id":"RE-06","description":"Replayed/conflicting/missing supplied evidence is retained","events":[{"id":"e1","type":"receiver","count":0},{"id":"e1","type":"receiver","count":1}],"complete":false,"conflicting_artifact":true,"expected":{"trace":"CONTRADICTORY_OR_REPLAYED_EVIDENCE","lifecycle_valid":false,"code":"G3_ARTIFACT_DIGEST_CONFLICT"}}
+  ]
+}
