@@ -116,3 +116,15 @@ Limits: https only, single send effect, at most 8 hops, POSIX only (other hosts 
 local per-root replay protection only.
 
 Reproduce: `node --test tests/task-dispatch-target.test.mjs`
+
+## TEST-host loopback integration (`experiments/dispatch-test-host/`)
+
+A test-owned host that drives the unchanged dispatch-target adapter end to end against a separate loopback receiver
+(child process, 127.0.0.1 only, own effect log). Ephemeral Ed25519 issuer keys live in memory only; the registry, actor and
+policy are synthetic. Dispatch is serialized through one promise chain. Authority is `TEST_HOST_ONLY_NOT_PRODUCTION`: a permit
+is never production or native-host authority, and `resolution_independence` stays `UNPROVEN` (only the receiver log is
+independent). The receiver refuses (421, no effect) a send pinned to another receiver identity. A timeout after the receiver
+recorded the effect leaves the grant burned and is never retried or refunded.
+
+    node --test tests/dispatch-test-host-loopback.test.mjs
+    node experiments/dispatch-test-host/run.mjs <empty_out_dir>   # bounded trial; writes trial.json evidence outside the repo
