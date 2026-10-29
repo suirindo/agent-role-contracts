@@ -13,7 +13,7 @@ import { spawn } from 'node:child_process';
 import { groupAlive, terminateGroup, armFailsafe } from './process-group.mjs';
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,14 +36,17 @@ const workDeadline = startedAt + trialTimeoutMs - cleanupReserveMs, hardDeadline
 // Reap budget: one bounded TERM+KILL round per group, in parallel, carved out of the cleanup reserve. Cleanup steps end by
 // hardDeadline - 2*reap (their own timeout-reap may then take up to reap), and the hard failsafe starts at hardDeadline - reap,
 // so the process has exited by hardDeadline. A group whose death cannot be confirmed is reported UNKNOWN, never silently dropped.
-const reapMs = Math.min(2000, Math.floor(cleanupReserveMs / 4)), reapOpts = { termMs: Math.floor(reapMs / 4), killMs: reapMs - Math.floor(reapMs / 4) };
-const cleanupDeadline = hardDeadline - 2 * reapMs;
+const reapWindowMs = Math.min(2000, Math.floor(cleanupReserveMs / 5));
+const reapPollMarginMs = Math.min(50, Math.max(1, Math.floor(reapWindowMs / 4)));
+const reapSignalMs = reapWindowMs - reapPollMarginMs;
+const reapOpts = { termMs: Math.floor(reapSignalMs / 4), killMs: reapSignalMs - Math.floor(reapSignalMs / 4) };
+const cleanupDeadline = hardDeadline - 2 * reapWindowMs;
 const unconfirmed = new Set();
-const reapAll = async () => { const r = await Promise.race([killTrackedChildren(reapOpts), new Promise(res => setTimeout(() => res({ confirmed: false, unknown: ['timeout'] }), reapMs + 250))]);
+const reapAll = async () => { const r = await Promise.race([killTrackedChildren(reapOpts), new Promise(res => setTimeout(() => res({ confirmed: false, unknown: ['timeout'] }), reapWindowMs))]);
  for (const pgid of r.unknown) unconfirmed.add(pgid); return r; };
 const unknownNote = () => unconfirmed.size ? 'UNKNOWN: process groups not confirmed reaped: ' + [...unconfirmed].join(',') + '\n' : '';
 // Hard failsafe: whatever is still running at the overall bound is group-terminated (bounded, confirmed) and the process exits.
-armFailsafe({ delayMs: trialTimeoutMs - reapMs, reap: reapAll, note: unknownNote });
+armFailsafe({ delayMs: trialTimeoutMs - reapWindowMs, reap: reapAll, note: unknownNote });
 for (const key of ['sshHost', 'remoteNode', 'remoteRoot', 'knownHosts', 'hostKeyAlias', 'expectedHostKeyFingerprint', 'expectedProxyCommand']) if (typeof cfg[key] !== 'string' || !cfg[key]) throw new Error('missing config ' + key);
 // Caller values reach ssh option values, argv and a remote shell (quoted) and pgrep/pkill patterns: allow only plain tokens.
 const plainPath = /^\/[A-Za-z0-9_.\/-]+$/, plainToken = /^[A-Za-z0-9_.:\[\]@-]+$/;
@@ -53,6 +56,7 @@ if (!plainToken.test(cfg.sshHost) || cfg.sshHost.startsWith('-') || !plainToken.
 if (!/^SHA256:[A-Za-z0-9+\/]{43}$/.test(cfg.expectedHostKeyFingerprint)) throw new Error('expectedHostKeyFingerprint must be an ssh SHA256 fingerprint');
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+const archiveRetainHelper = fileURLToPath(new URL('./archive-retain.mjs', import.meta.url));
 const sha = b => 'sha256:' + createHash('sha256').update(b).digest('hex');
 /**
  * Async, bounded, reaped helper child. Timeout = min(helperTimeoutMs, time left to `deadline`); on expiry (or output overflow) the whole
@@ -144,13 +148,12 @@ const finalize = reason => finalizing ??= (async () => {
   result.quiescent = stopped?.trim() === 'dead';
   if (stopped !== null && !result.quiescent) result.errors.push('stop receivers: a receiver process of this nonce is still alive');
   if (result.quiescent) {
-   const tar = [];
-   for (let i = 0; i < 2; i++) { tar[i] = await run('archive ' + i, 'tar -C ' + shq(remoteRoot) + ' -cf - --exclude ./bin .', { encoding: undefined }); if (!tar[i]) break; }
-   if (tar[0]?.length && tar[1] && Buffer.compare(tar[0], tar[1]) === 0) {
-    const file = join(out, 'm3-records.tar');
-    try { writeFileSync(file, tar[0], { mode: 0o600 }); if (sha(readFileSync(file)) !== sha(tar[0])) throw new Error('readback mismatch');
-     result.records_retained = true; result.records_tar_sha256 = sha(tar[0]); } catch (e) { result.errors.push('retain records: ' + e.message); }
-   } else if (tar[0] && tar[1]) result.errors.push('archive: root is empty or not stable between two reads');
+   const remote = 'tar -C ' + shq(remoteRoot) + ' -cf - --exclude ./bin .';
+   const temporary = [join(out, '.m3-records-0.tar'), join(out, '.m3-records-1.tar')], retained = join(out, 'm3-records.tar');
+   try {
+    const retainedResult = JSON.parse(await exec(process.execPath, [archiveRetainHelper], { input: JSON.stringify({ sshArgs, remote, temporary, retained }), encoding: 'utf8', deadline: cleanupDeadline, maxBuffer: 4096 }));
+    result.records_retained = true; result.records_tar_sha256 = retainedResult.sha256;
+   } catch (e) { result.errors.push('archive/retain records: ' + e.message.split('\n')[0]); }
   }
   if (result.records_retained) {
    await run('remove nonce root', 'rm -rf -- ' + shq(remoteRoot));

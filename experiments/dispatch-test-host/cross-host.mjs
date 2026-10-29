@@ -51,9 +51,22 @@ export const localLauncher = (dir, bind = '127.0.0.1') => ({ caseName, spec }) =
 /** SSH launcher: the receiver script (already placed at <remoteRoot>/bin) on the remote host, with `bind` (an address or "stdio"). */
 export const sshLauncher = ({ sshHost, sshOptions = [], remoteNode, remoteRoot, bind }) => {
  // Fail closed: a receiver session that carries the per-case secret must never run without the caller's host-key pin.
- const opts = sshOptions.filter((x, i) => sshOptions[i - 1] === '-o').map(x => x.toLowerCase());
- for (const need of ['stricthostkeychecking=yes', 'batchmode=yes', 'clearallforwardings=yes']) if (!opts.includes(need)) throw new Error('sshLauncher requires ' + need);
- for (const need of ['userknownhostsfile=', 'hostkeyalias=']) if (!opts.some(o => o.startsWith(need) && o.length > need.length)) throw new Error('sshLauncher requires ' + need);
+ const options = new Map();
+ for (let i = 0; i < sshOptions.length; i++) {
+  let option;
+  if (sshOptions[i] === '-o') option = sshOptions[++i];
+  else if (typeof sshOptions[i] === 'string' && sshOptions[i].startsWith('-o') && sshOptions[i].length > 2) option = sshOptions[i].slice(2);
+  else continue;
+  if (typeof option !== 'string') throw new Error('sshLauncher requires a value after -o');
+  if (!/^[A-Za-z][A-Za-z0-9]*=.+$/.test(option)) throw new Error('sshLauncher requires canonical key=value -o syntax');
+  const eq = option.indexOf('='), key = option.slice(0, eq < 0 ? option.length : eq).toLowerCase();
+  const value = eq < 0 ? '' : option.slice(eq + 1);
+  if (options.has(key)) throw new Error('sshLauncher rejects duplicate -o ' + key); // OpenSSH uses the first obtained value.
+  options.set(key, value);
+ }
+ for (const [key, value] of [['stricthostkeychecking', 'yes'], ['batchmode', 'yes'], ['clearallforwardings', 'yes']])
+  if (options.get(key)?.toLowerCase() !== value) throw new Error('sshLauncher requires ' + key + '=' + value);
+ for (const key of ['userknownhostsfile', 'hostkeyalias']) if (!options.get(key)) throw new Error('sshLauncher requires ' + key + '=<value>');
  return ({ caseName, spec }) => ({
  command: 'ssh', args: [...sshOptions, '-T', sshHost,
   ['exec', remoteNode, remoteRoot + '/bin/remote-receiver.mjs', remoteRoot + '/' + caseName, bind, JSON.stringify(spec)].map(shq).join(' ')], bind });

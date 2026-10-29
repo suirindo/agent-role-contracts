@@ -77,7 +77,12 @@ test('ssh launcher fails closed when any pin option is missing or weakened', () 
  assert.throws(() => sshLauncher(base), /./);
  for (const drop of ['BatchMode=yes', 'ClearAllForwardings=yes', 'StrictHostKeyChecking=yes', 'UserKnownHostsFile=/k', 'HostKeyAlias=a'])
   assert.throws(() => sshLauncher({ ...base, sshOptions: PIN_OPTIONS.filter((x, i) => x !== drop && PIN_OPTIONS[i + 1] !== drop) }), /./, drop);
- assert.throws(() => sshLauncher({ ...base, sshOptions: ['-o', 'StrictHostKeyChecking=no', ...PIN_OPTIONS.slice(0, 2), ...PIN_OPTIONS.slice(4)] }), /./);
+ for (const conflict of ['StrictHostKeyChecking no', 'HostKeyAlias wrong', 'BatchMode no'])
+  assert.throws(() => sshLauncher({ ...base, sshOptions: ['-o', conflict, ...PIN_OPTIONS] }), /canonical key=value/);
+ for (const conflict of ['BatchMode=no', 'ClearAllForwardings=no', 'StrictHostKeyChecking=no', 'UserKnownHostsFile=/wrong', 'HostKeyAlias=wrong']) {
+  assert.throws(() => sshLauncher({ ...base, sshOptions: ['-o', conflict, ...PIN_OPTIONS] }), /duplicate -o/, conflict);
+  assert.throws(() => sshLauncher({ ...base, sshOptions: [...PIN_OPTIONS, '-o' + conflict] }), /duplicate -o/, conflict);
+ }
 });
 
 test('ssh launcher quotes every remote argument, uses BatchMode and never requests port forwarding', () => {
@@ -250,9 +255,9 @@ test('offline fake SSH: slow preflight is bounded by the helper timeout and prec
 });
 
 test('offline fake SSH: the deadline counts from process start, so a slow preflight shortens the trial and cleanup still runs inside the total bound', opts, async () => {
- const trial = 8000;
- const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 2000, trialTimeoutMs: trial, cleanupReserveMs: 3000 }, { FAKE_SSH_G_DELAY_MS: '1500' }));
- assert.equal(result.ok, false); assert.equal(result.error.code, 124); assert.match(result.stderr, /overall trial timeout/);
+ const trial = 12000;
+ const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 4000, trialTimeoutMs: trial, cleanupReserveMs: 5000 }, { FAKE_SSH_G_DELAY_MS: '1500', FAKE_SSH_HANG_ON: "'exec'" }));
+ assert.equal(result.ok, false); assert.equal(result.error.code, 124, result.stderr); assert.match(result.stderr, /overall trial timeout/);
  assert.ok(elapsed < trial + SLACK, 'elapsed ' + elapsed);
  const cleanup = await cleanupOf(out); assert.equal(cleanup.removed, true, JSON.stringify(cleanup));
 });
