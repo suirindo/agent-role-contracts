@@ -29,6 +29,10 @@ export const REMOTE_RECEIVER_SCRIPT = new URL('./remote-receiver.mjs', import.me
 export const REMOTE_OBSERVER_SCRIPT = new URL('./remote-observer.mjs', import.meta.url).pathname;
 const sha = bytes => 'sha256:' + createHash('sha256').update(bytes).digest('hex');
 const within = (promise, ms) => new Promise(resolve => { const t = setTimeout(() => resolve(null), ms); promise.then(v => { clearTimeout(t); resolve(v); }); });
+// Every child this module spawns is tracked so an overall deadline can reap sessions whose case was abandoned.
+const tracked = new Set();
+const track = child => { tracked.add(child); child.once('exit', () => tracked.delete(child)); child.once('error', () => tracked.delete(child)); return child; };
+export const killTrackedChildren = () => { for (const c of tracked) { try { c.kill('SIGKILL'); } catch { /* gone */ } } tracked.clear(); };
 const shq = s => "'" + String(s).replace(/'/g, "'\\''") + "'";
 
 /** HMAC identity proof; must match remote-receiver.mjs. */
@@ -53,7 +57,7 @@ export const sshLauncher = ({ sshHost, sshOptions = [], remoteNode, remoteRoot, 
 
 /** Start one receiver set; the secret/nonce go on stdin only. stop() closes stdin (remote exits on EOF), then bounded TERM/KILL. */
 export async function startReceiverSet({ command, args, bind }, { secret, nonce, startupTimeoutMs = 30000 }) {
- const child = spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+ const child = track(spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] }));
  let stderr = ''; child.stderr.on('data', d => { if (stderr.length < 4096) stderr += d; });
  const exited = new Promise(r => { child.once('exit', (code, signal) => r({ code, signal })); child.once('error', e => r({ code: null, signal: null, error: e.message })); });
  const stop = async () => {
@@ -209,7 +213,7 @@ export async function createCrossHostTestHost({ caseName, sets, expected, nonce,
 /** Run remote-observer.mjs from `command`/`args` (local node or ssh) and parse its single JSON line. */
 export function observe(command, args, timeoutMs = 60000) {
  return new Promise((resolve, reject) => {
-  const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = track(spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] }));
   let out = '', err = '';
   const t = setTimeout(() => { child.kill('SIGKILL'); reject(new Error('observer timeout')); }, timeoutMs);
   child.stdout.on('data', d => { out += d; }); child.stderr.on('data', d => { err += d; });
