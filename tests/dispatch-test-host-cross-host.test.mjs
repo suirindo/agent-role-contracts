@@ -2,11 +2,13 @@
 // same script, stdin secret channel and observer that the real receiver host uses over SSH, so CI never needs that host.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { hostname, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request } from 'node:http';
 import { randomBytes } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { localLauncher, sshLauncher, startReceiverSet, observe, REMOTE_OBSERVER_SCRIPT } from '../experiments/dispatch-test-host/cross-host.mjs';
 import { CASES, runCase, judge } from '../experiments/dispatch-test-host/cross-host-cases.mjs';
 
@@ -16,6 +18,7 @@ const dirs = [];
 const tmp = async p => { const d = await mkdtemp(join(tmpdir(), p)); dirs.push(d); return d; };
 test.after(() => Promise.all(dirs.map(d => rm(d, { recursive: true, force: true }))));
 const alive = pid => { try { process.kill(pid, 0); return true; } catch { return false; } };
+const exec = promisify(execFile);
 
 for (const bind of ['stdio', '127.0.0.1'])
 test('all cross-host cases reproduce offline (' + bind + '): sender view matches the receiver-side observer, impostor host is refused', opts, async () => {
@@ -66,9 +69,19 @@ test('receiver set stops on stdin EOF and refuses to start without a valid secre
  await assert.rejects(startReceiverSet(localLauncher(dir)({ caseName: 'd', spec: { receivers: [{ id: 'recv-a' }] } }), { secret: 'short', nonce: 'x' }), /exited early/);
 });
 
+const PIN_OPTIONS = ['BatchMode=yes', 'ClearAllForwardings=yes', 'StrictHostKeyChecking=yes', 'UserKnownHostsFile=/k', 'HostKeyAlias=a'].flatMap(o => ['-o', o]);
+
+test('ssh launcher fails closed when any pin option is missing or weakened', () => {
+ const base = { sshHost: 'rx-host', remoteNode: '/n/node', remoteRoot: '/r', bind: 'stdio' };
+ assert.throws(() => sshLauncher(base), /./);
+ for (const drop of ['BatchMode=yes', 'ClearAllForwardings=yes', 'StrictHostKeyChecking=yes', 'UserKnownHostsFile=/k', 'HostKeyAlias=a'])
+  assert.throws(() => sshLauncher({ ...base, sshOptions: PIN_OPTIONS.filter((x, i) => x !== drop && PIN_OPTIONS[i + 1] !== drop) }), /./, drop);
+ assert.throws(() => sshLauncher({ ...base, sshOptions: ['-o', 'StrictHostKeyChecking=no', ...PIN_OPTIONS.slice(0, 2), ...PIN_OPTIONS.slice(4)] }), /./);
+});
+
 test('ssh launcher quotes every remote argument, uses BatchMode and never requests port forwarding', () => {
  for (const bind of ['stdio', '100.64.0.9']) {
-  const l = sshLauncher({ sshHost: 'rx-host', remoteNode: '/n/node', remoteRoot: "/r/it's", bind })({ caseName: 'c1', spec: { receivers: [{ id: 'recv-a' }] } });
+  const l = sshLauncher({ sshHost: 'rx-host', remoteNode: '/n/node', remoteRoot: "/r/it's", bind, sshOptions: PIN_OPTIONS })({ caseName: 'c1', spec: { receivers: [{ id: 'recv-a' }] } });
   assert.equal(l.command, 'ssh'); assert.equal(l.bind, bind);
   assert.ok(l.args.includes('BatchMode=yes'));
   assert.ok(!l.args.some(a => /^-[LRD]$/.test(a)));
@@ -90,4 +103,91 @@ test('stdio receiver opens no listening socket and answers only inside its own s
 test('README states the cross-host binding level and what remains UNKNOWN', async () => {
  const readme = await readFile(new URL('../experiments/dispatch-test-host/README.md', import.meta.url), 'utf8');
  assert.match(readme, /## Cross-host receiver/); assert.match(readme, /SSH/); assert.match(readme, /native N0/i); assert.match(readme, /UNKNOWN/);
+});
+
+async function fakeSshTrial(policy = 'strict', extra = {}, env = {}) {
+ const dir = await tmp('arc69-fake-ssh-'), bin = join(dir, 'bin'), remote = join(dir, 'remote'), out = join(dir, 'out');
+ await import('node:fs/promises').then(({ mkdir }) => Promise.all([mkdir(bin), mkdir(out)]));
+ const fake = new URL('./fixtures/fake-ssh.mjs', import.meta.url).pathname;
+ await chmod(fake, 0o755);
+ await import('node:fs/promises').then(({ symlink }) => symlink(fake, join(bin, 'ssh')));
+ const key = join(dir, 'host-key');
+ await exec('ssh-keygen', ['-q', '-t', 'ed25519', '-N', '', '-f', key]);
+ const pub = (await readFile(key + '.pub', 'utf8')).trim().split(/\s+/);
+ const fingerprint = (await exec('ssh-keygen', ['-l', '-f', key + '.pub'])).stdout.split(/\s+/)[1];
+ const knownHosts = join(dir, 'known_hosts'); await writeFile(knownHosts, 'rx-alias ' + pub[0] + ' ' + pub[1] + '\n');
+ const config = join(dir, 'config.json');
+ await writeFile(config, JSON.stringify({ sshHost: 'fake-rx', bind: 'stdio', remoteNode: process.execPath, remoteRoot: remote,
+  expectedHostname: hostname(), expectedUid: process.getuid(), knownHosts, hostKeyAlias: 'rx-alias', expectedHostKeyFingerprint: fingerprint, expectedProxyCommand: 'none', helperTimeoutMs: 10000,
+  trialTimeoutMs: 120000, ...extra }));
+ const log = join(dir, 'ssh.log');
+ const result = await exec(process.execPath, [new URL('../experiments/dispatch-test-host/run-cross-host.mjs', import.meta.url).pathname, out, config],
+  { env: { ...process.env, PATH: bin + ':' + process.env.PATH, FAKE_SSH_LOG: log, FAKE_SSH_POLICY: policy, FAKE_SSH_HANG_ON: extra.hangOn ?? '', ...env }, timeout: 130000 }).then(
+   x => ({ ok: true, ...x }), e => ({ ok: false, stdout: e.stdout ?? '', stderr: e.stderr ?? '', error: e }));
+ const calls = await readFile(log, 'utf8').then(s => s.trim().split('\n').filter(Boolean).map(JSON.parse), () => []);
+ return { result, calls, remote, out };
+}
+
+test('offline fake SSH: every receiver launcher, observer, upload, hash, inspection and cleanup transport carries the pin policy', opts, async () => {
+ const { result, calls } = await fakeSshTrial();
+ assert.equal(result.ok, true, result.stderr);
+ assert.ok(calls.length > 10);
+ for (const { options } of calls) assert.deepEqual({ batch: options.batchmode, forwarding: options.clearallforwardings, strict: options.stricthostkeychecking,
+  alias: options.hostkeyalias, known: Boolean(options.userknownhostsfile) }, { batch: 'yes', forwarding: 'yes', strict: 'yes', alias: 'rx-alias', known: true });
+ for (const token of ['remote-receiver.mjs', 'remote-observer.mjs', 'cat >', 'shasum', 'pgrep', 'rm -rf']) assert.ok(calls.some(c => c.args.at(-1).includes(token)), token);
+});
+
+for (const policy of ['permissive', 'mismatch', 'global-known-hosts', 'proxyjump', 'localcommand', 'knownhostscommand']) test('offline fake SSH: effective ' + policy + ' policy is rejected before remote effects', opts, async () => {
+ const { result, calls, remote } = await fakeSshTrial(policy);
+ assert.equal(result.ok, false); assert.match(result.stderr, /effective SSH policy/);
+ assert.equal(calls.length, 1); await assert.rejects(readFile(remote), /ENOENT/);
+});
+
+test('offline fake SSH: synchronous helper timeout is finite and exact nonce-root cleanup is attempted', opts, async () => {
+ const started = Date.now();
+ const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 200, trialTimeoutMs: 1000, hangOn: 'mkdir -p' });
+ assert.equal(result.ok, false); assert.ok(Date.now() - started < 10000);
+ assert.ok(calls.some(c => c.args.at(-1).startsWith("test -e '")), 'nonce-root existence probe missing');
+ const cleanup = JSON.parse(await readFile(join(out, 'cleanup.json'), 'utf8'));
+ assert.equal(cleanup.removed, true); assert.equal(cleanup.records_retained, false);
+ assert.ok(!calls.some(c => /rm -rf/.test(c.args.at(-1)) && !c.args.at(-1).includes(cleanup.remote_root)), 'cleanup touched something other than the nonce root');
+ assert.ok(calls.every(c => c.options.stricthostkeychecking === 'yes'));
+});
+
+test('offline fake SSH: an effective ProxyCommand must equal the declared one and is recorded', opts, async () => {
+ const wrong = await fakeSshTrial('strict', {}, { FAKE_SSH_PROXY: '/tmp/evil-proxy' });
+ assert.equal(wrong.result.ok, false); assert.match(wrong.result.stderr, /proxycommand/); assert.equal(wrong.calls.length, 1);
+ const ok = await fakeSshTrial('strict', { expectedProxyCommand: '/bin/proxy a b' }, { FAKE_SSH_PROXY: '/bin/proxy a b' });
+ assert.equal(ok.result.ok, true, ok.result.stderr);
+});
+
+test('offline fake SSH: wrong pin, malformed config and injection-shaped values are rejected before any ssh call', opts, async () => {
+ const wrongPin = 'SHA256:' + 'A'.repeat(43);
+ const cases = [{ expectedHostKeyFingerprint: wrongPin }, { expectedHostKeyFingerprint: 'nope' }, { hostKeyAlias: 'missing-alias' }, { hostKeyAlias: '-oProxyCommand=x' },
+  { sshHost: '-oProxyCommand=touch' }, { sshHost: 'h;rm' }, { remoteRoot: '/tmp/../etc' }, { remoteRoot: '/' }, { remoteRoot: "/tmp/a'b" }, { helperTimeoutMs: 5 },
+  { trialTimeoutMs: 50, helperTimeoutMs: 100 }, { expectedProxyCommand: undefined }];
+ for (const extra of cases) {
+  const { result, calls, remote } = await fakeSshTrial('strict', extra);
+  assert.equal(result.ok, false, JSON.stringify(extra));
+  assert.ok(calls.every(c => c.args.includes('-G')), 'no remote effect: ' + JSON.stringify(extra));
+  await assert.rejects(readFile(remote), /ENOENT/);
+ }
+});
+
+test('offline fake SSH: success retains records before removing only the nonce root, leaving the configured root and siblings', opts, async () => {
+ const dir = await tmp('arc69-fake-keep-');
+ const { result, remote, out } = await fakeSshTrial('strict');
+ assert.equal(result.ok, true, result.stderr);
+ const cleanup = JSON.parse(await readFile(join(out, 'cleanup.json'), 'utf8'));
+ assert.equal(cleanup.removed, true); assert.equal(cleanup.records_retained, true); assert.match(cleanup.records_tar_sha256, /^sha256:[0-9a-f]{64}$/);
+ assert.ok(cleanup.remote_root.startsWith(remote + '/')); await readFile(join(out, 'm3-records.tar'));
+ await assert.rejects(readFile(cleanup.remote_root), /ENOENT|EISDIR/); assert.ok(dir);
+});
+
+test('offline fake SSH: when records cannot be fetched the nonce root is kept as evidence and the run fails', opts, async () => {
+ const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 3000, hangOn: 'tar -C' });
+ assert.equal(result.ok, false);
+ const cleanup = JSON.parse(await readFile(join(out, 'cleanup.json'), 'utf8'));
+ assert.equal(cleanup.records_retained, false); assert.equal(cleanup.removed, false);
+ assert.ok(!calls.some(c => /rm -rf/.test(c.args.at(-1)) && c.args.at(-1).includes(cleanup.remote_root)), 'removed before retaining evidence');
 });

@@ -41,9 +41,15 @@ export const localLauncher = (dir, bind = '127.0.0.1') => ({ caseName, spec }) =
  command: process.execPath, args: [REMOTE_RECEIVER_SCRIPT, join(dir, caseName), bind, JSON.stringify(spec)], bind });
 
 /** SSH launcher: the receiver script (already placed at <remoteRoot>/bin) on the remote host, with `bind` (an address or "stdio"). */
-export const sshLauncher = ({ sshHost, sshOptions = [], remoteNode, remoteRoot, bind }) => ({ caseName, spec }) => ({
- command: 'ssh', args: ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=20', '-T', ...sshOptions, sshHost,
+export const sshLauncher = ({ sshHost, sshOptions = [], remoteNode, remoteRoot, bind }) => {
+ // Fail closed: a receiver session that carries the per-case secret must never run without the caller's host-key pin.
+ const opts = sshOptions.filter((x, i) => sshOptions[i - 1] === '-o').map(x => x.toLowerCase());
+ for (const need of ['stricthostkeychecking=yes', 'batchmode=yes', 'clearallforwardings=yes']) if (!opts.includes(need)) throw new Error('sshLauncher requires ' + need);
+ for (const need of ['userknownhostsfile=', 'hostkeyalias=']) if (!opts.some(o => o.startsWith(need) && o.length > need.length)) throw new Error('sshLauncher requires ' + need);
+ return ({ caseName, spec }) => ({
+ command: 'ssh', args: [...sshOptions, '-T', sshHost,
   ['exec', remoteNode, remoteRoot + '/bin/remote-receiver.mjs', remoteRoot + '/' + caseName, bind, JSON.stringify(spec)].map(shq).join(' ')], bind });
+};
 
 /** Start one receiver set; the secret/nonce go on stdin only. stop() closes stdin (remote exits on EOF), then bounded TERM/KILL. */
 export async function startReceiverSet({ command, args, bind }, { secret, nonce, startupTimeoutMs = 30000 }) {
