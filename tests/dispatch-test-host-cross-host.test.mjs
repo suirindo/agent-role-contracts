@@ -9,7 +9,8 @@ import { request } from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { localLauncher, sshLauncher, startReceiverSet, observe, REMOTE_OBSERVER_SCRIPT } from '../experiments/dispatch-test-host/cross-host.mjs';
+import { armFailsafe, terminateGroup } from '../experiments/dispatch-test-host/process-group.mjs';
+import { localLauncher, sshLauncher, startReceiverSet, observe, killTrackedChildren, REMOTE_OBSERVER_SCRIPT } from '../experiments/dispatch-test-host/cross-host.mjs';
 import { CASES, runCase, judge } from '../experiments/dispatch-test-host/cross-host-cases.mjs';
 
 const POSIX = ['linux', 'darwin'].includes(process.platform);
@@ -262,4 +263,69 @@ test('offline fake SSH: a hung case session is abandoned at the work deadline, r
  assert.equal(result.ok, false); assert.equal(result.error.code, 124);
  assert.ok(elapsed < trial + SLACK, 'elapsed ' + elapsed);
  const cleanup = await cleanupOf(out); assert.equal(cleanup.removed, true, JSON.stringify(cleanup)); assert.equal(cleanup.quiescent, true);
+});
+
+// --- process-group custody (#69): every ssh spawn is grouped; reap is confirmed for the whole group before clear/exit ---
+const pidsOf = file => readFile(file, 'utf8').then(s => s.trim().split('\n').filter(Boolean).map(Number), () => []);
+const GRANDCHILD = "const {spawn}=require('node:child_process');const g=spawn(process.execPath,['-e',\"process.on('SIGTERM',()=>{});setTimeout(()=>{},25000)\"],{stdio:'ignore'});require('node:fs').appendFileSync(process.env.PIDFILE,g.pid+'\\n');setTimeout(()=>{},25000)";
+const cleanupPids = async pidfile => { for (const p of await pidsOf(pidfile)) try { process.kill(p, 'SIGKILL'); } catch { /* gone */ } };
+
+test('process group: observe timeout reaps a TERM-ignoring grandchild before it rejects', opts, async () => {
+ const pidfile = join(await tmp('arc69-pg-'), 'pids'); process.env.PIDFILE = pidfile;
+ try {
+  await assert.rejects(observe(process.execPath, ['-e', GRANDCHILD], 600), /observer timeout/);
+  const pids = await pidsOf(pidfile); assert.equal(pids.length, 1);
+  assert.equal(alive(pids[0]), false, 'grandchild survived observe timeout');
+ } finally { await cleanupPids(pidfile); delete process.env.PIDFILE; }
+});
+
+test('process group: observer exit leaves no descendant behind, and killTrackedChildren confirms group death before clearing', opts, async () => {
+ const pidfile = join(await tmp('arc69-pg-'), 'pids'); process.env.PIDFILE = pidfile;
+ try {
+  const hung = observe(process.execPath, ['-e', GRANDCHILD], 60000); hung.catch(() => {});
+  for (let i = 0; i < 100 && !(await pidsOf(pidfile)).length; i++) await new Promise(r => setTimeout(r, 50));
+  const [gc] = await pidsOf(pidfile); assert.ok(alive(gc));
+  const r = await killTrackedChildren({ termMs: 200, killMs: 1000 });
+  assert.deepEqual(r, { confirmed: true, unknown: [] }); assert.equal(alive(gc), false);
+  assert.deepEqual(await killTrackedChildren(), { confirmed: true, unknown: [] });   // cleared only after confirmation; nothing left
+  await assert.rejects(hung);
+ } finally { await cleanupPids(pidfile); delete process.env.PIDFILE; }
+});
+
+test('process group: terminateGroup reports unconfirmed (not true) for a group it cannot kill, and never signals pid <= 1', opts, async () => {
+ assert.equal(await terminateGroup(1), false); assert.equal(await terminateGroup(0), false); assert.equal(await terminateGroup(-5), false);
+ assert.equal(await terminateGroup(2 ** 22 - 1), true);                           // no such group: already gone
+});
+
+test('process group: hard failsafe reaps, reports UNKNOWN groups explicitly, then exits 124', async () => {
+ const events = [];
+ armFailsafe({ delayMs: 10, reap: async () => { events.push('reap'); }, note: () => 'UNKNOWN: process groups not confirmed reaped: 4242\n',
+  write: s => events.push(['write', s]), exit: c => events.push(['exit', c]) }).ref();
+ await new Promise(r => setTimeout(r, 100));
+ assert.equal(events[0], 'reap'); assert.match(events[1][1], /UNKNOWN: process groups not confirmed reaped: 4242/); assert.deepEqual(events[2], ['exit', 124]);
+});
+
+test('offline fake SSH: abandoned case session with a TERM-ignoring ProxyCommand-like grandchild is group-reaped and cleanup still runs', opts, async () => {
+ const pidfile = join(await tmp('arc69-pg-'), 'pids');
+ try {
+  const trial = 12000;
+  const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 2000, trialTimeoutMs: trial, cleanupReserveMs: 4000 },
+   { FAKE_SSH_GRANDCHILD_PIDFILE: pidfile, FAKE_SSH_GRANDCHILD_ON: "'exec'", FAKE_SSH_LEADER_IGNORE_TERM: '1' }));
+  assert.equal(result.ok, false); assert.equal(result.error.code, 124); assert.ok(elapsed < trial + SLACK, 'elapsed ' + elapsed);
+  const pids = await pidsOf(pidfile); assert.ok(pids.length >= 1);
+  for (const p of pids) assert.equal(alive(p), false, 'grandchild ' + p + ' survived');
+  assert.equal((await cleanupOf(out)).removed, true); assert.doesNotMatch(result.stderr, /UNKNOWN: process groups/);
+ } finally { await cleanupPids(pidfile); }
+});
+
+test('offline fake SSH: a hung helper (cleanup step) with a TERM-ignoring grandchild is group-killed at its timeout, no survivor', opts, async () => {
+ const pidfile = join(await tmp('arc69-pg-'), 'pids');
+ try {
+  const { result, out } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 1000, trialTimeoutMs: 40000, cleanupReserveMs: 8000 },
+   { FAKE_SSH_GRANDCHILD_PIDFILE: pidfile, FAKE_SSH_GRANDCHILD_ON: 'rm -rf', FAKE_SSH_LEADER_IGNORE_TERM: '1' }));
+  assert.equal(result.ok, false); assert.equal(result.error.code, 3);
+  const pids = await pidsOf(pidfile); assert.ok(pids.length >= 1);
+  for (const p of pids) assert.equal(alive(p), false, 'grandchild ' + p + ' survived');
+  assert.equal((await cleanupOf(out)).removed, false);
+ } finally { await cleanupPids(pidfile); }
 });

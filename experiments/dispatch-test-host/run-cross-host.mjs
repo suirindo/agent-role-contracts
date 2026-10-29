@@ -10,13 +10,14 @@
  * timeout is min(helperTimeoutMs, remaining budget), so no step can run past its phase deadline; a hard failsafe exits at trialTimeoutMs.
  */
 import { spawn } from 'node:child_process';
+import { groupAlive, terminateGroup, armFailsafe } from './process-group.mjs';
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { localLauncher, sshLauncher, observe, killTrackedChildren, REMOTE_RECEIVER_SCRIPT, REMOTE_OBSERVER_SCRIPT, PAYLOAD, TEST_AUTHORITY } from './cross-host.mjs';
+import { localLauncher, sshLauncher, observe, killTrackedChildren, trackChild, REMOTE_RECEIVER_SCRIPT, REMOTE_OBSERVER_SCRIPT, PAYLOAD, TEST_AUTHORITY } from './cross-host.mjs';
 import { CASES, runCase, judge } from './cross-host-cases.mjs';
 
 const [outArg, cfgArg] = process.argv.slice(2);
@@ -31,10 +32,18 @@ const cleanupReserveMs = Number(cfg.cleanupReserveMs ?? Math.min(60000, Math.flo
 if (!Number.isInteger(helperTimeoutMs) || helperTimeoutMs < 100 || helperTimeoutMs > 120000 || !Number.isInteger(trialTimeoutMs) || trialTimeoutMs > 900000
  || !Number.isInteger(cleanupReserveMs) || cleanupReserveMs < 100 || trialTimeoutMs < helperTimeoutMs + cleanupReserveMs) throw new Error('invalid timeout configuration');
 const workDeadline = startedAt + trialTimeoutMs - cleanupReserveMs, hardDeadline = startedAt + trialTimeoutMs;
-// Hard failsafe: whatever is still running at the overall bound is killed and the process exits, with no synchronous work.
-const active = new Set();
-const killActive = () => { for (const c of active) { try { process.kill(-c.pid, 'SIGKILL'); } catch { try { c.kill('SIGKILL'); } catch { /* gone */ } } } };
-setTimeout(() => { killTrackedChildren(); killActive(); process.stderr.write('overall trial timeout (hard)\n'); process.exit(124); }, trialTimeoutMs).unref();
+// Every child (ssh included) leads its own process group and is registered; "reaped" means the whole group is confirmed gone.
+// Reap budget: one bounded TERM+KILL round per group, in parallel, carved out of the cleanup reserve. Cleanup steps end by
+// hardDeadline - 2*reap (their own timeout-reap may then take up to reap), and the hard failsafe starts at hardDeadline - reap,
+// so the process has exited by hardDeadline. A group whose death cannot be confirmed is reported UNKNOWN, never silently dropped.
+const reapMs = Math.min(2000, Math.floor(cleanupReserveMs / 4)), reapOpts = { termMs: Math.floor(reapMs / 4), killMs: reapMs - Math.floor(reapMs / 4) };
+const cleanupDeadline = hardDeadline - 2 * reapMs;
+const unconfirmed = new Set();
+const reapAll = async () => { const r = await Promise.race([killTrackedChildren(reapOpts), new Promise(res => setTimeout(() => res({ confirmed: false, unknown: ['timeout'] }), reapMs + 250))]);
+ for (const pgid of r.unknown) unconfirmed.add(pgid); return r; };
+const unknownNote = () => unconfirmed.size ? 'UNKNOWN: process groups not confirmed reaped: ' + [...unconfirmed].join(',') + '\n' : '';
+// Hard failsafe: whatever is still running at the overall bound is group-terminated (bounded, confirmed) and the process exits.
+armFailsafe({ delayMs: trialTimeoutMs - reapMs, reap: reapAll, note: unknownNote });
 for (const key of ['sshHost', 'remoteNode', 'remoteRoot', 'knownHosts', 'hostKeyAlias', 'expectedHostKeyFingerprint', 'expectedProxyCommand']) if (typeof cfg[key] !== 'string' || !cfg[key]) throw new Error('missing config ' + key);
 // Caller values reach ssh option values, argv and a remote shell (quoted) and pgrep/pkill patterns: allow only plain tokens.
 const plainPath = /^\/[A-Za-z0-9_.\/-]+$/, plainToken = /^[A-Za-z0-9_.:\[\]@-]+$/;
@@ -53,13 +62,14 @@ const sha = b => 'sha256:' + createHash('sha256').update(b).digest('hex');
 const exec = (command, args, { input, encoding, deadline = workDeadline, cwd, maxBuffer = 64 << 20, ignoreExit = false } = {}) => new Promise((resolve, reject) => {
  const budget = Math.min(helperTimeoutMs, deadline - Date.now());
  if (budget <= 0) return reject(new Error('trial deadline exhausted before ' + command));
- const child = spawn(command, args, { cwd, detached: true, stdio: ['pipe', 'pipe', 'pipe'] });
- active.add(child);
+ const child = trackChild(spawn(command, args, { cwd, detached: true, stdio: ['pipe', 'pipe', 'pipe'] }));
  const out = [], err = []; let size = 0, failure = null, settled = false, grace = null;
  const kill = why => { failure ??= new Error(why); try { process.kill(-child.pid, 'SIGKILL'); } catch { try { child.kill('SIGKILL'); } catch { /* gone */ } } grace ??= setTimeout(() => finish(), 2000); };
+ const reap = async () => { if (child.pid && groupAlive(child.pid) && !(await terminateGroup(child.pid, reapOpts))) { unconfirmed.add(child.pid); failure ??= new Error(command + ': UNKNOWN: process group ' + child.pid + ' not confirmed reaped'); } };
  const timer = setTimeout(() => kill(command + ' timed out after ' + budget + 'ms'), budget);
- const finish = (code, signal) => {
-  if (settled) return; settled = true; clearTimeout(timer); clearTimeout(grace); active.delete(child);
+ const finish = async (code, signal) => {
+  if (settled) return; settled = true; clearTimeout(timer); clearTimeout(grace);
+  await reap();                                                                 // descendants (ProxyCommand) must not outlive the helper
   const stdout = Buffer.concat(out);
   if (failure) return reject(failure);
   if (!ignoreExit && code !== 0) return reject(new Error(command + ' exited ' + (code ?? signal) + ': ' + Buffer.concat(err).toString('utf8').trim().split('\n')[0]));
@@ -126,7 +136,7 @@ const stopScript = (() => { const p = shq(receiverPattern);
 let finalizing = null;
 const finalize = reason => finalizing ??= (async () => {
  const result = { reason, remote_root: remoteRoot, quiescent: false, records_retained: false, records_tar_sha256: null, removed: false, errors: [] };
- const run = async (label, remote, opts = {}) => { try { return await ssh(remote, undefined, { deadline: hardDeadline, maxBuffer: 256 << 20, ...opts }); } catch (e) { result.errors.push(label + ': ' + e.message.split('\n')[0]); return null; } };
+ const run = async (label, remote, opts = {}) => { try { return await ssh(remote, undefined, { deadline: cleanupDeadline, maxBuffer: 256 << 20, ...opts }); } catch (e) { result.errors.push(label + ': ' + e.message.split('\n')[0]); return null; } };
  const exists = await run('exists', 'test -e ' + shq(remoteRoot) + ' && echo present || echo absent');
  if (exists === null) return result;                                            // cannot even talk to the host: nothing is claimed removed
  if (exists.trim() === 'present') {
@@ -211,10 +221,15 @@ try {
  process.stderr.write('trial failed: ' + e.message + '\n'); process.exitCode = timedOut ? 124 : 1;
 } finally {
  clearTimeout(workTimer); deadlineHit.catch(() => {});
- if (failed) { killTrackedChildren(); killActive(); }    // abandoned case sessions must not outlive the work phase; cleanup below uses fresh children
+ if (failed) await reapAll();    // abandoned case sessions must not outlive the work phase; cleanup below uses fresh children
  await rm(impDir, { recursive: true, force: true });
  const cleaned = await finalize('end');
  process.stderr.write('remote cleanup: ' + JSON.stringify({ quiescent: cleaned.quiescent, removed: cleaned.removed, records_retained: cleaned.records_retained, errors: cleaned.errors }) + '\n');
- if (!cleaned.removed) process.exitCode = 3;
- if (failed) process.exit(process.exitCode);
+ await reapAll();                                                               // final sweep: nothing this trial spawned may outlive it
+ if (unconfirmed.size) {
+  process.stderr.write(unknownNote()); cleaned.process_groups_unconfirmed = [...unconfirmed];
+  try { writeFileSync(join(out, 'cleanup.json'), JSON.stringify(cleaned, null, 1) + '\n', { mode: 0o600 }); } catch { /* reported via exit code */ }
+ }
+ if (!cleaned.removed || unconfirmed.size) process.exitCode = 3;
+ if (failed || unconfirmed.size) process.exit(process.exitCode);
 }

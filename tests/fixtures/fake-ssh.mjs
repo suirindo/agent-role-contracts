@@ -33,6 +33,14 @@ if (args.includes('-G')) {
  process.exit(0);
 }
 const remote = args.at(-1);
+// A ProxyCommand-like descendant: stays in ssh's process group, ignores SIGTERM, records its pid. FAKE_SSH_LEADER_IGNORE_TERM makes ssh itself ignore it too.
+if (process.env.FAKE_SSH_GRANDCHILD_PIDFILE && remote.includes(process.env.FAKE_SSH_GRANDCHILD_ON ?? 'exec')) {
+ const gc = spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setTimeout(()=>{},25000)"], { stdio: 'ignore' });
+ appendFileSync(process.env.FAKE_SSH_GRANDCHILD_PIDFILE, gc.pid + '\n');
+ if (process.env.FAKE_SSH_LEADER_IGNORE_TERM) process.on('SIGTERM', () => {});
+ setTimeout(() => process.exit(99), 25000);
+ await new Promise(() => {});
+}
 if (process.env.FAKE_SSH_HANG_ON && remote.includes(process.env.FAKE_SSH_HANG_ON)) setTimeout(() => process.exit(99), 25000);   // hangs; self-ends so a leaked double cannot linger
 else if (process.env.FAKE_SSH_STOP_ALIVE && remote.includes('pkill')) process.stdout.write('alive\n');   // receiver survives TERM and KILL
 else if (process.env.FAKE_SSH_TAR_UNSTABLE && remote.startsWith('tar -C')) {                     // the archive differs on every read: the root is still mutating

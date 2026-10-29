@@ -13,6 +13,7 @@
  * receiver host. With the SSH launcher the secret travels only inside the SSH channel whose host key is pinned by the caller.
  */
 import { spawn } from 'node:child_process';
+import { createGroupRegistry, terminateGroup, groupAlive } from './process-group.mjs';
 import http from 'node:http';
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { mkdir, mkdtemp, realpath, chmod, rm } from 'node:fs/promises';
@@ -29,10 +30,13 @@ export const REMOTE_RECEIVER_SCRIPT = new URL('./remote-receiver.mjs', import.me
 export const REMOTE_OBSERVER_SCRIPT = new URL('./remote-observer.mjs', import.meta.url).pathname;
 const sha = bytes => 'sha256:' + createHash('sha256').update(bytes).digest('hex');
 const within = (promise, ms) => new Promise(resolve => { const t = setTimeout(() => resolve(null), ms); promise.then(v => { clearTimeout(t); resolve(v); }); });
-// Every child this module spawns is tracked so an overall deadline can reap sessions whose case was abandoned.
-const tracked = new Set();
-const track = child => { tracked.add(child); child.once('exit', () => tracked.delete(child)); child.once('error', () => tracked.delete(child)); return child; };
-export const killTrackedChildren = () => { for (const c of tracked) { try { c.kill('SIGKILL'); } catch { /* gone */ } } tracked.clear(); };
+// Every child this module spawns is detached (its own process group) and tracked, so an overall deadline can reap whole sessions,
+// ProxyCommand descendants included. Resolves { confirmed, unknown }: unknown lists groups whose death could not be confirmed (state UNKNOWN).
+const registry = createGroupRegistry();
+const track = registry.track;
+export const trackChild = track;
+export const killTrackedChildren = opts => registry.terminateAll(opts);
+export const REAP_BUDGET_MS = 2000;                                              // worst case of one terminateGroup (TERM wait + KILL wait) is bounded by this
 const shq = s => "'" + String(s).replace(/'/g, "'\\''") + "'";
 
 /** HMAC identity proof; must match remote-receiver.mjs. */
@@ -57,16 +61,18 @@ export const sshLauncher = ({ sshHost, sshOptions = [], remoteNode, remoteRoot, 
 
 /** Start one receiver set; the secret/nonce go on stdin only. stop() closes stdin (remote exits on EOF), then bounded TERM/KILL. */
 export async function startReceiverSet({ command, args, bind }, { secret, nonce, startupTimeoutMs = 30000 }) {
- const child = track(spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] }));
+ const child = track(spawn(command, args, { detached: true, stdio: ['pipe', 'pipe', 'pipe'] }));
  let stderr = ''; child.stderr.on('data', d => { if (stderr.length < 4096) stderr += d; });
  const exited = new Promise(r => { child.once('exit', (code, signal) => r({ code, signal })); child.once('error', e => r({ code: null, signal: null, error: e.message })); });
  const stop = async () => {
   try { child.stdin.end(); } catch { /* gone */ }
-  let done = await within(exited, 5000); if (done) return done;
-  try { child.kill('SIGTERM'); } catch { /* gone */ }
-  done = await within(exited, 3000); if (done) return done;
-  try { child.kill('SIGKILL'); } catch { /* gone */ }
-  return (await within(exited, 3000)) ?? { code: null, signal: null, unreaped: true };
+  let done = await within(exited, 5000);
+  if (!done) { try { process.kill(-child.pid, 'SIGTERM'); } catch { /* gone */ } done = await within(exited, 3000); }
+  if (!done) { try { process.kill(-child.pid, 'SIGKILL'); } catch { /* gone */ } done = await within(exited, 3000); }
+  done ??= { code: null, signal: null, unreaped: true };
+  // The leader is gone, but a descendant (e.g. ssh ProxyCommand) may still hold the group: confirm the whole group is dead.
+  if (groupAlive(child.pid) && !(await terminateGroup(child.pid, { termMs: 500, killMs: 1500 }))) done = { ...done, unreaped: true };
+  return done;
  };
  child.stdin.on('error', () => {});
  // Line reader over the child's stdout: first line is the handshake, later lines (stdio mode) are replies by seq.
@@ -210,13 +216,22 @@ export async function createCrossHostTestHost({ caseName, sets, expected, nonce,
  } catch (e) { try { await close(); } catch { /* original error wins */ } throw e; }
 }
 
-/** Run remote-observer.mjs from `command`/`args` (local node or ssh) and parse its single JSON line. */
+/** Run remote-observer.mjs from `command`/`args` (local node or ssh) and parse its single JSON line. Rejects only after its process group is reaped. */
 export function observe(command, args, timeoutMs = 60000) {
  return new Promise((resolve, reject) => {
-  const child = track(spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] }));
-  let out = '', err = '';
-  const t = setTimeout(() => { child.kill('SIGKILL'); reject(new Error('observer timeout')); }, timeoutMs);
+  const child = track(spawn(command, args, { detached: true, stdio: ['ignore', 'pipe', 'pipe'] }));
+  let out = '', err = '', settled = false;
+  const reaped = async note => (await terminateGroup(child.pid, { termMs: 500, killMs: 1500 })) ? note : note + ' (UNKNOWN: process group ' + child.pid + ' not confirmed reaped)';
+  const fail = async msg => { if (settled) return; settled = true; clearTimeout(t); reject(new Error(await reaped(msg))); };
+  const t = setTimeout(() => { settled = true; reaped('observer timeout').then(m => reject(new Error(m))); }, timeoutMs);
   child.stdout.on('data', d => { out += d; }); child.stderr.on('data', d => { err += d; });
-  child.once('exit', code => { clearTimeout(t); if (code !== 0) return reject(new Error('observer exit ' + code + ' ' + err.trim())); try { resolve({ raw: out, json: JSON.parse(out) }); } catch (e) { reject(e); } });
+  child.once('error', e => fail('observer spawn failed: ' + e.message));
+  child.once('exit', async code => {
+   if (settled) return; settled = true; clearTimeout(t);
+   const tail = groupAlive(child.pid) ? await reaped('') : '';                   // leftover descendants of an exited observer are killed too
+   if (code !== 0) return reject(new Error('observer exit ' + code + ' ' + err.trim() + tail));
+   if (tail) return reject(new Error('observer left a process group' + tail));
+   try { resolve({ raw: out, json: JSON.parse(out) }); } catch (e) { reject(e); }
+  });
  });
 }
