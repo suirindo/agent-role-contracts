@@ -93,10 +93,34 @@ export async function createTestHost({ sendTimeoutMs = 1000, receiverOptions = {
  const resolved = new Map();       // operation digest -> receiver port/id pinned at resolve time
  const state = { route: 'recv-a', resolves: 0, sends: 0, sendOutcomes: [], hostCalls: 0 };
  const optsFor = id => ({ ...receiverOptions, ...(receiverOptions.byId?.[id] ?? {}) });
- const add = async (id, target, delayMs = 0) => { receivers[id] = await startReceiver(dir, id, delayMs, optsFor(id)); identities.set(id, target); return receivers[id]; };
- let adapter, closing, store;
- // Idempotent teardown: every receiver is stopped (each bounded) and the tempdir removed even if some step fails.
+ let adapter, closing, store, closed = false;
+ const reserved = new Set();       // ids that are registered or being started (admission is synchronous, before any spawn)
+ const pending = new Set();        // in-flight add() creations; teardown awaits and reaps every one
+ // Lifecycle invariant: once teardown begins no add() can create a surviving child. Admission (closed/duplicate check + id
+ // reservation) is synchronous, so it cannot interleave with teardown; an add that straddles close reaps its own child.
+ const add = (id, target, delayMs = 0) => {
+  if (closed) return Promise.reject(new Error('test host closed: add(' + id + ') refused'));
+  if (reserved.has(id)) return Promise.reject(new Error('duplicate receiver id ' + id));
+  reserved.add(id);
+  const creation = (async () => {
+   let r;
+   try { r = await startReceiver(dir, id, delayMs, optsFor(id)); } catch (e) { reserved.delete(id); throw e; }
+   if (closed) {
+    const exit = await r.stop(); reserved.delete(id);
+    throw new Error('test host closed during add(' + id + ')' + (exit.unreaped ? ' (child ' + r.pid + ' could not be reaped)' : ''));
+   }
+   receivers[id] = r; identities.set(id, target); return r;
+  })();
+  pending.add(creation); const settle = () => pending.delete(creation); creation.then(settle, settle);
+  return creation;
+ };
+ let tail = Promise.resolve();
+ // Idempotent teardown: refuse new work, let in-flight adds and the in-flight dispatch finish (each bounded), then stop every
+ // receiver (each bounded) and remove the tempdir even if some step fails.
  const teardown = () => closing ??= (async () => {
+  closed = true;
+  while (pending.size) await Promise.allSettled([...pending]);
+  await within(tail, 2 * sendTimeoutMs + 3000);
   const stops = await Promise.allSettled(Object.values(receivers).map(r => r.stop()));
   const removed = await Promise.allSettled([rm(dir, { recursive: true, force: true })]);
   const failures = [...stops, ...removed].filter(x => x.status === 'rejected').map(x => x.reason);
@@ -135,7 +159,6 @@ export async function createTestHost({ sendTimeoutMs = 1000, receiverOptions = {
  adapter = await createDispatchTargetAdapter({ root: store, destinations: { 'lab.receiver': APPROVED }, host, timeoutMs: 2000 });
 
  // Serialization: one dispatch at a time through a single promise chain; a failure never breaks the chain.
- let tail = Promise.resolve();
  const serialized = fn => { const run = tail.then(fn, fn); tail = run.catch(() => {}); return run; };
 
  /** Issue a synthetic approval. `mutate(s)` may alter the scenario before signing; `after(input, s)` may tamper after. */
@@ -153,7 +176,7 @@ export async function createTestHost({ sendTimeoutMs = 1000, receiverOptions = {
   if (!revisions.has(requestId)) revisions.set(requestId, 1);
   return tamper(render(s), s);
  }
- const dispatch = (approvalInput, payloadBytes = PAYLOAD) => serialized(() => adapter.dispatch({ approvalInput, payloadBytes }));
+ const dispatch = (approvalInput, payloadBytes = PAYLOAD) => closed ? Promise.reject(new Error('test host closed: dispatch refused')) : serialized(() => adapter.dispatch({ approvalInput, payloadBytes }));
  return {
   dir, state, receivers, issue, dispatch, adapter, revisions, add,
   setRoute: id => { state.route = id; },

@@ -189,3 +189,85 @@ test('positive control: normal construction and close still work with lifecycle 
  for (const p of pids) assert.equal(alive(p), false);
  assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
 });
+
+// ---- lifecycle: add() vs close(), duplicate ids, dispatch vs close ----
+const REAL = new URL('../experiments/dispatch-test-host/receiver.mjs', import.meta.url).pathname;
+/** A real receiver that records its pid and delays its handshake by `ms`. */
+async function slowReceiver(file, ms) {
+ return script('import { appendFileSync } from "node:fs"; appendFileSync(' + JSON.stringify(file) + ', process.pid + "\\n"); await new Promise(r => setTimeout(r, ' + ms + ')); await import(' + JSON.stringify(REAL) + ');');
+}
+const pidList = async file => (await readFile(file, 'utf8').catch(() => '')).split('\n').filter(Boolean).map(Number);
+const pidsFile = async () => { const d = await mkdtemp(join(tmpdir(), 'arc69-pids-')); tmpScripts.push(d); return join(d, 'pids'); };
+const fast = { stopTimeoutMs: 200, killTimeoutMs: 1000 };
+
+test('add after close is rejected before any spawn; close stays idempotent', opts, async () => {
+ const file = await pidsFile();
+ const before = new Set(await leftovers());
+ const h = await createTestHost({ receiverOptions: { ...fast, byId: { 'recv-x': { script: await slowReceiver(file, 0) } } } });
+ const exits = await h.close();
+ await assert.rejects(h.add('recv-x', APPROVED), /closed/);
+ assert.deepEqual(await pidList(file), [], 'no child spawned');
+ assert.equal(h.receivers['recv-x'], undefined);
+ assert.deepEqual(await h.close(), exits);
+ await assert.rejects(h.dispatch({}), /closed/);
+ assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
+});
+
+test('close during a delayed add handshake: the child is reaped, add rejects, nothing leaks', opts, async () => {
+ const file = await pidsFile();
+ const before = new Set(await leftovers());
+ const h = await createTestHost({ receiverOptions: { ...fast, startupTimeoutMs: 5000, byId: { 'recv-x': { script: await slowReceiver(file, 600) } } } });
+ const base = Object.values(h.receivers).map(r => r.pid);
+ const adding = h.add('recv-x', APPROVED);
+ const addOutcome = adding.then(() => 'resolved', e => e.message);
+ // Wait (bounded, polled) until the child has spawned and recorded its pid; its handshake is then still >=600ms away.
+ // A fixed sleep here was load-sensitive: under heavy host load node startup can exceed it.
+ for (const deadline = Date.now() + 4000; (await pidList(file)).length === 0 && Date.now() < deadline;) await new Promise(r => setTimeout(r, 20));
+ assert.equal((await pidList(file)).length, 1, 'child spawned before close');
+ const closing = h.close();
+ const late = h.add('recv-y', APPROVED);                // admitted after closure began
+ await assert.rejects(late, /closed/);
+ await closing;
+ assert.match(await addOutcome, /closed during add/);
+ for (const p of [...base, ...await pidList(file)]) assert.equal(alive(p), false, 'child ' + p + ' reaped');
+ assert.equal(h.receivers['recv-x'], undefined);
+ assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
+});
+
+test('success control: add before close registers a working receiver that close then reaps', opts, async () => {
+ const file = await pidsFile();
+ const h = await createTestHost({ receiverOptions: { ...fast, byId: { 'recv-x': { script: await slowReceiver(file, 100) } } } });
+ const r = await h.add('recv-x', APPROVED);
+ assert.equal(h.receivers['recv-x'], r); assert.equal(alive(r.pid), true);
+ await h.close();
+ assert.equal(alive(r.pid), false);
+ assert.deepEqual((await pidList(file)).filter(alive), []);
+});
+
+test('duplicate ids (sequential and overlapping) are rejected without spawning or replacing a receiver', opts, async () => {
+ const file = await pidsFile();
+ const h = await createTestHost({ receiverOptions: { ...fast, byId: { 'recv-x': { script: await slowReceiver(file, 300) } } } });
+ try {
+  const original = h.receivers['recv-a'];
+  await assert.rejects(h.add('recv-a', APPROVED), /duplicate/);
+  assert.equal(h.receivers['recv-a'], original); assert.equal(alive(original.pid), true);
+  const [a, b] = await Promise.allSettled([h.add('recv-x', APPROVED), h.add('recv-x', APPROVED)]);
+  assert.deepEqual([a.status, b.status], ['fulfilled', 'rejected']);
+  assert.equal((await pidList(file)).length, 1, 'only one child spawned for the id');
+ } finally { await h.close(); }
+ assert.deepEqual((await pidList(file)).filter(alive), []);
+});
+
+test('dispatch racing close: in-flight dispatch completes, later dispatch is refused, nothing leaks', opts, async () => {
+ const before = new Set(await leftovers());
+ const h = await createTestHost();
+ const pids = Object.values(h.receivers).map(r => r.pid);
+ const input = await h.issue();
+ const inflight = h.dispatch(input);
+ const closing = h.close();
+ await assert.rejects(h.dispatch(input), /closed/);
+ const r = await inflight; await closing;
+ assert.ok(['PERMIT_SOURCE_ONLY', 'UNKNOWN_HELD'].includes(r.adapter_decision), JSON.stringify(r));
+ for (const p of pids) assert.equal(alive(p), false);
+ assert.deepEqual((await leftovers()).filter(x => !before.has(x)), []);
+});
