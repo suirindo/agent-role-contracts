@@ -334,3 +334,55 @@ test('offline fake SSH: a hung helper (cleanup step) with a TERM-ignoring grandc
   assert.equal((await cleanupOf(out)).removed, false);
  } finally { await cleanupPids(pidfile); }
 });
+
+// --- observer output drain (#69 PR94 Low): the result is parsed only after stdout/stderr are fully read, never at leader 'exit' ---
+// Ordering is forced, not timed: the writer polls until the leader has been reaped by this test process (kill(pid,0) fails only
+// after waitpid, which is also when node emits 'exit'), so every byte it writes arrives strictly after the leader's 'exit' event.
+const BIG = 1 << 20;
+const AFTER_LEADER_REAPED = body => "const L=+process.env.LEADER;const w=()=>{try{process.kill(L,0);setTimeout(w,10)}catch{" + body + "}};w();";
+const leaderSpawning = (child, { detached }) => "const {spawn}=require('node:child_process');const g=spawn(process.execPath,['-e'," + JSON.stringify(child) +
+ "],{detached:" + detached + ",stdio:['ignore','inherit','ignore'],env:{...process.env,LEADER:String(process.pid)}});require('node:fs').appendFileSync(process.env.PIDFILE,g.pid+'\\n');g.unref();";
+
+test('observer drain: output that is completed after the leader exits is read to EOF and parsed whole, not parsed at exit', opts, async () => {
+ const pidfile = join(await tmp('arc69-drain-'), 'pids'); process.env.PIDFILE = pidfile;
+ try {
+  const writer = AFTER_LEADER_REAPED("process.stdout.write(JSON.stringify({pad:'x'.repeat(" + BIG + ")})+'\\n')");
+  const r = await observe(process.execPath, ['-e', leaderSpawning(writer, { detached: true })], 20000);
+  assert.equal(r.json.pad.length, BIG);
+ } finally { await cleanupPids(pidfile); delete process.env.PIDFILE; }
+});
+
+test('observer drain: a large JSON written by the leader itself is parsed whole', opts, async () => {
+ const r = await observe(process.execPath, ['-e', "process.stdout.write(JSON.stringify({pad:'y'.repeat(" + (4 * BIG) + ")})+'\\n')"], 20000);
+ assert.equal(r.json.pad.length, 4 * BIG);
+});
+
+test('observer drain: a pipe held outside the observer group after leader exit is bounded by drainMs, rejected, and that process is not signalled', opts, async () => {
+ const pidfile = join(await tmp('arc69-drain-'), 'pids'); process.env.PIDFILE = pidfile;
+ try {
+  const t0 = Date.now();
+  await assert.rejects(observe(process.execPath, ['-e', "process.stdout.write('{}\\n');" + leaderSpawning('setTimeout(()=>{},25000)', { detached: true })], 20000, { drainMs: 400 }),
+   /observer output not closed within 400ms after exit/);
+  assert.ok(Date.now() - t0 < 10000, 'waited for the overall timeout instead of the drain bound');
+  const [holder] = await pidsOf(pidfile); assert.ok(alive(holder), 'a process outside the observer group was signalled');
+ } finally { await cleanupPids(pidfile); delete process.env.PIDFILE; }
+});
+
+test('observer drain: a TERM-ignoring descendant in the observer group holding stdout is reaped and the full output is then parsed', opts, async () => {
+ const pidfile = join(await tmp('arc69-drain-'), 'pids'); process.env.PIDFILE = pidfile;
+ try {
+  const t0 = Date.now();
+  const r = await observe(process.execPath, ['-e', "process.stdout.write(JSON.stringify({ok:true})+'\\n');" + leaderSpawning("process.on('SIGTERM',()=>{});setTimeout(()=>{},25000)", { detached: false })], 20000, { drainMs: 4000 });
+  assert.deepEqual(r.json, { ok: true }); assert.ok(Date.now() - t0 < 10000);
+  const [gc] = await pidsOf(pidfile); assert.equal(alive(gc), false, 'group descendant survived');
+ } finally { await cleanupPids(pidfile); delete process.env.PIDFILE; }
+});
+
+test('observer drain: spawn failure, non-zero exit, invalid JSON and timeout stay distinct and settle once', opts, async () => {
+ await assert.rejects(observe(join(tmpdir(), 'arc69-no-such-observer-' + randomBytes(4).toString('hex')), []), e => /observer spawn failed/.test(e.message) && !/UNKNOWN/.test(e.message));
+ await assert.rejects(observe(process.execPath, ['-e', "process.stderr.write('bad');process.exitCode=3"]), /observer exit 3 bad/);
+ await assert.rejects(observe(process.execPath, ['-e', "process.stdout.write('not json')"]), e => e instanceof SyntaxError);
+ await assert.rejects(observe(process.execPath, ['-e', 'setTimeout(()=>{},25000)'], 300), /observer timeout/);
+ // exit racing the timeout: whichever wins, exactly one outcome and no unhandled rejection.
+ for (let i = 0; i < 5; i++) { const p = observe(process.execPath, ['-e', "process.stdout.write('{}')"], 1); await p.then(r => assert.deepEqual(r.json, {}), e => assert.match(e.message, /observer timeout/)); }
+});

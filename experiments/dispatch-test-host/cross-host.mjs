@@ -229,19 +229,28 @@ export async function createCrossHostTestHost({ caseName, sets, expected, nonce,
  } catch (e) { try { await close(); } catch { /* original error wins */ } throw e; }
 }
 
-/** Run remote-observer.mjs from `command`/`args` (local node or ssh) and parse its single JSON line. Rejects only after its process group is reaped. */
-export function observe(command, args, timeoutMs = 60000) {
+/**
+ * Run remote-observer.mjs from `command`/`args` (local node or ssh) and parse its single JSON line. Rejects only after its process group is reaped.
+ * The output is parsed only once stdout/stderr reach EOF ('close'), never at leader 'exit'; after the leader exits they must close within
+ * drainMs (a pipe still held by a process outside the group is a failure, never a partial or unconfirmed parse).
+ */
+export function observe(command, args, timeoutMs = 60000, { drainMs = 2000 } = {}) {
  return new Promise((resolve, reject) => {
   const child = track(spawn(command, args, { detached: true, stdio: ['ignore', 'pipe', 'pipe'] }));
   let out = '', err = '', settled = false;
-  const reaped = async note => (await terminateGroup(child.pid, { termMs: 500, killMs: 1500 })) ? note : note + ' (UNKNOWN: process group ' + child.pid + ' not confirmed reaped)';
-  const fail = async msg => { if (settled) return; settled = true; clearTimeout(t); reject(new Error(await reaped(msg))); };
-  const t = setTimeout(() => { settled = true; reaped('observer timeout').then(m => reject(new Error(m))); }, timeoutMs);
+  const closed = new Promise(r => child.once('close', () => r(true)));
+  const reaped = async note => child.pid === undefined || (await terminateGroup(child.pid, { termMs: 500, killMs: 1500 })) ? note : note + ' (UNKNOWN: process group ' + child.pid + ' not confirmed reaped)';
+  const fail = async msg => { if (settled) return; settled = true; clearTimeout(t); const m = await reaped(msg); child.stdout.destroy(); child.stderr.destroy(); reject(new Error(m)); };
+  const t = setTimeout(() => fail('observer timeout'), timeoutMs);
   child.stdout.on('data', d => { out += d; }); child.stderr.on('data', d => { err += d; });
   child.once('error', e => fail('observer spawn failed: ' + e.message));
   child.once('exit', async code => {
-   if (settled) return; settled = true; clearTimeout(t);
+   if (settled) return;
    const tail = groupAlive(child.pid) ? await reaped('') : '';                   // leftover descendants of an exited observer are killed too
+   const drained = !settled && await within(closed, drainMs);                   // their pipes close with them; anything else holding one is bounded here
+   if (settled) return;
+   if (!drained) return fail('observer output not closed within ' + drainMs + 'ms after exit' + tail);
+   settled = true; clearTimeout(t);
    if (code !== 0) return reject(new Error('observer exit ' + code + ' ' + err.trim() + tail));
    if (tail) return reject(new Error('observer left a process group' + tail));
    try { resolve({ raw: out, json: JSON.parse(out) }); } catch (e) { reject(e); }
