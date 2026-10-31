@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "starter-outside-scope",
+  "type": "code-change",
+  "objective": "Change one file under src and send it to an independent reviewer.",
+  "inputs": {
+    "scope": "secrets/production.txt"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared write authority.",
+    "The reviewer remains independent from the implementer."
+  ]
+}

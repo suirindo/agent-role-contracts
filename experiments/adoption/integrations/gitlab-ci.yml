@@ -1,0 +1,9 @@
+# Merge this job into your existing .gitlab-ci.yml; keep existing stages and jobs.
+# Use your approved Node 22.5+ image/digest if your runner requires one.
+# Checks supplied declaration files, not all merge-request changes or actual agent actions.
+arc-declarations:
+  stage: test
+  image: node:24
+  script:
+    - npm ci --ignore-scripts --include=dev
+    - npm run arc:check

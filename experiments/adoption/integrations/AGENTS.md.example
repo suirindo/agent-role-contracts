@@ -1,0 +1,9 @@
+## ARC task declarations
+
+Use the repository's existing instruction hierarchy and permissions. Before changing the files named by the current task, read `.arc/bundle.json` and `.arc/task.json`, then run `npm run arc:check` from the consumer root.
+
+Exit 0 means only that these declarations passed the checks that ran. Exit 1 is a declaration or JSON validation rejection; report its diagnostic and resolve the requested scope with the task owner. Exit 2 means an input could not be read or the CLI/tool check did not complete; report the input or tool error. Do not broaden the bundle or replace a reviewer to make a failing task pass.
+
+After a scope or role change, update the task through the repository's normal review process and rerun the check. Keep implementation and actual independent review separate. ARC does not grant permission to edit, merge, deploy, or send data.
+
+If the command cannot run, state that it was not run. Do not infer PASS from reading this instruction.

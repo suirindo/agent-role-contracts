@@ -1,0 +1,7 @@
+## ARC task declaration check
+
+Before editing the current task's declared files, read `.arc/bundle.json` and `.arc/task.json` and run `npm run arc:check` from this consumer's root. Preserve the project's existing permissions, sandbox, approval policy, and other CLAUDE.md guidance.
+
+Report the exit code and diagnostic: 0 = checked declarations are consistent; 1 = declaration or JSON validation rejection; 2 = an input read or CLI/tool error. Resolve a mismatch with the task owner. Do not widen authority or remove the independent reviewer to obtain PASS.
+
+Rerun after an approved scope or role change. PASS does not authenticate the actual reviewer or authorize execution, merging, deployment, or external communication. These instructions are guidance; they do not install a Claude hook or enforce tool permissions. If execution is unavailable, report the check as not run.

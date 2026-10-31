@@ -1,0 +1,5 @@
+#!/bin/sh
+# Integrate into your existing hook; do not overwrite it or global hooksPath.
+# Checks the staged .arc JSON declarations, not the paths/content of every staged file.
+# Dependencies must already be installed. This hook performs no npm installation.
+exec npm run arc:check:staged
