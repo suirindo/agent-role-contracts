@@ -15,7 +15,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
-For the published stable `1.0.0` package without cloning, use [the no-clone instructions](../README.md#try-the-published-stable-package-no-clone), including the documented `EPERM` npm-cache recovery. The already published `0.5.0` release is an archived compatibility baseline. The current public release was accepted in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52).
+For the published stable `1.0.0` package without cloning, use [the no-clone instructions](../README.md#try-the-published-stable-package-no-clone), including [recovery when npm cannot use its cache](../README.md#if-npm-cannot-use-its-cache). The already published `0.5.0` release is an archived compatibility baseline. The current public release was accepted in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52).
 
 ## Check your own edit
 
@@ -54,6 +54,7 @@ Prompt instructions alone do not provide a diagnostic when a task and its role's
 | Cloning fails | Check network access and whether the destination directory already exists. Use `npm --prefix agent-role-contracts run demo --silent` if it already contains this repository. |
 | `DEMO_ERROR: Cannot read examples/...` | Restore the bundled fixture named in the message. Use a copy for your own edits. |
 | `DEMO_ERROR` reports an unexpected check result | Restore the starter fixtures, rerun `npm run check`, and report the diagnostic if it still fails. |
+| npm reports `EPERM`, `EACCES`, or `ENOENT` for its cache directory | Use the [local-cache recovery](../README.md#if-npm-cannot-use-its-cache). Errors naming other paths need a different diagnosis. |
 | The CLI exits 2 | Check file paths, file encoding and options. Run `node bin/agent-role-contracts.mjs --help`. |
 
 The demo uses only portable Node.js file reads and JSON checks. No Bash, Docker, provider credentials, account login, network calls or installation scripts are required for the demo itself.
