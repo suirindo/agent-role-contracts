@@ -1,0 +1,7 @@
+## ARC declarations
+
+This repository uses `npm run arc:check` to check `.arc/bundle.json` and `.arc/task.json`. When command execution is available, run it before changing the declared task and again after an approved change to its scope or roles.
+
+Exit 0 checks declaration consistency only; exit 1 reports a declaration or JSON validation rejection; exit 2 means an input could not be read or the CLI/tool check could not complete. Report diagnostics. Do not widen authority, remove a reviewer, or invent a successful execution to resolve a failure.
+
+For a code-review surface without command execution, inspect whether the task and bundle changed and request the actual check result; mark it unverified until evidence exists. The real implementation/review separation and permissions remain the repository's responsibility. This instruction does not install enforcement or authorize merge, deployment, or external communication.

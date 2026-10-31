@@ -2,25 +2,9 @@
 
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-## 30秒で概要を見る
+[デモを試す](#3分で体験する-quick-start)、[自分のリポジトリで使う](https://github.com/suirindo/agent-role-contracts/tree/main/experiments/adoption)、[実業務で評価する](experiments/external-evaluation/README.md)から始められます。
 
-[Agent Role Contracts v0.5.0 — 30秒概要動画](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
-
-役割、権限、作業範囲を宣言し、実装とレビューを分離し、引き継ぎを明示して、実行前に矛盾を検査する流れを30秒で確認できます。
-
-**PASS ≠ 実行権限。** PASSは、実行した検査の範囲で供給された宣言が整合していることを示します。本人確認、実際のアクセス権、side effectの強制、証拠検証、実行承認は別の責務です。
-
-[公開v1.0.0を固定した外部評価キット](experiments/external-evaluation/README.md)では、実ワークフローの宣言と意図的な矛盾を再現し、[証拠記録テンプレート](experiments/external-evaluation/EVIDENCE_TEMPLATE.md)で結果を共有できます。合成例のPASSと第三者による実タスクの利用証拠は分けて扱います。
-
-**現在の安定版は`1.0.0`（npm `latest`、2026年10月16日確認）です。** npm公開と検証の正本は[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)にあります。`0.5.0`は互換性検証用の履歴版です。Node.js 22.5以上が必要で、既存のimport、同期・非同期API、CLI、12個のschema version/ID、fail-closedな宣言、G1 digestを維持します。ただし公開・PASSは実行者の本人確認、runtimeでのアクセス制御、本番導入を証明しません。
-
-## 0.5.0からの移行
-
-宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
-
-`1.0.0`の配布物には、`src/crewai-adapter.mjs`と`examples/crewai-adapter-spike/`内の7ファイルを追加しています。これらは未exportの実験用ファイルです。公開APIおよび1.xの互換性保証には含めず、CrewAI用のpackage subpathやCLI commandも提供しません。実験コードの同梱は、CrewAIの実行やruntime権限の強制を意味しません。
-
-公開済み`1.0.0`はnpmから[インストール](#インストール)できます。review済みlocal `.tgz`による導入は公開前candidateの履歴検証向けであり、通常の導入条件ではありません。[互換性の正本](docs/COMPATIBILITY.md)、[release gate](docs/RELEASE_GATES.md)、[公開受入記録](https://github.com/suirindo/agent-role-contracts/issues/52)を参照してください。
+ARCが検査するのは宣言の整合性です。PASSは実行許可を与えません。
 
 ## 3分で体験する Quick Start
 
@@ -70,6 +54,26 @@ Netsujoは、**Building trustworthy infrastructure for AI agents in the real wor
 次は[タスクのscopeを変更して自分で検査する](docs/QUICKSTART.md)、[1つの実ワークフローで評価する](docs/EVALUATE-WORKFLOW.md)、[5つの具体的な失敗例を再現する](docs/FAILURE-CASES.md)、[詳細な3-role例](#詳細な3-role例)、[構成と互換性の境界](docs/COMPATIBILITY.md)、[実サービス統合時の責任境界](docs/INTEGRATION.md)へ進めます。実ワークフローで試した結果は[専用フィードバックフォーム](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml)から共有できます。既存の制御で十分だった、という結果も有用です。改善提案は[Contributing](CONTRIBUTING.md)と[Issues](https://github.com/suirindo/agent-role-contracts/issues)を参照してください。
 
 一度きりの閲覧で終わらず、また使いたいと感じた場合は[リポジトリをStar](https://github.com/suirindo/agent-role-contracts)して保存してください。実ワークフローで何が役立ったかも共有されると、次の変更を想像ではなく実証に基づいて決められます。
+
+## 30秒で概要を見る
+
+[Agent Role Contracts v0.5.0 — 30秒概要動画](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
+
+役割、権限、作業範囲を宣言し、実装とレビューを分離し、引き継ぎを明示して、実行前に矛盾を検査する流れを30秒で確認できます。
+
+**PASS ≠ 実行権限。** PASSは、実行した検査の範囲で供給された宣言が整合していることを示します。本人確認、実際のアクセス権、side effectの強制、証拠検証、実行承認は別の責務です。
+
+[公開v1.0.0を固定した外部評価キット](experiments/external-evaluation/README.md)では、実ワークフローの宣言と意図的な矛盾を再現し、[証拠記録テンプレート](experiments/external-evaluation/EVIDENCE_TEMPLATE.md)で結果を共有できます。合成例のPASSと第三者による実タスクの利用証拠は分けて扱います。
+
+**現在の安定版は`1.0.0`（npm `latest`、2026年10月16日確認）です。** npm公開と検証の正本は[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)にあります。`0.5.0`は互換性検証用の履歴版です。Node.js 22.5以上が必要で、既存のimport、同期・非同期API、CLI、12個のschema version/ID、fail-closedな宣言、G1 digestを維持します。ただし公開・PASSは実行者の本人確認、runtimeでのアクセス制御、本番導入を証明しません。
+
+## 0.5.0からの移行
+
+宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
+
+`1.0.0`の配布物には、`src/crewai-adapter.mjs`と`examples/crewai-adapter-spike/`内の7ファイルを追加しています。これらは未exportの実験用ファイルです。公開APIおよび1.xの互換性保証には含めず、CrewAI用のpackage subpathやCLI commandも提供しません。実験コードの同梱は、CrewAIの実行やruntime権限の強制を意味しません。
+
+公開済み`1.0.0`はnpmから[インストール](#インストール)できます。review済みlocal `.tgz`による導入は公開前candidateの履歴検証向けであり、通常の導入条件ではありません。[互換性の正本](docs/COMPATIBILITY.md)、[release gate](docs/RELEASE_GATES.md)、[公開受入記録](https://github.com/suirindo/agent-role-contracts/issues/52)を参照してください。
 
 ## 汎用コアと用途別拡張
 

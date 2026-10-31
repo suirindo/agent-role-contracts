@@ -1,0 +1,18 @@
+{
+  "name": "arc-consumer-starter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A source-only consumer example for ARC declaration checks.",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "arc:check": "agent-role-contracts explain --bundle .arc/bundle.json --task .arc/task.json --format text",
+    "arc:check:negative": "agent-role-contracts explain --bundle .arc/bundle.json --task .arc/task-outside-scope.json --format text",
+    "arc:check:staged": "node scripts/staged-check.mjs"
+  },
+  "devDependencies": {
+    "@netsujo/agent-role-contracts": "1.0.0"
+  }
+}

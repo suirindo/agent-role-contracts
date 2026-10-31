@@ -1,0 +1,10 @@
+---
+description: Check the current ARC task declarations before repository edits
+alwaysApply: true
+---
+
+Before changing files for a declared task, read `.arc/bundle.json` and `.arc/task.json` and run `npm run arc:check` from the consumer root.
+
+Keep the existing project rules, task approval, and tool permissions. Exit 0 covers declaration consistency only. Exit 1 requires resolving the reported declaration or JSON validation rejection; exit 2 means an input could not be read or the CLI/tool check did not complete. Do not expand the allowed scope or remove a reviewer merely to make a check pass.
+
+Rerun after an approved task or role change. Record the observed result. If commands cannot be run, say that the check was not run. This rule provides model context; it is not a hook, sandbox, or authorization system.

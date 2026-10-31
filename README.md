@@ -2,44 +2,9 @@
 
 **Catch out-of-scope agent tasks, self-review, and stale handoffs before execution.**
 
-## 30-second overview
+Choose a starting point: [run the demo](#quick-start--three-minutes), [use the checker in your own repository](https://github.com/suirindo/agent-role-contracts/tree/main/experiments/adoption), or [evaluate a real workflow](experiments/external-evaluation/README.md).
 
-[Watch the 30-second Agent Role Contracts overview](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
-
-The video shows the core preflight flow: declare **role**, **permissions**, and **work scope**; keep implementation and review separate; make the **handoff** explicit; fail on contradictions before execution.
-
-**PASS ≠ execution authority.** A passing ARC check means the supplied declarations are internally consistent under the checks that ran. Runtime identity, actual permissions, side-effect enforcement, evidence verification, and execution approval remain separate responsibilities.
-
-- [Try the three-minute quick start](#quick-start--three-minutes)
-- [Read the v1.0.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v1.0.0)
-- [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
-- [Run the pinned v1.0.0 external evaluation kit](experiments/external-evaluation/README.md)
-
-**One-minute developer question (no installation):** Which mismatch has affected your coding-agent workflow? **A** — a task requests files outside declared scope; **B** — a review or approval is bound to a stale task; **C** — implementer and reviewer resolve to the same declared role; **D** — existing CI/runtime controls already handle these cases. [Reply with A/B/C/D + one real example in issue #37](https://github.com/suirindo/agent-role-contracts/issues/37). Negative findings are welcome. Omit secrets, private paths, and customer data.
-
-Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
-
-Agent Role Contracts turns those contradictions into deterministic, offline preflight checks.
-
-| Workflow mistake | What ARC checks |
-| --- | --- |
-| A task requests a write outside declared authority | Rejects it with a specific scope diagnostic |
-| Implementer and reviewer collapse into one declared role | Rejects the invalid role separation |
-| A reviewed task or action changes afterward | Rejects the stale subject binding |
-| A filesystem mapping drifts from the declared action | Rejects the declaration mismatch |
-| Lifecycle or handoff declarations become stale | Fails closed on the inconsistency |
-
-**If an agent is only chatting, you probably do not need ARC yet. If it can act, hand off, or review, prompt-only rules become much harder to trust.**
-
-No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
-
-**Stable release: `1.0.0` (npm `latest`, verified 2026-10-16).** The exact publication is documented in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). Node.js 22.5 or newer is required. The archived `0.5.0` release is the compatibility baseline; `1.0.0` preserves its public imports, synchronous/async API shapes, CLI behavior, twelve schema identities, fail-closed claims and G1 digest behavior. Publication does **not** authenticate an agent, enforce runtime permissions or establish production adoption.
-
-## Migrating from 0.5.0
-
-No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
-
-The published `1.0.0` package can be installed from npm using the [current stable instructions](#install) below. A reviewed local `.tgz` can reproduce historical prepublication evidence but is not required for ordinary installation. See the [compatibility commitment](docs/COMPATIBILITY.md), [release gates](docs/RELEASE_GATES.md) and [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52).
+The checker validates declarations. A PASS does not grant execution permission.
 
 ## Quick Start — three minutes
 
@@ -139,6 +104,45 @@ This project does not turn a declaration PASS into runtime authority. Identity, 
 - [Contribute a focused improvement](CONTRIBUTING.md) or [open an issue](https://github.com/suirindo/agent-role-contracts/issues).
 
 If the checker catches something you would want to catch again, [star the repository](https://github.com/suirindo/agent-role-contracts) to keep it handy, and share the workflow result so the next change is driven by evidence rather than feature speculation.
+
+## 30-second overview
+
+[Watch the 30-second Agent Role Contracts overview](https://github.com/suirindo/agent-role-contracts/releases/download/v0.5.0/agent-role-contracts-30s-overview.mp4)
+
+The video shows the core preflight flow: declare **role**, **permissions**, and **work scope**; keep implementation and review separate; make the **handoff** explicit; fail on contradictions before execution.
+
+**PASS ≠ execution authority.** A passing ARC check means the supplied declarations are internally consistent under the checks that ran. Runtime identity, actual permissions, side-effect enforcement, evidence verification, and execution approval remain separate responsibilities.
+
+- [Try the three-minute quick start](#quick-start--three-minutes)
+- [Read the v1.0.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v1.0.0)
+- [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
+- [Run the pinned v1.0.0 external evaluation kit](experiments/external-evaluation/README.md)
+
+**One-minute developer question (no installation):** Which mismatch has affected your coding-agent workflow? **A** — a task requests files outside declared scope; **B** — a review or approval is bound to a stale task; **C** — implementer and reviewer resolve to the same declared role; **D** — existing CI/runtime controls already handle these cases. [Reply with A/B/C/D + one real example in issue #37](https://github.com/suirindo/agent-role-contracts/issues/37). Negative findings are welcome. Omit secrets, private paths, and customer data.
+
+Agent workflows become harder to trust when one assistant turns into multiple roles with different authority, task scopes, review duties, and handoffs. Prompt instructions can say “write only inside `src/**`” while the next task points at `secrets/production.txt`, or claim independent review while implementation and review route through the same role.
+
+Agent Role Contracts turns those contradictions into deterministic, offline preflight checks.
+
+| Workflow mistake | What ARC checks |
+| --- | --- |
+| A task requests a write outside declared authority | Rejects it with a specific scope diagnostic |
+| Implementer and reviewer collapse into one declared role | Rejects the invalid role separation |
+| A reviewed task or action changes afterward | Rejects the stale subject binding |
+| A filesystem mapping drifts from the declared action | Rejects the declaration mismatch |
+| Lifecycle or handoff declarations become stale | Fails closed on the inconsistency |
+
+**If an agent is only chatting, you probably do not need ARC yet. If it can act, hand off, or review, prompt-only rules become much harder to trust.**
+
+No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
+
+**Stable release: `1.0.0` (npm `latest`, verified 2026-10-16).** The exact publication is documented in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). Node.js 22.5 or newer is required. The archived `0.5.0` release is the compatibility baseline; `1.0.0` preserves its public imports, synchronous/async API shapes, CLI behavior, twelve schema identities, fail-closed claims and G1 digest behavior. Publication does **not** authenticate an agent, enforce runtime permissions or establish production adoption.
+
+## Migrating from 0.5.0
+
+No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
+
+The published `1.0.0` package can be installed from npm using the [current stable instructions](#install) below. A reviewed local `.tgz` can reproduce historical prepublication evidence but is not required for ordinary installation. See the [compatibility commitment](docs/COMPATIBILITY.md), [release gates](docs/RELEASE_GATES.md) and [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52).
 
 ## General-purpose core and optional profiles
 
