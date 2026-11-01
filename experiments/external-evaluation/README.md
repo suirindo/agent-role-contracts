@@ -53,6 +53,8 @@ Use [EVIDENCE_TEMPLATE.md](EVIDENCE_TEMPLATE.md) to record findings and submit v
 
 For a worked comparison between ARC scope preflight and an independently maintained deterministic syntax scanner, see the [ARC × ShipRules-free fixture](shiprules-free/README.md). It remains a maintainer-executed public-repository synthetic comparison until an external operator reviews or runs it.
 
+For an exact recipient-declaration mapping and separate receipt-consistency limits, see the [HumanMirror public synthetic scenario](humanmirror-synthetic/README.md). Only two public declaration cases are executed; reconciliation and HumanMirror execution remain untested.
+
 ## Exit status and safety
 
 - `0`: expected declaration PASS → scope FAIL → repaired PASS, plus optional second declaration PASS.

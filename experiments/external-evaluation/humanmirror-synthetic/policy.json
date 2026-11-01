@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.2",
+  "id": "humanmirror-synthetic-fixed-policy-v1",
+  "task_type": "treasury-operation",
+  "allowed_chain_ids": [
+    "8453"
+  ],
+  "allowed_senders": [
+    "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+  ],
+  "allowed_recipients": [
+    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  ],
+  "allowed_spenders": [
+    "0x3333333333333333333333333333333333333333"
+  ],
+  "asset_limits": [
+    {
+      "chain_id": "8453",
+      "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+      "max_transfer_base_units": "10000",
+      "max_approval_base_units": "0",
+      "max_fee_base_units": "1000000000000000"
+    }
+  ],
+  "human_approver": "treasury-owner",
+  "max_evidence_age_seconds": 300
+}

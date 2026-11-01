@@ -1,0 +1,908 @@
+{
+  "experiment": "arc-humanmirror-synthetic-v1",
+  "verdict": "EXPECTED_OFFLINE_RESULTS_REPRODUCED",
+  "executed_at": "2026-11-01T03:51:48.255Z",
+  "evaluator": "maintainer-operated synthetic offline fixture",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "reference": {
+    "commit": "9f6771056c47de971202360952af6d41941f7625",
+    "version": "1.0.0",
+    "clean": true,
+    "loaded_file_sha256": {
+      "bin/agent-role-contracts.mjs": "3953d881b0f1ae30dd95f791435075c2625cb279b96d3c4af1be906601142186",
+      "schemas/bundle.schema.json": "87541def31c783a2023c6de3d69004ddb83322559a202b35ef39b0e937917375",
+      "schemas/filesystem-write-mapping.schema.json": "601b6f69c79ce8e315ae88cf4be6e2cc125045e0f8af42d3b276b724296d63d6",
+      "schemas/financial-execution.schema.json": "2f68aad21dbbfc0eb0a10a7378b7bdd63ee9ca21dd4b83e16ee75aba74b6f3a3",
+      "schemas/financial-intent.schema.json": "309f64d872af6cb7ee33538a014e9ddedbfed43dea1036bda596e429b34c8ea2",
+      "schemas/financial-policy.schema.json": "2be652292eb7fd60eadb68486081b8e5322474ba047dd9e4dac78856174e8a35",
+      "schemas/handoff.schema.json": "4e01c47210f670f69f5aed869b102717f250a0425fda6b5e3be8894500e9aa1e",
+      "schemas/role-contract.schema.json": "2061c773d7806324880e59da25312b74a8d41f24b6d1fa673eeb85f2a94d4129",
+      "schemas/safe-proposal.schema.json": "2ecc870f27dec1386d2dc259b30b92e4c211cf7c724ae47ec89db22a89d4497a",
+      "schemas/task-action-binding.schema.json": "de830fc522e29ac343c0fcef5e3529a980fcd85470b6f80def933e71beddb1dc",
+      "schemas/task-action.schema.json": "4b8afd5bb26600f269248356bd40d9be5460cf3aa8ef211496104648f6a9d071",
+      "schemas/task-lifecycle.schema.json": "4359acfca3fc9cba8c027e23474b5f06ba7a78336463666a74b3da5fba565528",
+      "schemas/task.schema.json": "a6ef6cbf7e439e09dbc605dbf844a623642728c17aba091f07c2f4b19e16489f",
+      "src/action-binding.mjs": "a8fe2d62c0ed45d3051781b4194fbfe515908d1370aec11c9556c85432598560",
+      "src/contract-checks.mjs": "aebc44dd6032b2665546bb5c0df8c9ba6cf53cbbe3e2c8aa4d9f5e0f794a7d6f",
+      "src/core.mjs": "5f2a11f6389aea62ba46d691bde09550e4971bcc921209cd9fe4b9f59e6bbd75",
+      "src/crewai-adapter.mjs": "20875d35807b5fd33ba016dbe0b36396fd68b6e388fcd93bca0d5324b1e1e64f",
+      "src/filesystem-write-adapter.mjs": "0a14f7e64647688a5ef0d6feb3417da1c0698f1fc07607fee6688105ce6c4d72",
+      "src/finance-profile.mjs": "06cab4b76e6a84e2423e0a9dcdc95273fe3c6e0931d717061451ad198ce9b981",
+      "src/finance.mjs": "e6c99f21f2525a3a5dc51cc8f57e367f8ab288b9466cac7f2d33e9e3b322da4d",
+      "src/index.mjs": "139fa222513ae824eb0d61d9bc3edd4af9ce2510b841cd40a0a06b454370c9c6",
+      "src/report.mjs": "398ba3e730629dd25323640ca28bb643624994a7cc9b5635af28a93ffae10fb9",
+      "src/safe.mjs": "b51d92631262f31046a3cad4aa429f220a676a2f9886b6c86f613f904bafbb6c",
+      "src/schema.mjs": "fe62279bda206a4a45c4f7cd5d8c167114daef595dc75f49e07f6fbfcf6e98ea",
+      "src/schemas.adapters.generated.mjs": "7dafae8c19367aa5042e91be5af35b4343f8e3204618030d045e381755bced6b",
+      "src/schemas.core.generated.mjs": "8d133a5326d88a655889707ef51f4f9b391d504d22c7844c1f7682a5b6b9fbc2",
+      "src/schemas.finance.generated.mjs": "48d5d8bd6c62d2ac4a5b3c3daf180cfeb8fa7a557c61a86f56f6dc46054e2f17",
+      "src/schemas.generated.mjs": "0ccc0804b776ec46e5a80a86bcd468a4b248201e0ee2823b27bf3fd888f233c7",
+      "src/strict-json.mjs": "9fd06503ad5a36833a93d776137e4cb6e1fd803158928ddb0429b2f305a52ce5",
+      "src/task-lifecycle.mjs": "f08e41bcf10315aec2f98b7a74babcedb618548901b27d67546494d2621dfe25",
+      "src/validation.mjs": "98677ec8d0b43c78eadd083f6dbb852762592befd6e6ca190c1ec5284eb4f9d5",
+      "src/version.mjs": "f8448a246bc6ef6717d714e05727c35197845a1869c92c398df972273a06f3a1"
+    }
+  },
+  "input_sha256": {
+    "scenario.json": "23083276de0356e7c601c9244dbe9afe54abe935f1ddc323aa4e2b8aea00a238",
+    "bundle.json": "5c3b104ab2f5eba4ba29a85f34cf4b64da02d6ac834bf51cc5d89830eaa89e4c",
+    "task.json": "5ac2a8d202240b7da280a1a00070495b0f2b05c4a47dc82151098a6b214b23ea",
+    "policy.json": "30b86c5b5b16bdcb449308518c5277c19970099dd70af605363eec23a00b9ff5",
+    "transaction-a.json": "958910cfbac90462503348f062e69d6aa8569d5cf0c789b0711cbafba3b332c1",
+    "transaction-b.json": "f2a07a5b04dba67f5eaae4925e6650478411a113d4adcb9da969214a7084f912",
+    "intent-fictional.json": "3633e99c4c7aa278d664cd40dc4a3d8edd7b5c00bff3ea34644a9e54fb3d2eb4",
+    "receipt-fictional.json": "0e90f201f919b59813cccb9526078a4230c0c081b711ea30d99aba56dcb8e7df"
+  },
+  "runner_sha256": "502c70e0a7206735e3623b30860fe0f81ef8acd50421a2ac4205bfccf4b4d06e",
+  "public_scenario": [
+    {
+      "case_id": "valid-declaration",
+      "expected_arc_declaration": "PASS",
+      "observed_arc": "PASS",
+      "arc_reconciliation_applicability": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_humanmirror": "NOT_RUN",
+      "reconciliation_executed": false
+    },
+    {
+      "case_id": "recipient-mutation",
+      "expected_arc_declaration": "REJECT",
+      "observed_arc": "REJECT",
+      "arc_reconciliation_applicability": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_humanmirror": "NOT_RUN",
+      "reconciliation_executed": false
+    },
+    {
+      "case_id": "settled-missing-response",
+      "expected_arc_declaration": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_arc": "NOT_RUN",
+      "arc_reconciliation_applicability": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_humanmirror": "NOT_RUN",
+      "reconciliation_executed": false
+    },
+    {
+      "case_id": "uncertain-settlement",
+      "expected_arc_declaration": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_arc": "NOT_RUN",
+      "arc_reconciliation_applicability": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "observed_humanmirror": "NOT_RUN",
+      "reconciliation_executed": false
+    }
+  ],
+  "results": [
+    {
+      "case_id": "valid-declaration",
+      "expected": {
+        "exit_code": 0,
+        "valid": true,
+        "codes": []
+      },
+      "observed": {
+        "exit_code": 0,
+        "stdout": "{\n  \"validation_stage\": \"proposal\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-subject\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "elapsed_ms": 27.166,
+        "report": {
+          "validation_stage": "proposal",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-subject",
+          "valid": true,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": []
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-subject",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--transaction",
+        "transaction-a.json"
+      ]
+    },
+    {
+      "case_id": "recipient-mutation",
+      "expected": {
+        "exit_code": 1,
+        "valid": false,
+        "codes": [
+          "FINANCE_RECIPIENT_NOT_ALLOWED"
+        ]
+      },
+      "observed": {
+        "exit_code": 1,
+        "stdout": "{\n  \"validation_stage\": \"proposal\",\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-subject\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"FINANCE_RECIPIENT_NOT_ALLOWED\",\n      \"path\": \"transaction/target\",\n      \"message\": \"Proposal target is outside the declared policy\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "elapsed_ms": 25.074,
+        "report": {
+          "validation_stage": "proposal",
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-subject",
+          "valid": false,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": [
+            {
+              "code": "FINANCE_RECIPIENT_NOT_ALLOWED",
+              "path": "transaction/target",
+              "message": "Proposal target is outside the declared policy"
+            }
+          ]
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-subject",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--transaction",
+        "transaction-b.json"
+      ]
+    },
+    {
+      "case_id": "fictional-intent-precondition",
+      "expected": {
+        "exit_code": 0,
+        "valid": true,
+        "codes": []
+      },
+      "observed": {
+        "exit_code": 0,
+        "stdout": "{\n  \"validation_stage\": \"intent\",\n  \"evaluated_at\": \"2030-01-01T00:00:03Z\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-intent\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "elapsed_ms": 30.277,
+        "report": {
+          "validation_stage": "intent",
+          "evaluated_at": "2030-01-01T00:00:03Z",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-intent",
+          "valid": true,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": []
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:03Z"
+      ]
+    },
+    {
+      "case_id": "matching-fictional-receipt",
+      "expected": {
+        "exit_code": 0,
+        "valid": true,
+        "codes": []
+      },
+      "observed": {
+        "exit_code": 0,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"execution\": {\n    \"schema_version\": \"0.2\",\n    \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n    \"chain_id\": \"8453\",\n    \"transaction_hash\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"nonce\": \"7\",\n    \"block_number\": \"1235\",\n    \"status\": \"success\",\n    \"executed_at\": \"2030-01-01T00:00:03Z\",\n    \"observed_at\": \"2030-01-01T00:00:04Z\"\n  },\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "elapsed_ms": 29.388,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "execution": {
+            "schema_version": "0.2",
+            "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+            "chain_id": "8453",
+            "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "nonce": "7",
+            "block_number": "1235",
+            "status": "success",
+            "executed_at": "2030-01-01T00:00:03Z",
+            "observed_at": "2030-01-01T00:00:04Z"
+          },
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": true,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": []
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "7",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z"
+      },
+      "receipt_sha256": "d1d6706b75717494d2c589f1a5264d2a6a75d366b7f9e8a299cfc831ca65359c"
+    },
+    {
+      "case_id": "nonce-mismatch",
+      "expected": {
+        "exit_code": 1,
+        "valid": false,
+        "codes": [
+          "FINANCE_EXECUTION_NONCE_MISMATCH"
+        ]
+      },
+      "observed": {
+        "exit_code": 1,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"execution\": {\n    \"schema_version\": \"0.2\",\n    \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n    \"chain_id\": \"8453\",\n    \"transaction_hash\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"nonce\": \"8\",\n    \"block_number\": \"1235\",\n    \"status\": \"success\",\n    \"executed_at\": \"2030-01-01T00:00:03Z\",\n    \"observed_at\": \"2030-01-01T00:00:04Z\"\n  },\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"FINANCE_EXECUTION_NONCE_MISMATCH\",\n      \"path\": \"financial_execution/nonce\",\n      \"message\": \"Execution receipt belongs to a different transaction nonce\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "elapsed_ms": 29.213,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "execution": {
+            "schema_version": "0.2",
+            "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+            "chain_id": "8453",
+            "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "nonce": "8",
+            "block_number": "1235",
+            "status": "success",
+            "executed_at": "2030-01-01T00:00:03Z",
+            "observed_at": "2030-01-01T00:00:04Z"
+          },
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": false,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": [
+            {
+              "code": "FINANCE_EXECUTION_NONCE_MISMATCH",
+              "path": "financial_execution/nonce",
+              "message": "Execution receipt belongs to a different transaction nonce"
+            }
+          ]
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "8",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z"
+      },
+      "receipt_sha256": "58cd7b05e92aa34ba6303910fbb230b68e4cc7c43e493fe47739ab56d6e3302d"
+    },
+    {
+      "case_id": "different-fictional-hash",
+      "expected": {
+        "exit_code": 0,
+        "valid": true,
+        "codes": []
+      },
+      "observed": {
+        "exit_code": 0,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"execution\": {\n    \"schema_version\": \"0.2\",\n    \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n    \"chain_id\": \"8453\",\n    \"transaction_hash\": \"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n    \"nonce\": \"7\",\n    \"block_number\": \"1235\",\n    \"status\": \"success\",\n    \"executed_at\": \"2030-01-01T00:00:03Z\",\n    \"observed_at\": \"2030-01-01T00:00:04Z\"\n  },\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "elapsed_ms": 28.795,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "execution": {
+            "schema_version": "0.2",
+            "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+            "chain_id": "8453",
+            "transaction_hash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "nonce": "7",
+            "block_number": "1235",
+            "status": "success",
+            "executed_at": "2030-01-01T00:00:03Z",
+            "observed_at": "2030-01-01T00:00:04Z"
+          },
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": true,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": []
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "nonce": "7",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z"
+      },
+      "receipt_sha256": "1d7246e8050c0b93f6b39005371d8f09f65cf704da095c8f8208482c3b1b3651"
+    },
+    {
+      "case_id": "same-receipt-revalidated",
+      "expected": {
+        "exit_code": 0,
+        "valid": true,
+        "codes": []
+      },
+      "observed": {
+        "exit_code": 0,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"financial_profile\": \"0.2\",\n  \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n  \"task_id\": \"humanmirror-synthetic-op-001\",\n  \"policy_id\": \"humanmirror-synthetic-fixed-policy-v1\",\n  \"transaction\": {\n    \"operation\": \"erc20_transfer\",\n    \"chain_id\": \"8453\",\n    \"sender\": \"0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e\",\n    \"asset\": \"0xcccccccccccccccccccccccccccccccccccccccc\",\n    \"target\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"amount_base_units\": \"10000\",\n    \"max_fee_base_units\": \"1000000000000000\",\n    \"nonce\": \"7\",\n    \"current_allowance_base_units\": null\n  },\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"execution\": {\n    \"schema_version\": \"0.2\",\n    \"subject_digest\": \"sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a\",\n    \"chain_id\": \"8453\",\n    \"transaction_hash\": \"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"nonce\": \"7\",\n    \"block_number\": \"1235\",\n    \"status\": \"success\",\n    \"executed_at\": \"2030-01-01T00:00:03Z\",\n    \"observed_at\": \"2030-01-01T00:00:04Z\"\n  },\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "elapsed_ms": 29.208,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "financial_profile": "0.2",
+          "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+          "task_id": "humanmirror-synthetic-op-001",
+          "policy_id": "humanmirror-synthetic-fixed-policy-v1",
+          "transaction": {
+            "operation": "erc20_transfer",
+            "chain_id": "8453",
+            "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+            "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+            "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_base_units": "10000",
+            "max_fee_base_units": "1000000000000000",
+            "nonce": "7",
+            "current_allowance_base_units": null
+          },
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "execution": {
+            "schema_version": "0.2",
+            "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+            "chain_id": "8453",
+            "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "nonce": "7",
+            "block_number": "1235",
+            "status": "success",
+            "executed_at": "2030-01-01T00:00:03Z",
+            "observed_at": "2030-01-01T00:00:04Z"
+          },
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": true,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": []
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "7",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z"
+      },
+      "receipt_sha256": "d1d6706b75717494d2c589f1a5264d2a6a75d366b7f9e8a299cfc831ca65359c"
+    },
+    {
+      "case_id": "null-receipt",
+      "expected": {
+        "exit_code": 1,
+        "valid": false,
+        "codes": [
+          "SCHEMA_TYPE"
+        ]
+      },
+      "observed": {
+        "exit_code": 1,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"SCHEMA_TYPE\",\n      \"path\": \"financial_execution\",\n      \"message\": \"Expected \\\"object\\\"\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "elapsed_ms": 30.17,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": false,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": [
+            {
+              "code": "SCHEMA_TYPE",
+              "path": "financial_execution",
+              "message": "Expected \"object\""
+            }
+          ]
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": null,
+      "receipt_sha256": "38e0b9de817f645c4bec37c0d4a3e58baecccb040f5718dc069a72c7385a0bed"
+    },
+    {
+      "case_id": "unknown-tool_response",
+      "expected": {
+        "exit_code": 1,
+        "valid": false,
+        "codes": [
+          "SCHEMA_ADDITIONALPROPERTIES"
+        ]
+      },
+      "observed": {
+        "exit_code": 1,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"SCHEMA_ADDITIONALPROPERTIES\",\n      \"path\": \"financial_execution/tool_response\",\n      \"message\": \"Unknown field\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "elapsed_ms": 28.176,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": false,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": [
+            {
+              "code": "SCHEMA_ADDITIONALPROPERTIES",
+              "path": "financial_execution/tool_response",
+              "message": "Unknown field"
+            }
+          ]
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "7",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z",
+        "tool_response": "MISSING"
+      },
+      "receipt_sha256": "6839a285027653bfbd7c13a6f41c2e068ab7bcd9f227c625e474da05c882d273"
+    },
+    {
+      "case_id": "unknown-operation_id",
+      "expected": {
+        "exit_code": 1,
+        "valid": false,
+        "codes": [
+          "SCHEMA_ADDITIONALPROPERTIES"
+        ]
+      },
+      "observed": {
+        "exit_code": 1,
+        "stdout": "{\n  \"validation_stage\": \"execution\",\n  \"evaluated_at\": \"2030-01-01T00:00:05Z\",\n  \"chain_state_verified\": false,\n  \"simulation_executed\": false,\n  \"address_checksum_verified\": false,\n  \"transaction_serialization_verified\": false,\n  \"execution_receipt_verified\": false,\n  \"transaction_hash_verified\": false,\n  \"financial_safety_verified\": false,\n  \"replay_protection_enforced\": false,\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"financial-execution\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"SCHEMA_ADDITIONALPROPERTIES\",\n      \"path\": \"financial_execution/operation_id\",\n      \"message\": \"Unknown field\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "elapsed_ms": 28.673,
+        "report": {
+          "validation_stage": "execution",
+          "evaluated_at": "2030-01-01T00:00:05Z",
+          "chain_state_verified": false,
+          "simulation_executed": false,
+          "address_checksum_verified": false,
+          "transaction_serialization_verified": false,
+          "execution_receipt_verified": false,
+          "transaction_hash_verified": false,
+          "financial_safety_verified": false,
+          "replay_protection_enforced": false,
+          "tool": "agent-role-contracts",
+          "version": "1.0.0",
+          "kind": "financial-execution",
+          "valid": false,
+          "execution_authorized": false,
+          "runtime_enforcement": false,
+          "identity_verified": false,
+          "evidence_verified": false,
+          "source_files_checked": false,
+          "sensitive_data_scanned": false,
+          "output_schema_validated": false,
+          "errors": [
+            {
+              "code": "SCHEMA_ADDITIONALPROPERTIES",
+              "path": "financial_execution/operation_id",
+              "message": "Unknown field"
+            }
+          ]
+        }
+      },
+      "matches_expectation": true,
+      "command": [
+        "<node>",
+        "<arc-v1>/bin/agent-role-contracts.mjs",
+        "finance-execution",
+        "--bundle",
+        "bundle.json",
+        "--task",
+        "task.json",
+        "--policy",
+        "policy.json",
+        "--intent",
+        "intent-fictional.json",
+        "--at",
+        "2030-01-01T00:00:05Z",
+        "--receipt",
+        "<temporary-receipt.json>"
+      ],
+      "receipt_input": {
+        "schema_version": "0.2",
+        "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+        "chain_id": "8453",
+        "transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "7",
+        "block_number": "1235",
+        "status": "success",
+        "executed_at": "2030-01-01T00:00:03Z",
+        "observed_at": "2030-01-01T00:00:04Z",
+        "operation_id": "synthetic-op-001"
+      },
+      "receipt_sha256": "f7d50935ea971ba94abbde9221d0210294753972c5a52ee47fbc5f2aba53c139"
+    }
+  ],
+  "boundaries": {
+    "network_calls": false,
+    "payments_executed": false,
+    "humanmirror_executed": false,
+    "receipt_authenticity_verified": false,
+    "replay_prevention_verified": false,
+    "settlement_verified": false,
+    "delivery_verified": false,
+    "operation_id_reconciliation_implemented": false,
+    "missing_response_scenarios_executed": false,
+    "human_time_savings_measured": false,
+    "external_adoption_count": 0
+  }
+}

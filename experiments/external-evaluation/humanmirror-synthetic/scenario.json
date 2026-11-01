@@ -1,0 +1,59 @@
+{
+  "fixture_id": "arc-humanmirror-synthetic-v1",
+  "chain": "eip155:8453",
+  "asset": "USDC",
+  "asset_decimals": 6,
+  "amount_minor": 10000,
+  "authorized_recipient": "A",
+  "operation_id": "synthetic-op-001",
+  "cases": [
+    {
+      "case_id": "valid-declaration",
+      "proposed_recipient": "A",
+      "settlement_evidence": "NONE",
+      "tool_response": "NOT_RUN",
+      "expected_arc_declaration": "PASS",
+      "expected_humanmirror_advisory": "NOT_SPECIFIED",
+      "observed_arc": "NOT_RUN",
+      "observed_humanmirror": "NOT_RUN"
+    },
+    {
+      "case_id": "recipient-mutation",
+      "proposed_recipient": "B",
+      "settlement_evidence": "NONE",
+      "tool_response": "NOT_RUN",
+      "expected_arc_declaration": "REJECT",
+      "expected_humanmirror_advisory": "REJECT_RECIPIENT_MISMATCH",
+      "observed_arc": "NOT_RUN",
+      "observed_humanmirror": "NOT_RUN"
+    },
+    {
+      "case_id": "settled-missing-response",
+      "proposed_recipient": "A",
+      "settlement_evidence": "SYNTHETIC_VERIFIED_RECEIPT",
+      "tool_response": "MISSING",
+      "expected_arc_declaration": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "expected_humanmirror_advisory": {
+        "settlement": "CONFIRMED_IN_MOCK",
+        "delivery": "UNKNOWN",
+        "new_payment_without_reconciliation": false
+      },
+      "observed_arc": "NOT_RUN",
+      "observed_humanmirror": "NOT_RUN"
+    },
+    {
+      "case_id": "uncertain-settlement",
+      "proposed_recipient": "A",
+      "settlement_evidence": "NONE",
+      "tool_response": "MISSING",
+      "expected_arc_declaration": "NOT_APPLICABLE_TO_RECONCILIATION",
+      "expected_humanmirror_advisory": {
+        "settlement": "UNKNOWN",
+        "delivery": "UNKNOWN",
+        "new_payment_without_reconciliation": false
+      },
+      "observed_arc": "NOT_RUN",
+      "observed_humanmirror": "NOT_RUN"
+    }
+  ]
+}

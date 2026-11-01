@@ -1,0 +1,11 @@
+{
+  "operation": "erc20_transfer",
+  "chain_id": "8453",
+  "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+  "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+  "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "amount_base_units": "10000",
+  "max_fee_base_units": "1000000000000000",
+  "nonce": "7",
+  "current_allowance_base_units": null
+}
