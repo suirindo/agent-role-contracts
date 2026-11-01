@@ -75,6 +75,9 @@ See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 revie
 
 ## Next
 
+- **Check one task of your own:** use the [consumer starter](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md), then the [first-task exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.md). The [Japanese path](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md) covers setup through repair in Japanese.
+- **A command did not work:** use the [copyable POSIX/PowerShell commands](SHELL-COMMANDS.md) or [record a blocked first attempt](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml).
+- **Understand what the next check covers:** read the [bundle map](BUNDLE-MAP.md), [command selector](COMMANDS.md), [API example](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md), [handoff exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/HANDOFF.md) or [review exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/DECLARED-REVIEW.md).
 - [Evaluate a real workflow using the pinned v1.0.0 kit](../experiments/external-evaluation/README.md) and [record reproducible evidence](../experiments/external-evaluation/EVIDENCE_TEMPLATE.md).
 - [Full three-role example](../README.md#full-three-role-example): coordination, conditional inputs and handoffs.
 - [Architecture and extraction boundary](COMPATIBILITY.md): which concepts the public package retains.

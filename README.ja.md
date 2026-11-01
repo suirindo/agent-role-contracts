@@ -1,8 +1,10 @@
 # Agent Role Contracts
 
+[English](README.md)
+
 **役割・権限宣言・引き継ぎの矛盾を、エージェントを起動せずに検査する。**
 
-[デモを試す](#3分で体験する-quick-start)、[自分のリポジトリで使う](https://github.com/suirindo/agent-role-contracts/tree/main/experiments/adoption)、[実業務で評価する](experiments/external-evaluation/README.md)から始められます。
+[デモを試す](#3分で体験する-quick-start)、[自分のリポジトリで使う](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)、[実業務で評価する](experiments/external-evaluation/README.md)から始められます。
 
 ARCが検査するのは宣言の整合性です。PASSは実行許可を与えません。
 
@@ -27,7 +29,27 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
-cloneせず公開済み`1.0.0`を試す手順は、英語READMEの[Try the published stable package](README.md#try-the-published-stable-package-no-clone)にあります。旧`0.5.0`を再現する場合はそのversionを明示指定し、現行の推奨インストールと区別してください。
+### デモの次に、自分のタスクを検査する
+
+| 今の状態 | 次に進む手順 |
+| --- | --- |
+| デモが動いたので、自分のタスクを試したい | [日本語の導入手順](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)から、[最初のタスクと修復](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.ja.md)へ進みます。 |
+| 導入中にコマンドが失敗した | [日本語の導入手順](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)のセットアップ確認と診断に沿って、失敗した入力・設定を確認します。 |
+| bundleの各項目やコマンドの違いを知りたい | [bundleの対応表](docs/BUNDLE-MAP.md)と[コマンド選択表](docs/COMMANDS.md)を参照できます（英語）。 |
+| 自分のプログラムから呼びたい | [公開APIを使う実行可能な例](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md)があります（英語）。 |
+| 試した結果や、開始できなかった理由を残したい | [初回報告フォーム](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml)へ、実行した範囲を記録できます（英語）。 |
+
+cloneせず公開済み`1.0.0`を試す場合は、新しい空のディレクトリで次のコマンドを実行します。最後のコマンドは途中で改行せず、そのままコピーできます。
+
+```sh
+mkdir arc-first-check
+cd arc-first-check
+npm init --yes
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+node node_modules/@netsujo/agent-role-contracts/bin/agent-role-contracts.mjs explain --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json --format text
+```
+
+PowerShellでは上の`npm`を`npm.cmd`で実行します。[PowerShell用のコピー可能な全文](docs/SHELL-COMMANDS.md#windows-powershell)もあります。インストールの成功を確認してから検査へ進んでください。最後に`PASS: explain`が表示され、検査の終了コードは0になります。負の例は`starter-task.json`を`starter-task-outside-scope.json`に替えると再現でき、`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を表示して終了コード1になります。旧`0.5.0`は履歴の再現用であり、この導入では使用しません。
 
 ### npmのキャッシュを使えない場合
 
@@ -37,7 +59,7 @@ npmの**キャッシュディレクトリへのアクセス・作成時**に`EPE
 - `npm init`で失敗した場合は、先に`npm --cache ./.npm-cache init --yes`を実行します。
 - 後続のnpm/npxコマンドにも同じ指定を付けます。キャッシュディレクトリはコミットしません。
 
-コピーして使えるコマンドは、英語READMEの[キャッシュ復旧手順](README.md#if-npm-cannot-use-its-cache)にあります。PowerShellでもこのフラグを使えますが、複数行のコマンドは行末のバックスラッシュを除き、1行で入力してください。
+たとえばインストールで失敗した場合は、`npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.0`を実行します。PowerShellでは`npm.cmd`を使います。上の`node`による検査コマンドはnpmキャッシュを使いません。
 
 入力ファイルなど、キャッシュ以外のパスがエラーに出ている場合は、そのパスを確認してください。すべての`ENOENT`がキャッシュの問題とは限りません。
 

@@ -6,6 +6,8 @@ The repository and npm `latest` carry published stable `1.0.0` ([publication evi
 
 ## Bind the check to the proposed work
 
+For a concrete starting point, use the [public API recipe](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md), [handoff mismatch and repair](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/HANDOFF.md), or [declared-review exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/DECLARED-REVIEW.md). The [bundle map](BUNDLE-MAP.md) explains the actual JSON fields, and the [command selector](COMMANDS.md) separates the checks. [How these checks fit together](CHECKING-DECLARATIONS.md) compares ARC with prompts, schema validation and configured CI rules.
+
 Supply the approved bundle and policy from a trusted source. User- or task-supplied authority declarations must not silently become the integration's authorization policy.
 
 For the v0.1 bundle/task/handoff APIs, retain the exact input bytes, checker version and your own trusted task/source revision with the result. A saved PASS has no built-in expiry or revocation mechanism.
