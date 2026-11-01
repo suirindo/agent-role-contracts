@@ -1,5 +1,9 @@
 # Write the first task for your repository
 
+English | [日本語](FIRST-TASK.ja.md)
+
+For PowerShell commands below, use `npx.cmd` and inspect `$LASTEXITCODE` immediately afterward. POSIX shells use `npx` and `echo $?`. No line-continuation changes are needed.
+
 Start after the [standalone consumer check](README.md#1-try-a-standalone-consumer) works. Choose a real code change under `src/` that fits your current authority and needs an independent reviewer. If your work needs different paths or roles, use the repository's existing authority review; this exercise keeps `.arc/bundle.json` unchanged.
 
 ## Describe the work before running it

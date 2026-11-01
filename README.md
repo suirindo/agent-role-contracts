@@ -1,5 +1,7 @@
 # Agent Role Contracts
 
+[日本語](README.ja.md)
+
 **Catch out-of-scope agent tasks, self-review, and stale handoffs before execution.**
 
 Choose a starting point: [run the demo](#quick-start--three-minutes), [use the checker in your own repository](https://github.com/suirindo/agent-role-contracts/tree/main/experiments/adoption), or [evaluate a real workflow](experiments/external-evaluation/README.md).
@@ -43,9 +45,23 @@ Next: docs/QUICKSTART.md (change the scope and rerun the checker).
 
 The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
 
+### After the demo: check one task of your own
+
+| Where you are | Next useful step |
+| --- | --- |
+| The demo passed; I want to check my own task. | [Use the consumer starter](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md), then [describe one task and repair a rejection](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.md). |
+| I copied the starter but a command failed. | [Verify the setup](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md#1-try-a-standalone-consumer) and [find the repair](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md#find-the-failed-input-before-changing-authority). |
+| I want to understand or change the declarations. | [Read the bundle map](docs/BUNDLE-MAP.md) and [choose the right command](docs/COMMANDS.md). |
+| I want to call ARC from code. | [Run the complete published API example](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md). |
+| I tried it or could not start. | [Record a first attempt](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml); a blocked attempt is useful feedback too. |
+
+For a specific contradiction, try the [handoff repair](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/HANDOFF.md) or [declared-review exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/DECLARED-REVIEW.md). If you already have schema checks or CI rules, [compare their responsibilities with ARC](docs/CHECKING-DECLARATIONS.md) before adding a check.
+
 ### Try the published stable package (no clone)
 
 To run the published `1.0.0` stable package without cloning the repository, start in an empty directory:
+
+For commands you can paste unchanged into **PowerShell** or a POSIX shell, use the [shell-specific installation and rejection check](docs/SHELL-COMMANDS.md).
 
 ```sh
 mkdir agent-role-contracts-first-check

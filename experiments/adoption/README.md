@@ -1,5 +1,7 @@
 # Use ARC in an existing development workflow
 
+English | [日本語](README.ja.md)
+
 This experimental, source-only kit connects the published **Agent Role Contracts 1.0.0** checker to a consumer repository. It is not included in the already-published npm 1.0.0 package. The templates are optional examples, not certified integrations or runtime enforcement.
 
 Choose one entry point after the consumer check works. All eight entry points use the same declaration check; do not install every example.
@@ -15,6 +17,8 @@ Choose one entry point after the consumer check works. All eight entry points us
 | Your existing CI, schemas, IAM, and review already cover the problem | Keep those controls; skip this trial unless you can name a remaining declaration mismatch |
 
 ## 1. Try a standalone consumer
+
+In PowerShell, use `npm.cmd` / `npx.cmd` wherever these instructions say `npm` / `npx`; inspect `$LASTEXITCODE` immediately after the command. In a POSIX shell, use `echo $?`. This selects the Windows command launcher without changing execution policy.
 
 Requires Git, Node.js 22.5 or newer, and npm. Run this in a directory where `agent-role-contracts` and `arc-check` do not exist:
 
