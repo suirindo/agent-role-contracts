@@ -89,6 +89,8 @@ The CI examples install development dependencies with lifecycle scripts disabled
 
 The GitHub Actions template checks the PR head's task against the base commit's bundle, using only the base commit's installed, version-checked 1.0.0 dependency. Merge the reviewed bundle, dependency pin, and lockfile into the base branch before enabling it. The candidate bundle is ignored, so editing it cannot widen this check's authority; a bundle edit is not automatically rejected or approved. The workflow itself and merge rules still need your existing trusted review and branch protection.
 
+Require branches to be up to date before merge: the template uses the base SHA captured when the pull-request event occurred. A later authority change on the base needs a fresh check. This template runs on pull requests; a merge queue needs a separately reviewed `merge_group` workflow.
+
 ### VS Code: add input hints alongside the task
 
 The optional [vscode-settings.json](integrations/vscode-settings.json) associates the consumer's bundle and two task files with the schemas shipped in the installed **1.0.0** dependency. When supported and loaded, it provides property/value completion and structural diagnostics; keep the existing VS Code task for ARC's checks across declarations.

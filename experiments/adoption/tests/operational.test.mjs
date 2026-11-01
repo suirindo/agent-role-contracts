@@ -152,27 +152,41 @@ test('published 1.0.0 distinguishes exact files, subtrees, siblings and invalid 
   }
 }));
 
-test('an edited own-task example passes, fails outside scope, and passes after repair with one bundle hash', () => fixture((directory) => {
-  const hash = bundleHash(directory);
+test('published 1.0.0 returns the documented code and path for invalid task declarations', () => fixture((directory) => {
   const task = read(directory, 'task.json');
-  const check = (status) => explain(directory, status, '.arc/bundle.json', '.arc/task-first.json');
-  task.id = 'greeting-fallback-1';
-  task.objective = 'Update the fallback greeting in src/greeting.mjs.';
-  task.acceptance_criteria = [
-    'The greeting handles an unnamed user without throwing.',
-    'The existing greeting tests pass.',
-    'An independent reviewer checks the change.',
+  const missingObjective = { ...task };
+  delete missingObjective.objective;
+  const cases = [
+    [missingObjective, 'SCHEMA_REQUIRED', 'task/objective'],
+    [{ ...task, $schema: 'https://example.invalid/task.json' }, 'SCHEMA_ADDITIONALPROPERTIES', 'task/$schema'],
+    [{ ...task, type: 'unknown-task-type' }, 'TASK_TYPE_UNROUTED', 'task/type'],
   ];
-  task.inputs.scope = 'src/greeting.mjs';
-  write(directory, 'task-first.json', task);
+  for (const [input, code, path] of cases) {
+    write(directory, 'task.json', input);
+    const report = explain(directory, 1);
+    assert.deepEqual(report.errors.map(({ code, path }) => ({ code, path })), [{ code, path }]);
+  }
+}));
+
+test('the documented first-task JSON passes, fails outside scope, and passes after repair with one bundle hash', () => fixture((directory) => {
+  const hash = bundleHash(directory);
+  const block = readFileSync(join(adoption, 'FIRST-TASK.md'), 'utf8').match(/^```json[ \t]*\r?\n([\s\S]*?)^```[ \t]*\r?$/m);
+  assert.ok(block, 'FIRST-TASK.md must contain its task JSON example.');
+  const task = JSON.parse(block[1]);
+  const originalScope = task.inputs.scope;
+  const check = (status) => {
+    const report = explain(directory, status, '.arc/bundle.json', '.arc/task-first.json');
+    assert.equal(bundleHash(directory), hash);
+    return report;
+  };
+  writeFileSync(join(directory, '.arc/task-first.json'), block[1]);
   check(0);
   task.inputs.scope = 'secrets/private.json';
   write(directory, 'task-first.json', task);
   assert.equal(check(1).errors[0].code, 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY');
-  task.inputs.scope = 'src/greeting.mjs';
+  task.inputs.scope = originalScope;
   write(directory, 'task-first.json', task);
   check(0);
-  assert.equal(bundleHash(directory), hash);
 }));
 
 test('a candidate can widen its own policy; the unchanged trusted bundle rejects that same task', () => fixture((directory) => {

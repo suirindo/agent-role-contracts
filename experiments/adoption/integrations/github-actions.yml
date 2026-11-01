@@ -2,6 +2,8 @@
 # Checks the supplied declaration files, not all changed files or actual agent actions.
 # First merge the reviewed bundle, pinned dependency and lockfile into the base branch.
 # The workflow/check itself still needs your existing trusted review and branch protection.
+# Require branches to be up to date before merge: base.sha is captured at event time.
+# Merge queues need a separately reviewed merge_group workflow.
 name: ARC declarations
 on:
   pull_request:
