@@ -4,6 +4,16 @@ This experimental, source-only kit connects the published **Agent Role Contracts
 
 Choose one entry point after the consumer check works. All eight entry points use the same declaration check; do not install every example.
 
+### Is this a useful check for your workflow?
+
+| What you need | Appropriate next step |
+| --- | --- |
+| Compare a task's declared write scope and declared review roles before work starts | Try the standalone consumer below, then write [one task of your own](FIRST-TASK.md) |
+| Learn what a rejection means before installing a consumer dependency | Run the existing [source demo](../../docs/QUICKSTART.md#run-the-demo) |
+| Check JSON shape, code correctness, or which files actually changed | Use your schema validation, tests, and diff review; ARC does not replace them |
+| Enforce live permissions, identities, or approvals | Keep your IAM, sandbox, and approval controls; this kit checks declarations |
+| Your existing CI, schemas, IAM, and review already cover the problem | Keep those controls; skip this trial unless you can name a remaining declaration mismatch |
+
 ## 1. Try a standalone consumer
 
 Requires Git, Node.js 22.5 or newer, and npm. Run this in a directory where `agent-role-contracts` and `arc-check` do not exist:
@@ -27,11 +37,34 @@ npx --no-install agent-role-contracts explain --bundle .arc/bundle.json --task .
 
 This must return 1 with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`. Malformed JSON is rejected with `JSON_INVALID` and exit 1 in the pinned 1.0.0 checker. An input file that cannot be read returns 2. A failed input read is not a successful declaration check.
 
+From the same consumer root, verify the local installation and the expected positive, negative, and unreadable-input results:
+
+```sh
+node scripts/verify-setup.mjs
+```
+
+This source-only helper does not install dependencies, change files, or contact a service. It returns 0 only when its setup checks all match expectations; missing setup or an unexpected result returns 2. That helper result is separate from the core check's 0/1/2 exits and does not show that your own task or integration ran.
+
 ## 2. Bring only the needed files into your repository
 
-These templates expect the consumer package.json, `.arc/`, and `scripts/` at your repository root. Review the consumer's `.arc/` fixtures, then replace the illustrative roles, paths, and task with your approved task. Keep the authority bundle under the repository's existing trusted review process. Add the fixed dev dependency and the `arc:check` script to the existing package.json; do not replace it. Install with `--ignore-scripts`, retain the lockfile, and check the exact task you intend to use.
+These templates expect the consumer package.json, `.arc/`, and `scripts/` at your repository root. Review the consumer's `.arc/` fixtures and choose a task inside the existing declared scope. Keep the authority bundle under the repository's existing trusted review process, including any later changes to roles or allowed paths. Add the fixed dev dependency and the `arc:check` script to the existing package.json; do not replace it. Install with `--ignore-scripts`, retain the lockfile, and check the exact task you intend to use.
 
-The checker reads declarations, not your Git diff or task-scope files. A task that omits an actual changed file can still pass. Your integration must construct or independently compare the task scope with the real change. A PR that edits both its policy and its task can also make itself pass; these examples do not establish a trusted policy baseline.
+The checker reads declarations, not your Git diff or task-scope files. A task that omits an actual changed file can still pass. Your integration must construct or independently compare the task scope with the real change. Checking a task and a widened bundle from the same untrusted change can also make that task pass; the GitHub Actions template below keeps those inputs separate.
+
+Use the [first-task walkthrough](FIRST-TASK.md) to edit the task ID, route type, objective, scope, and acceptance criteria while keeping the supplied authority bundle unchanged.
+
+### Scope compatibility: installed 1.0.0 and source main
+
+The consumer remains pinned to **published 1.0.0** even when you copy this kit from a newer source commit. With the starter's `src/**` authority:
+
+| Task scope | Published 1.0.0 | Source main |
+| --- | --- | --- |
+| `src/example.mjs`, `src/nested/file.mjs`, or `src/**` | Accepted | Accepted |
+| `src2/example.mjs` | Rejected: outside `src/**` | Same |
+| `.github/workflows/arc.yml` | Rejected: dot-prefixed segment | Supported syntax only with matching, explicitly approved root `.github` authority; still outside the starter's `src/**` |
+| `src/.hidden`, `../src/file.mjs`, or `/tmp/file.mjs` | Rejected: invalid scope syntax | Same |
+
+The root `.github` exception is an [unreleased source change](../../docs/COMPATIBILITY.md#unreleased-source-candidate-explicitly-scoped-root-github-paths), absent from the immutable 1.0.0 package. Do not rename a task's scope to hide an actual `.github` change or widen authority to force a PASS. For a workflow whose paths 1.0.0 cannot express, keep the existing review controls and record the limitation.
 
 ## 3. Choose an entry point
 
@@ -53,6 +86,8 @@ For the local hook, copy the consumer's `scripts/staged-check.mjs` to the same r
 When adding a new local hook, make the reviewed hook file executable; Git ignores hooks without the executable bit. Locate the default path with `git rev-parse --git-path hooks/pre-commit`, and check for an existing hook or configured hook manager before making changes. Running the example with `sh` only tests its command; it does not prove Git has installed or invoked the hook.
 
 The CI examples install development dependencies with lifecycle scripts disabled and invoke the local checker. GitHub Actions requests read-only contents permission, retains no checkout credential, uses no secrets, and does not use `pull_request_target`. These are example checks, not a supply-chain security review of the consumer's dependencies or a protected merge policy.
+
+The GitHub Actions template checks the PR head's task against the base commit's bundle, using only the base commit's installed, version-checked 1.0.0 dependency. Merge the reviewed bundle, dependency pin, and lockfile into the base branch before enabling it. The candidate bundle is ignored, so editing it cannot widen this check's authority; a bundle edit is not automatically rejected or approved. The workflow itself and merge rules still need your existing trusted review and branch protection.
 
 ### VS Code: add input hints alongside the task
 
@@ -85,9 +120,32 @@ This is an optional settings example, not an extension. The root-anchored matche
 | 1 | Declaration or JSON validation rejected the input | Correct the task or resolve the scope/role decision; keep the diagnostic |
 | 2 | A file read or CLI/tool error prevented the check | Repair the input, path, or tool error and rerun |
 
+### Find the failed input before changing authority
+
+| Observed result in the pinned consumer | Repair, then rerun the same command |
+| --- | --- |
+| `JSON_INVALID` (exit 1) | Repair JSON syntax in the named input; do not treat a parse failure as a scope decision |
+| `SCHEMA_REQUIRED` at `task/objective` (exit 1) | Restore a nonempty objective describing the requested outcome |
+| `SCHEMA_ADDITIONALPROPERTIES` at `task/$schema` (exit 1) | Remove `$schema` from the task and use the editor's external schema association |
+| `TASK_TYPE_UNROUTED` at `task/type` (exit 1) | Use the intended existing route; the starter declares `code-change`. A new route needs a reviewed bundle change |
+| `TASK_WRITE_SCOPE_INVALID` at `task/inputs/scope` (exit 1) | Use the accurate portable relative path supported by the installed version; see the compatibility table above |
+| `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` at `task/inputs/scope` (exit 1) | Compare the real task with the reviewed authority. Correct a mistaken scope; route genuinely broader work through existing approval |
+| `CLI_ERROR` (exit 2) | Read `message`; correct the command/options or the named path, read access, and working directory. The checker did not reach a declaration result |
+| `ARC staged declaration check: Stage one resolved regular file for …` (exit 2) | Resolve conflicts and stage the reviewed `.arc/bundle.json` and `.arc/task.json`; changing only the worktree does not change the checked input |
+
+For conceptual role and handoff failures, use the existing [failure cases](../../docs/FAILURE-CASES.md). Keep the exact command, core version, exit, and redacted diagnostic when asking for help.
+
+### Bound the trial, maintenance, and removal
+
+Start with one reviewed task, one entry point, and a time limit for the trial. If setup cannot be completed within that limit, record where it stopped. Note the source commit, fixed core version, lockfile, and each file or block you add; preserve the original scripts, hooks, editor settings, and pipeline. Do not change global Git settings to run this trial.
+
+When keeping it, update the task for each real change and review authority changes through the existing trusted process. Recheck after updating the kit or integration. A core upgrade needs an explicitly reviewed version and lockfile change plus compatible checks; the fixed 1.0.0 setup helper is not a compatibility test for a later release.
+
+To stop, remove only the ARC job, script entries, hook invocation, instruction block, or editor task/schema associations you added. Keep all other entries and hook behavior. Delete an ARC-only file only after checking no other task uses it. Remove the ARC dependency and update the lockfile through your package manager only if no remaining consumer uses it. Keep the reviewed task and result if they are useful records; no repository reset or recursive cleanup is needed.
+
 Use the existing [workflow evaluation kit](../external-evaluation/README.md) for two genuine tasks. Record preparation, maintenance, and rechecking effort, contradictions found, and overlap with your existing controls. A local template test is not evidence of native agent behavior, hosted CI success, production adoption, or time saved.
 
-Share a redacted result through the existing [workflow feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml). If you expect to return to the project, the repository's optional Star action remains available.
+Report a first attempt, including `NOT_RUN` or `BLOCKED`, through the short [first-attempt form](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml). Share a real workflow through the existing [workflow feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml). Neither a setup check nor a first-attempt report substitutes for the two genuine tasks above. If you expect to return to the project, the repository's optional Star action remains available.
 
 ## Sources and verification boundary
 
@@ -103,4 +161,4 @@ Template formats were checked against the primary documentation on 2026-11-01:
 - [Cursor rules](https://cursor.com/docs/rules)
 - [GitHub Copilot repository instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions)
 
-This kit does not claim that a hosted pipeline, editor, or model session has executed these templates. Validate the chosen integration in your own environment before relying on it.
+Automated consumer checks do not establish that your chosen template has run in your pipeline, editor, or model session. Validate that integration in your own environment before relying on it.
