@@ -202,3 +202,52 @@ test('a candidate can widen its own policy; the unchanged trusted bundle rejects
   assert.ok(trusted.errors.some((error) => error.code === 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY'));
   assert.equal(bundleHash(directory), hash);
 }));
+
+test('the shipped Actions guard rejects symlinks in every candidate task path component', () => {
+  const workflow = readFileSync(join(adoption, 'integrations/github-actions.yml'), 'utf8');
+  const step = workflow.match(/^      - name: Require a regular candidate task\r?\n        shell: bash\r?\n        run: \|\r?\n((?:          [^\n]*\n)+)/m);
+  assert.ok(step, 'The published workflow must contain its candidate path guard.');
+  assert.ok(workflow.indexOf(step[0]) < workflow.indexOf('      - name: Install only the trusted base dependency'),
+    'Reject invalid candidate paths before installing or running the trusted checker.');
+  const guard = step[1].split('\n').filter(Boolean).map((line) => line.slice(10)).join('\n');
+  const cases = [
+    'regular', 'out-of-scope', 'task-directory', 'task-symlink',
+    'task-dangling-symlink', 'task-missing', 'parent-symlink',
+    'parent-dangling-symlink', 'checkout-symlink',
+  ];
+  for (const kind of cases) fixture((directory) => {
+    const hash = bundleHash(directory);
+    const candidate = join(directory, 'arc-candidate');
+    const parent = join(candidate, '.arc');
+    const taskPath = join(parent, 'task.json');
+    mkdirSync(parent, { recursive: true });
+    cpSync(join(directory, '.arc/task.json'), taskPath);
+    if (kind === 'out-of-scope') {
+      const task = JSON.parse(readFileSync(taskPath, 'utf8'));
+      task.inputs.scope = 'secrets/production.txt';
+      writeFileSync(taskPath, JSON.stringify(task) + '\n');
+    } else if (kind.startsWith('task-')) {
+      unlinkSync(taskPath);
+      if (kind === 'task-directory') mkdirSync(taskPath);
+      if (kind === 'task-symlink') symlinkSync(join(directory, '.arc/task.json'), taskPath);
+      if (kind === 'task-dangling-symlink') symlinkSync('missing.json', taskPath);
+    } else if (kind.startsWith('parent-')) {
+      rmSync(parent, { recursive: true });
+      symlinkSync(kind === 'parent-symlink' ? join(directory, '.arc') : 'missing', parent, 'dir');
+    } else if (kind === 'checkout-symlink') {
+      rmSync(candidate, { recursive: true });
+      symlinkSync(directory, candidate, 'dir');
+    }
+    const accepted = kind === 'regular' || kind === 'out-of-scope';
+    const before = accepted ? readFileSync(taskPath, 'utf8') : null;
+    const result = expectStatus(run('bash', ['-e', '-u', '-o', 'pipefail', '-c', guard], directory), accepted ? 0 : 2);
+    if (accepted) {
+      const report = explain(directory, kind === 'regular' ? 0 : 1, '.arc/bundle.json', 'arc-candidate/.arc/task.json');
+      if (kind === 'out-of-scope') assert.ok(report.errors.some((error) => error.code === 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY'));
+      assert.equal(readFileSync(taskPath, 'utf8'), before, kind + ': input task is unchanged');
+    } else {
+      assert.equal(result.stderr.trim(), 'Candidate .arc/task.json must be a regular file under non-symlink directories.', kind);
+    }
+    assert.equal(bundleHash(directory), hash, kind + ': trusted bundle is unchanged');
+  });
+});
