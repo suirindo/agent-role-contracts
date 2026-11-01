@@ -40,7 +40,7 @@ The checker reads declarations, not your Git diff or task-scope files. A task th
 | GitHub Actions | [github-actions.yml](integrations/github-actions.yml) | Add a reviewed workflow under `.github/workflows/`; preserve existing workflows | Pull requests |
 | GitLab CI | [gitlab-ci.yml](integrations/gitlab-ci.yml) | Merge the job into your existing pipeline and use an approved Node image | Pipeline job |
 | Local Git hook | [pre-commit](integrations/pre-commit) | Integrate with your existing hook; do not overwrite it or change global hooksPath | A local commit; checks staged declarations |
-| VS Code | [vscode-tasks.json](integrations/vscode-tasks.json) | Merge the task into your existing `.vscode/tasks.json` | Manual task invocation |
+| VS Code | [vscode-tasks.json](integrations/vscode-tasks.json), optional [schema settings](integrations/vscode-settings.json) | Merge the task into `.vscode/tasks.json`; see the editing setup below | Manual task invocation; optional input hints while editing |
 | Codex | [AGENTS.md.example](integrations/AGENTS.md.example) | Append the reviewed section to the applicable `AGENTS.md` | Instruction-guided; verify actual execution |
 | Claude Code | [CLAUDE.md.example](integrations/CLAUDE.md.example) | Append to the project `CLAUDE.md` or `.claude/CLAUDE.md` | Instruction-guided; verify actual execution |
 | Cursor | [arc.mdc.example](integrations/arc.mdc.example) | Add as `.cursor/rules/arc.mdc` after reviewing existing rules | Model context with `alwaysApply: true`; verify execution |
@@ -53,6 +53,29 @@ For the local hook, copy the consumer's `scripts/staged-check.mjs` to the same r
 When adding a new local hook, make the reviewed hook file executable; Git ignores hooks without the executable bit. Locate the default path with `git rev-parse --git-path hooks/pre-commit`, and check for an existing hook or configured hook manager before making changes. Running the example with `sh` only tests its command; it does not prove Git has installed or invoked the hook.
 
 The CI examples install development dependencies with lifecycle scripts disabled and invoke the local checker. GitHub Actions requests read-only contents permission, retains no checkout credential, uses no secrets, and does not use `pull_request_target`. These are example checks, not a supply-chain security review of the consumer's dependencies or a protected merge policy.
+
+### VS Code: add input hints alongside the task
+
+The optional [vscode-settings.json](integrations/vscode-settings.json) associates the consumer's bundle and two task files with the schemas shipped in the installed **1.0.0** dependency. When supported and loaded, it provides property/value completion and structural diagnostics; keep the existing VS Code task for ARC's checks across declarations.
+
+1. Install the pinned consumer dependency as described above, then open the consumer directory as the VS Code folder. For the standalone example, open `arc-check`, where `package.json`, `.arc/`, and `node_modules/` are siblings. For an existing project, open that project's root instead.
+2. Merge the two entries from the template's `json.schemas` array into that folder's `.vscode/settings.json`. Preserve every existing setting and schema association; do not replace the file or add a second `json.schemas` key. In a multi-root workspace, use the relevant folder's settings. The `./node_modules/...` schema URLs are relative to that folder root, not to `.vscode/` or this source kit's `integrations/` directory.
+3. Keep the exact file matches, or change them to your own declaration filenames. The `${workspaceFolder}/` prefix anchors the three matches to the opened consumer folder: `.arc/bundle.json`, `.arc/task.json`, and `.arc/task-outside-scope.json`. Keep that prefix; a leading `/` alone can also match a nested `.arc/` directory. Avoid a broad `task*.json` pattern: action, binding, and lifecycle declarations use different schemas. Check existing associations for overlapping matches.
+
+Do **not** add a `$schema` property to the bundle or task JSON. ARC 1.0.0 rejects that extra property. The workspace association keeps editor metadata outside the declarations and reuses the installed schemas without copying or changing them.
+
+Try the editing path in a disposable copy of the consumer directory, keeping the declaration paths unchanged, or restore any edits before checking the real task:
+
+| Input or action | Expected editor behavior | ARC check / next action |
+| --- | --- | --- |
+| Open `.arc/task.json` and request completion | Suggestions include task properties and the supported `schema_version` value | Run **ARC: check declared task** from the existing task template, or `npm run arc:check` |
+| Remove required `objective`, give it a number, or add an unknown property | A structural diagnostic identifies the problem | Restore or correct the declaration, then rerun the task |
+| Open `.arc/task-outside-scope.json` | The file can have no schema diagnostic: its shape is valid | `npm run arc:check:negative` must still return 1 with `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` |
+| Schema cannot be loaded | Treat the input hints as unavailable | Check the opened folder and installed local schema path; install the pinned dependency if missing |
+
+Use JSON language mode for declaration files. If diagnostics are absent, check whether `json.validate.enable` was disabled in your effective settings. A quiet Problems panel does not prove that a schema loaded or that ARC passed. The editor's schema check cannot compare a task's scope with bundle authority, inspect a Git diff, grant permission, or replace review. Continue using the CLI/task even when the editor reports no errors.
+
+This is an optional settings example, not an extension. The root-anchored matches require a VS Code client that expands `${workspaceFolder}` in `json.schemas.fileMatch`; that support was confirmed in the installed VS Code 1.141.0 client code and the [official client source](https://github.com/microsoft/vscode/blob/main/extensions/json-language-features/client/src/jsonClient.ts). Older-client compatibility is unverified. Client mapping plus language-service probes and CLI checks do not establish that a VS Code GUI session has used the configuration. Setup time, maintenance cost, and time saved still need measurement in real use.
 
 ## 4. Read the result and decide whether to keep it
 
@@ -74,6 +97,7 @@ Template formats were checked against the primary documentation on 2026-11-01:
 - [GitLab CI YAML](https://docs.gitlab.com/ci/yaml/)
 - [Git hooks](https://git-scm.com/docs/githooks)
 - [VS Code Tasks](https://code.visualstudio.com/docs/debugtest/tasks)
+- [VS Code JSON schema associations](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings)
 - [Codex project instructions](https://developers.openai.com/codex/guides/agents-md/)
 - [Claude Code project memory](https://code.claude.com/docs/en/memory)
 - [Cursor rules](https://cursor.com/docs/rules)
