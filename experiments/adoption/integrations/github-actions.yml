@@ -24,6 +24,15 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: arc-candidate
           persist-credentials: false
+      - name: Require a regular candidate task
+        shell: bash
+        run: |
+          if [[ -L arc-candidate || ! -d arc-candidate ||
+                -L arc-candidate/.arc || ! -d arc-candidate/.arc ||
+                -L arc-candidate/.arc/task.json || ! -f arc-candidate/.arc/task.json ]]; then
+            echo 'Candidate .arc/task.json must be a regular file under non-symlink directories.' >&2
+            exit 2
+          fi
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24'
