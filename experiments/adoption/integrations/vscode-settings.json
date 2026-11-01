@@ -1,0 +1,17 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "${workspaceFolder}/.arc/bundle.json"
+      ],
+      "url": "./node_modules/@netsujo/agent-role-contracts/schemas/bundle.schema.json"
+    },
+    {
+      "fileMatch": [
+        "${workspaceFolder}/.arc/task.json",
+        "${workspaceFolder}/.arc/task-outside-scope.json"
+      ],
+      "url": "./node_modules/@netsujo/agent-role-contracts/schemas/task.schema.json"
+    }
+  ]
+}
