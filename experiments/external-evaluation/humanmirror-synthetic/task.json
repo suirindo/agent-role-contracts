@@ -1,0 +1,14 @@
+{
+  "schema_version": "0.1",
+  "id": "humanmirror-synthetic-op-001",
+  "type": "treasury-operation",
+  "objective": "Check the fictional public HumanMirror recipient scenario offline.",
+  "inputs": {
+    "scope": "intents/vendor-payment.json"
+  },
+  "acceptance_criteria": [
+    "The declared proposal stays inside the treasury policy.",
+    "A different declared role reviews the exact proposal.",
+    "The declared human owner approves the same subject."
+  ]
+}

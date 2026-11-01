@@ -1,0 +1,34 @@
+{
+  "schema_version": "0.2",
+  "transaction": {
+    "operation": "erc20_transfer",
+    "chain_id": "8453",
+    "sender": "0x5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e",
+    "asset": "0xcccccccccccccccccccccccccccccccccccccccc",
+    "target": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "amount_base_units": "10000",
+    "max_fee_base_units": "1000000000000000",
+    "nonce": "7",
+    "current_allowance_base_units": null
+  },
+  "simulation": {
+    "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+    "status": "success",
+    "chain_id": "8453",
+    "block_number": "1234",
+    "observed_at": "2030-01-01T00:00:00Z",
+    "return_value": true
+  },
+  "review": {
+    "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+    "role_id": "risk-reviewer",
+    "decision": "pass",
+    "reviewed_at": "2030-01-01T00:00:01Z"
+  },
+  "human_approval": {
+    "subject_digest": "sha256:c10029de2cc0ea3786b6fd0fa1f52c22361a74d789ed19ae0afc52bb5411ca9a",
+    "role_id": "treasury-owner",
+    "decision": "approved",
+    "approved_at": "2030-01-01T00:00:02Z"
+  }
+}
