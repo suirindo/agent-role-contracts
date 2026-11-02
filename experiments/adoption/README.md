@@ -134,7 +134,7 @@ This is an optional settings example, not an extension. The root-anchored matche
 | `SCHEMA_REQUIRED` at `task/objective` (exit 1) | Restore a nonempty objective describing the requested outcome |
 | `SCHEMA_ADDITIONALPROPERTIES` at `task/$schema` (exit 1) | Remove `$schema` from the task and use the editor's external schema association |
 | `TASK_TYPE_UNROUTED` at `task/type` (exit 1) | Use the intended existing route; the starter declares `code-change`. A new route needs a reviewed bundle change |
-| `TASK_WRITE_SCOPE_INVALID` at `task/inputs/scope` (exit 1) | Use the accurate portable relative path supported by the installed version; see the compatibility table above |
+| `TASK_WRITE_SCOPE_INVALID` at `task/inputs/scope` (exit 1) | Use the accurate portable relative path supported by the installed version; find the cause in [how to write the scope value](FIRST-TASK.md#write-the-scope-value) and the compatibility table above |
 | `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` at `task/inputs/scope` (exit 1) | Compare the real task with the reviewed authority. Correct a mistaken scope; route genuinely broader work through existing approval |
 | `CLI_ERROR` (exit 2) | Read `message`; correct the command/options or the named path, read access, and working directory. The checker did not reach a declaration result |
 | `ARC staged declaration check: Stage one resolved regular file for …` (exit 2) | Resolve conflicts and stage the reviewed `.arc/bundle.json` and `.arc/task.json`; changing only the worktree does not change the checked input |

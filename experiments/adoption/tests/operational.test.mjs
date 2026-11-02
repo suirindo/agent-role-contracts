@@ -189,6 +189,80 @@ test('the documented first-task JSON passes, fails outside scope, and passes aft
   check(0);
 }));
 
+// Rows of the first-task "scope value" table: [documented value, documented code].
+function scopeTable(name, heading) {
+  const text = readFileSync(join(adoption, name), 'utf8');
+  const start = text.indexOf(heading);
+  assert.notEqual(start, -1, `${name} must contain ${heading}`);
+  const section = text.slice(start + heading.length, text.indexOf('\n## ', start + heading.length) >>> 0);
+  const rows = section.split(/\r?\n/).filter((line) => /^\| `[^`]+` \| `[A-Z_]+` \|/.test(line))
+    .map((line) => line.match(/^\| `([^`]+)` \| `([A-Z_]+)` \|/).slice(1));
+  assert.ok(rows.length >= 8, `${name} must document at least eight scope values`);
+  return rows;
+}
+
+// GitHub-style heading anchors used by the first-task links.
+function anchors(name) {
+  return new Set(readFileSync(join(adoption, name), 'utf8').split(/\r?\n/)
+    .filter((line) => /^#{1,6} /.test(line))
+    .map((line) => line.replace(/^#+ /, '').toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, '').replace(/ /g, '-')));
+}
+
+test('every documented first-task scope value returns its documented 1.0.0 code, identically in English and Japanese', () => fixture((directory) => {
+  const english = scopeTable('FIRST-TASK.md', '## Write the scope value');
+  const japanese = scopeTable('FIRST-TASK.ja.md', '## scope の書き方');
+  assert.deepEqual(japanese, english);
+  const hash = bundleHash(directory);
+  const task = read(directory, 'task.json');
+  for (const [value, code] of english) {
+    task.inputs.scope = value.startsWith('[') ? JSON.parse(value) : value;
+    write(directory, 'task.json', task);
+    const report = explain(directory, 1);
+    assert.deepEqual(report.errors.map(({ code, path }) => ({ code, path })), [{ code, path: 'task/inputs/scope' }], value);
+  }
+  assert.equal(bundleHash(directory), hash);
+}));
+
+test('first-task guidance for several paths matches published 1.0.0', () => fixture((directory) => {
+  const bundle = read(directory, 'bundle.json');
+  const task = read(directory, 'task.json');
+  const check = (allowed, scope, status, code) => {
+    bundle.roles[0].contract.authority.allowed_write_scopes = allowed;
+    task.inputs.scope = scope;
+    write(directory, 'bundle.json', bundle);
+    write(directory, 'task.json', task);
+    const report = explain(directory, status);
+    if (code) assert.deepEqual(report.errors.map((error) => error.code), [code], scope);
+  };
+  check(['src/**'], 'src/greeting/**', 0);
+  check(['packages/app/**'], 'packages/app/**', 0);
+  check(['packages/app/**'], 'packages/app/src/a.mjs', 0);
+  // One task per top-level directory passes only once the authority includes it.
+  check(['src/**'], 'tests/greeting.test.mjs', 1, 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY');
+  check(['src/**', 'tests/**'], 'src/greeting.mjs', 0);
+  check(['src/**', 'tests/**'], 'tests/greeting.test.mjs', 0);
+  check(['src/**', 'tests/**'], '**', 1, 'TASK_WRITE_SCOPE_INVALID');
+}));
+
+test('first-task scope links resolve to existing headings', () => {
+  const links = [
+    ['FIRST-TASK.md', 'FIRST-TASK.md', 'write-the-scope-value'],
+    ['FIRST-TASK.md', 'FIRST-TASK.md', 'when-one-change-touches-several-paths'],
+    ['FIRST-TASK.md', 'README.md', 'scope-compatibility-installed-100-and-source-main'],
+    ['FIRST-TASK.ja.md', 'FIRST-TASK.ja.md', 'scope-の書き方'],
+    ['FIRST-TASK.ja.md', 'FIRST-TASK.ja.md', '一つの変更が複数のパスにまたがる場合'],
+    ['FIRST-TASK.ja.md', 'README.ja.md', '公開版-100-で使える-scope'],
+    ['README.md', 'FIRST-TASK.md', 'write-the-scope-value'],
+    ['README.ja.md', 'FIRST-TASK.ja.md', 'scope-の書き方'],
+  ];
+  for (const [from, to, anchor] of links) {
+    const text = readFileSync(join(adoption, from), 'utf8');
+    const target = from === to ? `(#${anchor})` : `(${to}#${anchor})`;
+    assert.ok(text.includes(target), `${from} must link ${target}`);
+    assert.ok(anchors(to).has(anchor), `${to} must contain a heading for #${anchor}`);
+  }
+});
+
 test('a candidate can widen its own policy; the unchanged trusted bundle rejects that same task', () => fixture((directory) => {
   const hash = bundleHash(directory);
   const candidate = read(directory, 'bundle.json');

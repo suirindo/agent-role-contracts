@@ -98,7 +98,7 @@ Git hook、各エージェントの指示ファイル、VS Code の詳細設定�
 | `SCHEMA_REQUIRED`、`task/objective`、終了コード 1 | 求める結果を表す、空でない `objective` を戻す |
 | `SCHEMA_ADDITIONALPROPERTIES`、`task/$schema`、終了コード 1 | task 内の `$schema` を削除し、エディター側のスキーマ関連付けを使う |
 | `TASK_TYPE_UNROUTED`、`task/type`、終了コード 1 | 意図した既存の経路を選ぶ。同梱例は `code-change`。新しい経路には bundle のレビューが必要 |
-| `TASK_WRITE_SCOPE_INVALID`、`task/inputs/scope`、終了コード 1 | 利用中のバージョンで扱える、実際の作業に即した相対パスを使う。上の scope 表を確認する |
+| `TASK_WRITE_SCOPE_INVALID`、`task/inputs/scope`、終了コード 1 | 利用中のバージョンで扱える、実際の作業に即した相対パスを使う。原因は[scope の書き方](FIRST-TASK.ja.md#scope-の書き方)と上の scope 表で確認する |
 | `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`、`task/inputs/scope`、終了コード 1 | 誤記した scope を修正する。実際に広い範囲が必要なら、既存の権限承認へ戻す |
 | `CLI_ERROR`、終了コード 2 | `message` を読み、コマンド・オプション、対象パス、読取権限、作業ディレクトリを直す |
 | `ARC staged declaration check: Stage one resolved regular file for …`、終了コード 2 | 競合を解消し、レビュー済みの `.arc/bundle.json` と `.arc/task.json` をステージする。作業ファイルだけの変更では入力は変わらない |
