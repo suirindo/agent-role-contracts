@@ -55,6 +55,35 @@ For a worked comparison between ARC scope preflight and an independently maintai
 
 For an exact recipient-declaration mapping and separate receipt-consistency limits, see the [HumanMirror public synthetic scenario](humanmirror-synthetic/README.md). Only two public declaration cases are executed; reconciliation and HumanMirror execution remain untested.
 
+## How to read a result
+
+Misreadings recur in reports, so the vocabulary is fixed here.
+
+| You see | It means | It does not mean |
+| --- | --- | --- |
+| Helper exit `0` | The expected sequence ran: PASS, injected FAIL, repaired PASS (plus the optional second declaration PASS). | That the injected invalid declaration "passed". The FAIL in the middle is the expected result. |
+| `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` on a path you typed wrong | A **correct refusal**: the path is outside the declared authority. | A false refusal. Count it as `false_refusals: 0`. |
+| False refusal | A **legitimate**, intended declaration was rejected. | Any rejection. Record the exact input and diagnostic. |
+| Declaration PASS | The supplied declarations are consistent. | Runtime blocking, reviewer identity, that a write happened or was prevented. |
+| `SELF_REPORTED` | You ran it and report it; nobody else has reproduced it. | Verified. `MAINTAINER_REPRODUCED` and `INDEPENDENTLY_REPRODUCED` require the original files, not pasted JSON. |
+| `NOT_RUN` | You did not perform that check. | Zero problems. Unmeasured is not zero. |
+
+A recap of an earlier report is not a new run; say which it is. A declaration PASS on a second task file is not a second real task;
+that needs a distinct commit or operation record.
+
+## Common setup errors
+
+Seen in the recorded evaluations; each is an input problem, not a security finding.
+
+| Diagnostic | Cause | Fix |
+| --- | --- | --- |
+| `SCHEMA_TYPE` on action `parameters` | Parameters were arrays or objects. | G1 action parameters are flat scalars (string, number, boolean, null). |
+| Binding rejected on `human_approval.role_id` | The approval role differs from the route's `accountable`. | Use exactly `routes[].accountable` for the approval, and a route reviewer for `reviews[].role_id`. |
+| `SCHEMA_MINITEMS` on `routes[].reviewers` | All reviewers were removed to model a solo workflow. | Keep at least one declared reviewer; a solo workflow is a result to record, not a bundle to force through. |
+| `WRITE_SCOPE_SYNTAX` / `TASK_WRITE_SCOPE_INVALID` on `.github/...`, `(ja)`, `[slug]`, spaces, non-ASCII | The stable grammar cannot express the path. | Record `UNSUPPORTED_REQUIRED_SCOPE` with the exact path; do not widen or rename. See [the boundary table](../../docs/COMPATIBILITY.md#path-shapes-the-stable-grammar-cannot-express). |
+| `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` for every new file | Exact-file scopes need a bundle edit per file. | Declare an intentionally bounded subtree such as `outputs/kit/**` when every path under it should be writable. |
+| Bundle SHA-256 differs between evaluator and maintainer | JSON was pasted and re-serialized (whitespace, key order). | Attach the original files; record `original_file_sha256` from those bytes. |
+
 ## Exit status and safety
 
 - `0`: expected declaration PASS → scope FAIL → repaired PASS, plus optional second declaration PASS.

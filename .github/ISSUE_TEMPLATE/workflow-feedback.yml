@@ -73,6 +73,26 @@ body:
       placeholder: "Different task ID + exact version/commit + public CI URL, or NOT RUN"
     validations:
       required: false
+  - type: dropdown
+    id: evidence_class
+    attributes:
+      label: Evidence class of this report
+      description: NOT_RUN is a problem report without a run. SELF_REPORTED is a run nobody else reproduced. REPRODUCIBLE_PACKET attaches the original files (not pasted JSON) with their SHA-256 so a maintainer can reproduce it.
+      options:
+        - "NOT_RUN problem report"
+        - "SELF_REPORTED run"
+        - "REPRODUCIBLE_PACKET (original files attached)"
+    validations:
+      required: true
+  - type: dropdown
+    id: recap
+    attributes:
+      label: Is this a distinct new run or a recap of an earlier report?
+      options:
+        - "New run"
+        - "Recap of an earlier report (adds only what changed)"
+    validations:
+      required: true
   - type: textarea
     id: existing_controls
     attributes:

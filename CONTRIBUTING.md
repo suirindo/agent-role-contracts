@@ -29,9 +29,33 @@ Before opening a pull request:
 2. add a focused regression, including a failing case for authority/review changes;
 3. run `npm run check`;
 4. keep diagnostics deterministic and fail closed on ambiguous declarations;
-5. avoid provider credentials, customer data, internal paths and runtime-specific authority in fixtures.
+5. avoid provider credentials, customer data, internal paths and runtime-specific authority in fixtures;
+6. in the PR description, give the exact-HEAD CI run URL (a Draft PR's hosted CI is **SKIPPED**, which is not PASS), the independent review receipt URL if one exists, and the pass/fail/skip counts of your own `npm run check` with the platform.
 
 Breaking public schema or API changes require an explicit package/schema version change. Security reports should follow `SECURITY.md`.
+
+### Review-input hygiene
+
+Independent review of a pull request is bounded by cost and capacity. Reviews have been refused or left indeterminate because a
+diff carried vendored copies of `src/` and other files that nothing imported. Keep review inputs small and honest:
+
+- do not copy `src/` or `schemas/` into an experiment; import the real modules, or pin exact blobs in a manifest and reference them;
+- include only files the change actually imports or documents; remove scaffolding before the PR is marked Ready;
+- keep one PR to one bounded change, so that a main advance by another PR costs one small re-review rather than a large one.
+
+### Running the checks outside CI
+
+`npm run check` runs the whole suite on Linux, macOS and Windows, with Node.js 22.5 and 24 in CI. On another machine some tests
+**skip with a stated reason**: opt-in loopback labs, a Linux overlayfs pilot, and the offline fake-SSH trial when `ssh-keygen`
+is not on `PATH`. A skip is not a failure, and a failure is not environment noise: read the reason printed next to each `# SKIP`,
+and treat any `not ok` as a regression to reproduce before you change a test. Run `npm test` or `npm run check` rather than
+`node --test` directly; one compatibility test needs `npm_execpath` and says so when it is missing.
+
+### Stopping a task
+
+An agent or contributor who cannot finish a task should leave a handoff that passes the
+[stop gate](experiments/stop-gate/README.md): every acceptance criterion accounted for, unknown outcomes written down, a concrete
+next action named. "Partially done" in a comment is not a stop.
 
 
 ## Feedback without a code change
