@@ -113,6 +113,7 @@ This project does not turn a declaration PASS into runtime authority. Identity, 
 - [Change a task scope and check it yourself](docs/QUICKSTART.md).
 - [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md) without treating a declaration PASS as runtime authority.
 - [Reproduce five concrete failure cases](docs/FAILURE-CASES.md), including scope drift, declared self-review and stale subject binding.
+- [Re-check a task when another agent takes over](docs/AGENT-SWITCH-REVALIDATION.md), and require a checkable handoff at every stop with the [stop gate](experiments/stop-gate/README.md) (source-only experiment).
 - [Share real-workflow feedback](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml), including cases where your existing controls are already enough.
 - [Explore coordination and handoffs](#full-three-role-example).
 - [Read the architecture and extraction boundary](docs/COMPATIBILITY.md).

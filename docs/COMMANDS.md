@@ -34,5 +34,6 @@ Do not turn an expected negative fixture's exit `1` into an exit `0` in the real
 - **A task was replaced before handoff:** [handoff mismatch and repair](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/HANDOFF.md).
 - **Implementation and review share one declared role:** [review separation exercise](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/DECLARED-REVIEW.md).
 - **Review is stale after a task/action change:** [existing G1 example](../examples/action-binding/demo.mjs) and [integration sequence](INTEGRATION.md#integration-sequence).
+- **Another agent takes over, or an agent stopped midway:** [what to re-check at the switch](AGENT-SWITCH-REVALIDATION.md) and the [stop gate](../experiments/stop-gate/README.md) that makes a checkable handoff the only allowed end state (source-only experiment).
 
 These are declaration examples. For a software defect or a result from your own use, choose the appropriate [contribution route](../CONTRIBUTING.md#choose-a-contribution).
