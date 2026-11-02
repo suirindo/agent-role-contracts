@@ -1,0 +1,18 @@
+## Stopping rule (paste into AGENTS.md, CLAUDE.md, ChatGPT project instructions or any harness instruction file)
+
+You may stop working on the current task only after `.arc/handoff.json` passes the stop gate:
+
+```sh
+node experiments/stop-gate/cli.mjs --bundle .arc/bundle.json --task .arc/task.json --handoff .arc/handoff.json --format text
+```
+
+Rules for the handoff:
+
+- Copy every acceptance criterion from `.arc/task.json` verbatim into `completed` (met) or `unresolved` (not met). Omit none, paraphrase none.
+- Write `complete` only when every criterion is in `completed`, `unresolved` is empty, and at least one `evidence` entry names a file or a command that a reviewer can open or rerun.
+- If you cannot finish for any reason (usage limit, timeout, missing permission, blocked dependency, unclear requirement), write `blocked` or `in_progress`, list what is unmet in `unresolved`, and name a concrete `required_next_action` and a declared `suggested_next_agent`. "None", "TBD", "continue" are not actions.
+- If you do not know whether an action you started completed, write an `unresolved` item that starts with `UNKNOWN` and say what evidence would resolve it. Do not retry it on your own, and do not describe it as done.
+- Report the gate's exit code and output verbatim. Exit 1 means you are not done stopping: fix the handoff, not the task declarations. Exit 2 means the gate could not run: say so; do not infer acceptance.
+- Stopping without a passing handoff is not an allowed end state. Ending your reply with "incomplete", "partially done" or a summary is not a stop.
+
+A passing gate records your stop consistently. It does not verify your work, rerun tests, prove the evidence, authenticate you, or authorize anything.
