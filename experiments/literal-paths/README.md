@@ -11,8 +11,9 @@ semantic completion, or human value result is established by this profile.
 
 ## Choose a profile
 
-- Stable (`src/core.mjs`, the CLI in `bin/`): no hidden, underscore, bracket or
-  group path segments.
+- Stable (`src/core.mjs`, the CLI in `bin/`): every segment starts with an ASCII
+  letter or digit, except a root `.github`; leading `_x`, `[slug]` and `(group)`
+  segments are unsupported. Internal underscores remain supported.
 - `literal-path/0.1`: the sections "Explicit versions (0.1)" through
   "Review evidence" below.
 - `literal-path/0.2`: the section "literal-path/0.2". Use it for `[slug]`,
@@ -105,7 +106,7 @@ validates under 0.2 (`G1_SUBJECT_MISMATCH`), and the reverse.
 ### First run
 
 Needs Node.js >= 22.5 and a source checkout of this repository; run every command
-from its root. `npm install agent-role-contracts` does not provide this CLI or
+from its root. Installing `@netsujo/agent-role-contracts` does not provide this CLI or
 profile, and nothing here needs or authorizes `npm install`, `npm publish` or any
 other npm command. Work in a scratch directory outside the checkout:
 
@@ -119,6 +120,8 @@ cp examples/code-task.json ../lp02-try/task.json
    `literal-path-bundle/0.2`. In the `implementer` role, replace
    `contract.authority.allowed_write_scopes` with the real path or the narrowest
    subtree, for example `["src/app/[locale]/(marketing)/_components/**"]`.
+   A `/**` scope also covers hidden descendants such as `.env`; see
+   [Containment](#containment).
 2. In `task.json`, set `schema_version` to `literal-path-task/0.2` and
    `inputs.scope` to the same path or a path inside it.
 3. Run:
