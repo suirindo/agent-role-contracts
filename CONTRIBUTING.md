@@ -42,6 +42,18 @@ diff carried vendored copies of `src/` and other files that nothing imported. Ke
 - do not copy `src/` or `schemas/` into an experiment; import the real modules, or pin exact blobs in a manifest and reference them;
 - include only files the change actually imports or documents; remove scaffolding before the PR is marked Ready;
 - keep one PR to one bounded change, so that a main advance by another PR costs one small re-review rather than a large one.
+- `tests/review-input-hygiene.test.mjs` fails when a file under `experiments/` is a byte-identical copy of a `src/` or `schemas/` file that is not on its listed exceptions.
+
+### Where a review result must land
+
+A review counts only when its verdict can be read where the PR is decided. Deliver it as a PR comment or review, or as a file
+committed to the PR branch, with the exact head SHA it reviewed. A verdict written only to a reviewer tool's private directory,
+or a session that ended without one, is **no review**: record it as `NOT_RUN` or `UNKNOWN`, not as pending PASS.
+
+### Status counters
+
+Counters and gates live in [docs/STATUS.md](docs/STATUS.md). Update the row by PR with its date and source; an issue comment
+links to it rather than restating counters.
 
 ### Running the checks outside CI
 
