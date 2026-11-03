@@ -4,12 +4,15 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symli
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import test from 'node:test';
+import { test as nodeTest } from 'node:test';
+import { skipReason } from './consumer-install.mjs';
 
 const adoptionRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const template = join(adoptionRoot, 'consumer');
 const packageRoot = resolve(process.env.ARC_PACKAGE_ROOT || join(template, 'node_modules/@netsujo/agent-role-contracts'));
 const hook = join(adoptionRoot, 'integrations/pre-commit');
+// One stated skip per test when the consumer dependency is absent, instead of one opaque failure per step (#108).
+const test = (name, fn) => nodeTest(name, { skip: skipReason(packageRoot) }, fn);
 
 function run(command, args, cwd) {
   return spawnSync(command, args, { cwd, encoding: 'utf8', env: process.env });

@@ -5,13 +5,16 @@ import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlin
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import test from 'node:test';
+import { test as nodeTest } from 'node:test';
+import { skipReason } from './consumer-install.mjs';
 
 const adoption = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const consumer = join(adoption, 'consumer');
 // Use the consumer's locked installation, never the repository source or an override.
 const packageRoot = join(consumer, 'node_modules/@netsujo/agent-role-contracts');
 const cli = join(packageRoot, 'bin/agent-role-contracts.mjs');
+// One stated skip per test when the consumer dependency is absent, instead of one opaque failure per step (#108).
+const test = (name, fn) => nodeTest(name, { skip: skipReason(packageRoot) }, fn);
 const env = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null' };
 for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_COMMON_DIR', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES']) delete env[key];
 

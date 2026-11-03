@@ -27,8 +27,8 @@ function readJson(text, label) {
   let value;
   try {
     value = parseJsonRejectDuplicateKeys(text, 'JSON_INVALID');
-  } catch {
-    return { errors: [issue('JSON_INVALID', label, 'Invalid JSON, duplicate decoded keys, or nesting deeper than 64')] };
+  } catch (error) {
+    return { errors: [issue('JSON_INVALID', label, error.detail || 'Invalid JSON, duplicate decoded keys, or nesting deeper than 64')] };
   }
   let nodes = 0;
   try {

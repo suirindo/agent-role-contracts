@@ -250,7 +250,8 @@ test('packed public consumer corpus and optional published differential', {timeo
   assert.equal(baseline.installedVersion, '0.5.0');
   assert.equal(candidate.installedVersion, '1.0.0');
   const oldHelp = 'Finance is a v0.2 preview. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nExit 0: declared contracts consistent.';
-  const newHelp = 'The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nExit 0: the invoked declaration check passed; it does not mean another operation passed.';
+  // Reviewed help differences from the published 0.5.0 baseline: the two 1.0.0 wording changes plus the unreleased package-bin usage line (#110).
+  const newHelp = 'The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nInstalled as a dependency, run the same commands through the package bin, for example: npx --no-install agent-role-contracts explain --bundle .arc/bundle.json --task .arc/task.json --format text\nExit 0: the invoked declaration check passed; it does not mean another operation passed.';
   assert.equal(baseline.cli.help.stdout.replace(oldHelp, newHelp), candidate.cli.help.stdout, 'only the reviewed help lines may differ');
   const {help: baselineHelp, ...baselineCli} = baseline.cli;
   const {help: candidateHelp, ...candidateCli} = candidate.cli;
