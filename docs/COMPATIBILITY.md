@@ -113,6 +113,30 @@ The migration keeps existing declaration/profile versions and public call paths 
 Source preparation alone is not v1 acceptance. Each release needs packed-artifact verification, the supported OS/Node matrix, all release/security/provenance gates, documentation review, and independent review and acceptance on the exact candidate commit. Publication and downstream production adoption are separate decisions and evidence.
 
 
+## Path shapes the stable grammar cannot express
+
+Real evaluations keep meeting paths that the portable scope grammar (`segment[/segment...]`, optional trailing `/**`, segments of
+`A-Z a-z 0-9 . _ -` not starting with `.`) cannot write down. The rejection is deterministic and is reported on the input that
+carries the shape; it is an **applicability gap, not a security finding**. `tests/scope-grammar-boundary.test.mjs` pins this table.
+
+| Shape | Example | Result | Where |
+| --- | --- | --- | --- |
+| Hidden root other than `.github` | `.env`, `.vscode/**` | `WRITE_SCOPE_SYNTAX` | bundle `allowed_write_scopes` |
+| Root `.github` segment | `.github/ISSUE_TEMPLATE/x.yml` | PASS in **source main** only; `WRITE_SCOPE_SYNTAX` in published 1.0.0 | both |
+| Hidden segment below the root | `src/.env`, `src/x/.hidden/a` | `TASK_WRITE_SCOPE_INVALID` | task `inputs.scope` |
+| Parenthesised or bracketed segment (Next.js route group, dynamic segment) | `src/(ja)/page.tsx`, `src/[slug]/page.tsx` | `TASK_WRITE_SCOPE_INVALID` | task |
+| Whitespace, `@`, non-ASCII characters | `src/a b.txt`, `src/@scope/a`, `src/日本語.md` | `TASK_WRITE_SCOPE_INVALID` | task |
+| Relative prefix, traversal, absolute path, backslash, trailing `/` | `./src/a`, `src/../etc`, `/src/a`, `src\a`, `src/` | `TASK_WRITE_SCOPE_INVALID` | task |
+| `*` anywhere except a trailing `/**` | `src/*.mjs`, `src/**/*.mjs` | `WRITE_SCOPE_SYNTAX` | bundle |
+
+A valid path that is merely outside the declared authority is a different result, `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`.
+
+When a legitimate workflow needs one of these shapes, keep the real scope, record `UNSUPPORTED_REQUIRED_SCOPE` with the exact
+path in the evaluation evidence, and do not widen the bundle or rename the path to obtain a PASS. Declaring the shape in
+`allowed_write_scopes` does not make it expressible: it adds `WRITE_SCOPE_SYNTAX` on the bundle. The source-only
+[literal-path profile](../experiments/literal-paths/README.md) is the explicit experiment for such paths; the stable grammar is
+unchanged until the 1.x compatibility process accepts a change.
+
 ## Unreleased source candidate: explicitly scoped root .github paths
 
 A real evaluation-onboarding task included `.github/ISSUE_TEMPLATE/workflow-feedback.yml`. The stable 1.0.0 grammar rejects that exact legitimate repository path as `WRITE_SCOPE_SYNTAX`. This source-only fix permits an explicitly declared **root** `.github` segment, for example that exact file or `.github/ISSUE_TEMPLATE/**`, while retaining the original exact/subtree containment rules. No runtime permission is granted.

@@ -7,18 +7,22 @@ import { hostname, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request } from 'node:http';
 import { randomBytes } from 'node:crypto';
-import { execFile } from 'node:child_process';
+import { execFile, spawn, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
-import { armFailsafe, terminateGroup } from '../experiments/dispatch-test-host/process-group.mjs';
+import { armFailsafe, terminateGroup, groupAlive, processAlive, procStat } from '../experiments/dispatch-test-host/process-group.mjs';
 import { localLauncher, sshLauncher, startReceiverSet, observe, killTrackedChildren, REMOTE_OBSERVER_SCRIPT } from '../experiments/dispatch-test-host/cross-host.mjs';
 import { CASES, runCase, judge } from '../experiments/dispatch-test-host/cross-host-cases.mjs';
 
 const POSIX = ['linux', 'darwin'].includes(process.platform);
 const opts = { skip: !POSIX && 'POSIX only' };
+// The fake-SSH trial mints a throwaway pinned host key with ssh-keygen (OpenSSH). Without it the trial cannot start, so it is
+// skipped with that reason instead of failing with ENOENT; a missing host tool is not a regression. '-?' only prints usage.
+const SSH_KEYGEN = !spawnSync('ssh-keygen', ['-?'], { stdio: 'ignore' }).error;
+const sshOpts = { skip: !POSIX ? 'POSIX only' : !SSH_KEYGEN ? 'ssh-keygen not found on PATH (needed to mint the pinned host key)' : false };
 const dirs = [];
 const tmp = async p => { const d = await mkdtemp(join(tmpdir(), p)); dirs.push(d); return d; };
 test.after(() => Promise.all(dirs.map(d => rm(d, { recursive: true, force: true }))));
-const alive = pid => { try { process.kill(pid, 0); return true; } catch { return false; } };
+const alive = processAlive;                                                      // a zombie cannot act: it counts as gone (Linux /proc)
 const exec = promisify(execFile);
 
 for (const bind of ['stdio', '127.0.0.1'])
@@ -134,7 +138,7 @@ async function fakeSshTrial(policy = 'strict', extra = {}, env = {}) {
  return { result, calls, remote, out };
 }
 
-test('offline fake SSH: every receiver launcher, observer, upload, hash, inspection and cleanup transport carries the pin policy', opts, async () => {
+test('offline fake SSH: every receiver launcher, observer, upload, hash, inspection and cleanup transport carries the pin policy', sshOpts, async () => {
  const { result, calls } = await fakeSshTrial();
  assert.equal(result.ok, true, result.stderr);
  assert.ok(calls.length > 10);
@@ -143,13 +147,13 @@ test('offline fake SSH: every receiver launcher, observer, upload, hash, inspect
  for (const token of ['remote-receiver.mjs', 'remote-observer.mjs', 'cat >', 'shasum', 'pgrep', 'rm -rf']) assert.ok(calls.some(c => c.args.at(-1).includes(token)), token);
 });
 
-for (const policy of ['permissive', 'mismatch', 'global-known-hosts', 'proxyjump', 'localcommand', 'knownhostscommand']) test('offline fake SSH: effective ' + policy + ' policy is rejected before remote effects', opts, async () => {
+for (const policy of ['permissive', 'mismatch', 'global-known-hosts', 'proxyjump', 'localcommand', 'knownhostscommand']) test('offline fake SSH: effective ' + policy + ' policy is rejected before remote effects', sshOpts, async () => {
  const { result, calls, remote } = await fakeSshTrial(policy);
  assert.equal(result.ok, false); assert.match(result.stderr, /effective SSH policy/);
  assert.equal(calls.length, 1); await assert.rejects(readFile(remote), /ENOENT/);
 });
 
-test('offline fake SSH: synchronous helper timeout is finite and exact nonce-root cleanup is attempted', opts, async () => {
+test('offline fake SSH: synchronous helper timeout is finite and exact nonce-root cleanup is attempted', sshOpts, async () => {
  const started = Date.now();
  const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 200, trialTimeoutMs: 1000, hangOn: 'mkdir -p' });
  assert.equal(result.ok, false); assert.ok(Date.now() - started < 10000);
@@ -160,14 +164,14 @@ test('offline fake SSH: synchronous helper timeout is finite and exact nonce-roo
  assert.ok(calls.every(c => c.options.stricthostkeychecking === 'yes'));
 });
 
-test('offline fake SSH: an effective ProxyCommand must equal the declared one and is recorded', opts, async () => {
+test('offline fake SSH: an effective ProxyCommand must equal the declared one and is recorded', sshOpts, async () => {
  const wrong = await fakeSshTrial('strict', {}, { FAKE_SSH_PROXY: '/tmp/evil-proxy' });
  assert.equal(wrong.result.ok, false); assert.match(wrong.result.stderr, /proxycommand/); assert.equal(wrong.calls.length, 1);
  const ok = await fakeSshTrial('strict', { expectedProxyCommand: '/bin/proxy a b' }, { FAKE_SSH_PROXY: '/bin/proxy a b' });
  assert.equal(ok.result.ok, true, ok.result.stderr);
 });
 
-test('offline fake SSH: wrong pin, malformed config and injection-shaped values are rejected before any ssh call', opts, async () => {
+test('offline fake SSH: wrong pin, malformed config and injection-shaped values are rejected before any ssh call', sshOpts, async () => {
  const wrongPin = 'SHA256:' + 'A'.repeat(43);
  const cases = [{ expectedHostKeyFingerprint: wrongPin }, { expectedHostKeyFingerprint: 'nope' }, { hostKeyAlias: 'missing-alias' }, { hostKeyAlias: '-oProxyCommand=x' },
   { sshHost: '-oProxyCommand=touch' }, { sshHost: 'h;rm' }, { remoteRoot: '/tmp/../etc' }, { remoteRoot: '/' }, { remoteRoot: "/tmp/a'b" }, { helperTimeoutMs: 5 },
@@ -180,7 +184,7 @@ test('offline fake SSH: wrong pin, malformed config and injection-shaped values 
  }
 });
 
-test('offline fake SSH: success retains records before removing only the nonce root, leaving the configured root and siblings', opts, async () => {
+test('offline fake SSH: success retains records before removing only the nonce root, leaving the configured root and siblings', sshOpts, async () => {
  const dir = await tmp('arc69-fake-keep-');
  const { result, remote, out } = await fakeSshTrial('strict');
  assert.equal(result.ok, true, result.stderr);
@@ -190,7 +194,7 @@ test('offline fake SSH: success retains records before removing only the nonce r
  await assert.rejects(readFile(cleanup.remote_root), /ENOENT|EISDIR/); assert.ok(dir);
 });
 
-test('offline fake SSH: when records cannot be fetched the nonce root is kept as evidence and the run fails', opts, async () => {
+test('offline fake SSH: when records cannot be fetched the nonce root is kept as evidence and the run fails', sshOpts, async () => {
  const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 3000, hangOn: 'tar -C' });
  assert.equal(result.ok, false);
  const cleanup = JSON.parse(await readFile(join(out, 'cleanup.json'), 'utf8'));
@@ -205,7 +209,7 @@ const cleanupOf = out => readFile(join(out, 'cleanup.json'), 'utf8').then(JSON.p
 const timed = async run => { const t = Date.now(); const r = await run(); return { ...r, elapsed: Date.now() - t }; };
 const SLACK = 6000;   // node start, ssh-keygen and reaping on a loaded machine
 
-test('offline fake SSH: cleanup stops and proves the nonce receivers dead, then archives twice, then removes only the nonce root', opts, async () => {
+test('offline fake SSH: cleanup stops and proves the nonce receivers dead, then archives twice, then removes only the nonce root', sshOpts, async () => {
  const { result, calls, out } = await fakeSshTrial();
  assert.equal(result.ok, true, result.stderr);
  const stop = idx(calls, /pkill -TERM -f .*emote-receiver/), tar = idx(calls, /^tar -C/), rm = idx(calls, /rm -rf/), exists = idx(calls, /^test -e .* && echo present/);
@@ -216,7 +220,7 @@ test('offline fake SSH: cleanup stops and proves the nonce receivers dead, then 
  assert.equal(cleanup.quiescent, true); assert.equal(cleanup.removed, true); assert.equal(cleanup.records_retained, true);
 });
 
-test('offline fake SSH: if a nonce receiver cannot be proven dead nothing is archived or deleted and cleanup fails', opts, async () => {
+test('offline fake SSH: if a nonce receiver cannot be proven dead nothing is archived or deleted and cleanup fails', sshOpts, async () => {
  const { result, calls, out } = await fakeSshTrial('strict', {}, { FAKE_SSH_STOP_ALIVE: '1' });
  assert.equal(result.ok, false); assert.equal(result.error.code, 3);
  assert.deepEqual(idx(calls, /^tar -C/), []); assert.deepEqual(idx(calls, /rm -rf/), []);
@@ -226,7 +230,7 @@ test('offline fake SSH: if a nonce receiver cannot be proven dead nothing is arc
  await assert.rejects(readFile(join(out, 'm3-records.tar')), /ENOENT/);
 });
 
-test('offline fake SSH: an archive that changes between two reads is not retained and the root is not deleted', opts, async () => {
+test('offline fake SSH: an archive that changes between two reads is not retained and the root is not deleted', sshOpts, async () => {
  const { result, calls, out } = await fakeSshTrial('strict', {}, { FAKE_SSH_TAR_UNSTABLE: '1' });
  assert.equal(result.ok, false); assert.equal(result.error.code, 3);
  assert.deepEqual(idx(calls, /rm -rf/), []);
@@ -235,26 +239,26 @@ test('offline fake SSH: an archive that changes between two reads is not retaine
  assert.match(cleanup.errors.join(' '), /not stable/); await readdir(cleanup.remote_root);
 });
 
-test('offline fake SSH: a hung stop step is bounded, and prevents archive and delete', opts, async () => {
+test('offline fake SSH: a hung stop step is bounded, and prevents archive and delete', sshOpts, async () => {
  const { result, calls, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 1000, trialTimeoutMs: 40000, cleanupReserveMs: 8000 }, { FAKE_SSH_HANG_ON: 'pkill' }));
  assert.equal(result.ok, false); assert.ok(elapsed < 40000 + SLACK, 'elapsed ' + elapsed);
  assert.deepEqual(idx(calls, /^tar -C/), []); assert.deepEqual(idx(calls, /rm -rf/), []);
  assert.equal((await cleanupOf(out)).removed, false);
 });
 
-test('offline fake SSH: a hung remove step is bounded by the helper timeout and reported as not removed', opts, async () => {
+test('offline fake SSH: a hung remove step is bounded by the helper timeout and reported as not removed', sshOpts, async () => {
  const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 1000, trialTimeoutMs: 40000, cleanupReserveMs: 8000 }, { FAKE_SSH_HANG_ON: 'rm -rf' }));
  assert.equal(result.ok, false); assert.equal(result.error.code, 3); assert.ok(elapsed < 40000 + SLACK, 'elapsed ' + elapsed);
  const cleanup = await cleanupOf(out); assert.equal(cleanup.records_retained, true); assert.equal(cleanup.removed, false);
 });
 
-test('offline fake SSH: slow preflight is bounded by the helper timeout and precedes every remote effect', opts, async () => {
+test('offline fake SSH: slow preflight is bounded by the helper timeout and precedes every remote effect', sshOpts, async () => {
  const { result, calls, remote, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 500, trialTimeoutMs: 3000, cleanupReserveMs: 1000 }, { FAKE_SSH_G_DELAY_MS: '20000' }));
  assert.equal(result.ok, false); assert.ok(elapsed < 3000 + SLACK, 'elapsed ' + elapsed);
  assert.ok(calls.every(c => c.args.includes('-G'))); await assert.rejects(readFile(remote), /ENOENT/);
 });
 
-test('offline fake SSH: the deadline counts from process start, so a slow preflight shortens the trial and cleanup still runs inside the total bound', opts, async () => {
+test('offline fake SSH: the deadline counts from process start, so a slow preflight shortens the trial and cleanup still runs inside the total bound', sshOpts, async () => {
  const trial = 12000;
  const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 4000, trialTimeoutMs: trial, cleanupReserveMs: 5000 }, { FAKE_SSH_G_DELAY_MS: '1500', FAKE_SSH_HANG_ON: "'exec'" }));
  assert.equal(result.ok, false); assert.equal(result.error.code, 124, result.stderr); assert.match(result.stderr, /overall trial timeout/);
@@ -262,7 +266,7 @@ test('offline fake SSH: the deadline counts from process start, so a slow prefli
  const cleanup = await cleanupOf(out); assert.equal(cleanup.removed, true, JSON.stringify(cleanup));
 });
 
-test('offline fake SSH: a hung case session is abandoned at the work deadline, reaped, and the nonce root is still cleaned', opts, async () => {
+test('offline fake SSH: a hung case session is abandoned at the work deadline, reaped, and the nonce root is still cleaned', sshOpts, async () => {
  const trial = 12000;
  const { result, out, elapsed } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 2000, trialTimeoutMs: trial, cleanupReserveMs: 4000 }, { FAKE_SSH_HANG_ON: "'exec'" }));
  assert.equal(result.ok, false); assert.equal(result.error.code, 124);
@@ -302,6 +306,34 @@ test('process group: terminateGroup reports unconfirmed (not true) for a group i
  assert.equal(await terminateGroup(2 ** 22 - 1), true);                           // no such group: already gone
 });
 
+const PERL = !spawnSync('perl', ['-e', '1'], { stdio: 'ignore' }).error;
+const zombieOpts = { skip: process.platform !== 'linux' ? 'Linux /proc only' : !PERL ? 'perl not found (used as a parent that never waits)' : false };
+// A perl parent forks A into its own session (so A leads group A), A forks B and neither ever waits: B exits at once and stays a
+// zombie in group A while A lives; killing A leaves a zombie leader whose parent will not reap it. That is exactly the shape an
+// init that reaps orphans lazily (or a container without one) leaves behind after a successful group kill.
+const ZOMBIE_PARENT = 'use POSIX; $|=1; my $a = fork; if ($a == 0) { POSIX::setsid(); my $b = fork; if ($b == 0) { exit 0 } print "B $b\\n"; sleep 30; exit 0 } print "A $a\\n"; sleep 30';
+const until = async (pred, ms = 5000) => { const end = Date.now() + ms; while (!pred()) { if (Date.now() >= end) return false; await new Promise(r => setTimeout(r, 20)); } return true; };
+
+test('process group: zombies count as gone, live members keep the group alive, and signal 0 alone would have said otherwise', zombieOpts, async () => {
+ const parent = spawn('perl', ['-e', ZOMBIE_PARENT], { stdio: ['ignore', 'pipe', 'ignore'] });
+ try {
+  let out = ''; parent.stdout.on('data', d => { out += d; });
+  assert.ok(await until(() => /A \d+\n/.test(out) && /B \d+\n/.test(out)), 'parent announced both pids: ' + JSON.stringify(out));
+  const a = Number(out.match(/A (\d+)/)[1]), b = Number(out.match(/B (\d+)/)[1]);
+  assert.ok(await until(() => procStat(b)?.state === 'Z'), 'B became a zombie that A never waits for');
+  assert.equal(procStat(b).pgrp, a, 'B stayed in group A');
+  assert.equal(processAlive(a), true); assert.equal(processAlive(b), false);
+  assert.equal(groupAlive(a), true, 'A still executes, so the group is alive despite the zombie');
+  process.kill(a, 'SIGKILL');
+  assert.ok(await until(() => procStat(a)?.state === 'Z'), 'A is a zombie its perl parent never waits for');
+  let signalZero = true; try { process.kill(a, 0); } catch { signalZero = false; }
+  assert.equal(signalZero, true, 'the kernel still answers signal 0 for the zombie leader');
+  assert.equal(processAlive(a), false);
+  assert.equal(groupAlive(a), false, 'a group with no executing member is gone even while its zombie leader is unreaped');
+  assert.equal(await terminateGroup(a, { termMs: 50, killMs: 50 }), true, 'reap is confirmed without waiting for a lazy init');
+ } finally { parent.kill('SIGKILL'); await new Promise(r => parent.once('exit', r)); }
+});
+
 test('process group: hard failsafe reaps, reports UNKNOWN groups explicitly, then exits 124', async () => {
  const events = [];
  armFailsafe({ delayMs: 10, reap: async () => { events.push('reap'); }, note: () => 'UNKNOWN: process groups not confirmed reaped: 4242\n',
@@ -310,7 +342,7 @@ test('process group: hard failsafe reaps, reports UNKNOWN groups explicitly, the
  assert.equal(events[0], 'reap'); assert.match(events[1][1], /UNKNOWN: process groups not confirmed reaped: 4242/); assert.deepEqual(events[2], ['exit', 124]);
 });
 
-test('offline fake SSH: abandoned case session with a TERM-ignoring ProxyCommand-like grandchild is group-reaped and cleanup still runs', opts, async () => {
+test('offline fake SSH: abandoned case session with a TERM-ignoring ProxyCommand-like grandchild is group-reaped and cleanup still runs', sshOpts, async () => {
  const pidfile = join(await tmp('arc69-pg-'), 'pids');
  try {
   const trial = 12000;
@@ -323,7 +355,7 @@ test('offline fake SSH: abandoned case session with a TERM-ignoring ProxyCommand
  } finally { await cleanupPids(pidfile); }
 });
 
-test('offline fake SSH: a hung helper (cleanup step) with a TERM-ignoring grandchild is group-killed at its timeout, no survivor', opts, async () => {
+test('offline fake SSH: a hung helper (cleanup step) with a TERM-ignoring grandchild is group-killed at its timeout, no survivor', sshOpts, async () => {
  const pidfile = join(await tmp('arc69-pg-'), 'pids');
  try {
   const { result, out } = await timed(() => fakeSshTrial('strict', { helperTimeoutMs: 1000, trialTimeoutMs: 40000, cleanupReserveMs: 8000 },

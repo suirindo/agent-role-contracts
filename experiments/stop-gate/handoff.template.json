@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1",
+  "task_id": "<copy .arc/task.json id exactly>",
+  "from_agent": "<your declared role id, e.g. implementer>",
+  "suggested_next_agent": "<a declared participant with a delegation or reporting relation, e.g. reviewer or coordinator>",
+  "current_status": "blocked",
+  "objective": "<copy .arc/task.json objective exactly>",
+  "completed": [
+    "<each acceptance criterion you met, copied verbatim from .arc/task.json acceptance_criteria>"
+  ],
+  "evidence": [
+    { "file": "<path a reviewer can open>", "result": "<what it shows>" },
+    { "command": "<command a reviewer can rerun>", "result": "<observed exit code and summary>" }
+  ],
+  "decisions": [
+    "<a decision you took and why>"
+  ],
+  "risks": [
+    "<a risk the next agent must know>"
+  ],
+  "unresolved": [
+    "<each acceptance criterion you did not meet, copied verbatim>",
+    "UNKNOWN whether <the action you started> completed; <what evidence would resolve it>"
+  ],
+  "required_next_action": "<one concrete action for suggested_next_agent>",
+  "confidence": 0.5
+}

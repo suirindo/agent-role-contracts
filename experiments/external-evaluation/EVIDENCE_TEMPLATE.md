@@ -21,6 +21,11 @@
 - Would the operator keep the check? Why:
 - Secret/private data scrub verified? `YES / NO`:
 - Evidence classification: `SELF_REPORTED / PUBLIC_CI_VERIFIED / INDEPENDENTLY_REPRODUCED`:
+- Is this a recap of an earlier report, or a distinct new run? `RECAP / NEW_RUN`:
+- Original files attached (not pasted JSON) and their `original_file_sha256` (bundle, task, output):
+- Implementer and reviewer were the same person or process? `YES / NO / UNKNOWN` (if YES, independence was not exercised):
+- Second task has a distinct objective, output and acceptance from the first? `YES / NO / NOT RUN`:
+- Paths the stable grammar could not express, recorded as `UNSUPPORTED_REQUIRED_SCOPE`, or `NONE`:
 - Known limits:
 
 **Do not count a synthetic example or the kit's in-memory second declaration as actual external adoption or genuine second-task execution. A declaration PASS also does not prove real runtime authorization, reviewer identity, writes, effects or business outcome.**

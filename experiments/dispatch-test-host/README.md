@@ -32,6 +32,12 @@ open a bounded time after the observer exits is a failure, not a partial result)
 `node experiments/dispatch-test-host/run-cross-host.mjs <empty_out_dir> <config.json>` (ssh alias, `bind`, overlay address,
 remote node and root, expected hostname/uid, pinned `known_hosts` file and host key alias).
 
+Sender-host prerequisites: Node.js 22.5+, and OpenSSH `ssh` and `ssh-keygen` on `PATH` (`ssh-keygen -F` reads the pinned host key
+back from `known_hosts` before any session is opened). The offline tests mint a throwaway host key with `ssh-keygen` too; when it is
+absent they are **skipped with that reason**, not failed, so `npm run check` stays honest on a machine without OpenSSH. Reaping is
+confirmed per process group; on Linux a zombie (exited, not yet waited for) counts as gone because it cannot act, so an init that
+reaps orphans lazily, or a container without one, does not turn a completed kill into `UNKNOWN`.
+
 With `bind: "stdio"` the receiver set opens **no network listener**: request/response JSON lines travel on the receiver
 process's own stdin/stdout inside the SSH session that started it. Use this when the overlay only admits SSH and the SSH client
 policy clears port forwarding: no firewall, overlay policy, SSH policy or system setting is changed. The destination is then

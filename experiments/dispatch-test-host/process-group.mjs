@@ -2,8 +2,44 @@
  * Process-group custody for helper children (#69). Every ssh child is spawned detached so it leads its own process group; a
  * ProxyCommand (or any descendant that stays in the group) is therefore reachable by signalling the group, and "reaped" means the
  * whole group is gone, not just the leader. Only groups this process spawned and still holds are ever signalled (no pattern kill).
+ *
+ * "Alive" means "can still execute". On Linux a zombie (exited, not yet waited for by its parent or by init) holds no execution
+ * and cannot produce an effect, so it counts as gone: an init that reaps orphans lazily, or a container without one, would
+ * otherwise leave a fully killed group unconfirmable for seconds or forever. Elsewhere liveness is the kernel's signal-0 answer.
  */
-export const groupAlive = pgid => { try { process.kill(-pgid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
+import { readdirSync, readFileSync } from 'node:fs';
+
+const LINUX = process.platform === 'linux';
+const DEAD_STATES = new Set(['Z', 'X', 'x']);                                    // zombie, dead (both spellings seen across kernels)
+/** Linux /proc/<pid>/stat: the fields after the parenthesised comm are state, ppid, pgrp, ... Returns null once the process is gone. */
+export const procStat = pid => {
+ let text; try { text = readFileSync('/proc/' + pid + '/stat', 'utf8'); } catch { return null; }
+ const rest = text.slice(text.lastIndexOf(')') + 2).split(' ');
+ return { state: rest[0], ppid: Number(rest[1]), pgrp: Number(rest[2]) };
+};
+/** Linux: does any member of the group still execute? null when /proc cannot be listed (the caller then keeps the signal-0 answer). */
+const groupHasRunnable = pgid => {
+ let names; try { names = readdirSync('/proc'); } catch { return null; }
+ for (const name of names) {
+  if (!/^\d+$/.test(name)) continue;
+  const s = procStat(Number(name));                                             // null: exited between readdir and read; not a member any more
+  if (s && s.pgrp === pgid && !DEAD_STATES.has(s.state)) return true;
+ }
+ return false;
+};
+
+/** One process can still execute: signal 0 is answered and, on Linux, it is not a zombie. */
+export const processAlive = pid => {
+ try { process.kill(pid, 0); } catch { return false; }
+ if (!LINUX) return true;
+ const s = procStat(pid); return s !== null && !DEAD_STATES.has(s.state);
+};
+/** Some member of the group can still execute. EPERM (a member we may not signal) is conservatively alive. */
+export const groupAlive = pgid => {
+ try { process.kill(-pgid, 0); } catch (e) { return e.code === 'EPERM'; }
+ if (!LINUX) return true;
+ const runnable = groupHasRunnable(pgid); return runnable === null ? true : runnable;
+};
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const signalGroup = (pgid, sig) => { try { process.kill(-pgid, sig); } catch { /* group gone */ } };
 const waitGone = async (pgid, ms) => { const end = Date.now() + ms; while (groupAlive(pgid)) { if (Date.now() >= end) return false; await sleep(20); } return true; };
