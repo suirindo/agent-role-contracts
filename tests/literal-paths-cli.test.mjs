@@ -112,7 +112,10 @@ test('CLI performs no writes and leaves its working directory untouched',t=>{
  assert.equal(r.status,0,r.stderr);assert.deepEqual(readdirSync(f.dir).sort(),before);
 });
 test('the experiment is not part of the published package',()=>{
- const r=spawnSync('npm',['pack','--dry-run','--json','--ignore-scripts'],{cwd:root,encoding:'utf8',timeout:60000});
+ // npm supplies its CLI path on every supported OS; avoid shell/npm.cmd rules.
+ assert.ok(process.env.npm_execpath,'npm_execpath is unset: run this test through npm test or npm run check');
+ const r=spawnSync(process.execPath,[process.env.npm_execpath,'pack','--dry-run','--json','--ignore-scripts'],{cwd:root,encoding:'utf8',timeout:60000});
+ assert.equal(r.error,undefined,`npm pack failed to launch or timed out: ${r.error&&r.error.message}`);
  assert.equal(r.status,0,r.stderr);const files=JSON.parse(r.stdout)[0].files.map(f=>f.path);
  assert.ok(files.length>0);assert.equal(files.some(p=>p.startsWith('experiments/')||p.includes('literal-paths')),false);
 });

@@ -107,8 +107,10 @@ validates under 0.2 (`G1_SUBJECT_MISMATCH`), and the reverse.
 
 Needs Node.js >= 22.5 and a source checkout of this repository; run every command
 from its root. Installing `@netsujo/agent-role-contracts` does not provide this CLI or
-profile, and nothing here needs or authorizes `npm install`, `npm publish` or any
-other npm command. Work in a scratch directory outside the checkout:
+profile. The CLI walkthrough below needs neither `npm install` nor `npm publish`.
+The test command under Limits does use npm, including a package dry-run
+(`npm pack --dry-run`); it publishes nothing. Work in a scratch directory outside
+the checkout:
 
 ```
 mkdir ../lp02-try
@@ -195,4 +197,6 @@ removed, escaped output).
 
 No symlink resolution, no case-insensitive-filesystem collision detection
 (`Src` and `src` are distinct bytes), no proof of runtime mediation, no
-execution. Run `node --test tests/literal-paths-0.2.test.mjs tests/literal-paths-cli.test.mjs`.
+execution. Run `npm test` from the repository root. npm provides `npm_execpath`,
+which the package-exclusion test uses to run the package dry-run without a shell;
+invoking `node --test` directly on that file fails that test.
