@@ -203,7 +203,9 @@ test('archived differential comparator permits only installed top-level report v
   }
 });
 
-test('packed public consumer corpus and optional published differential', {timeout: 180_000}, t => {
+// Packing needs the npm CLI that launched the suite. Under a bare `node --test` there is none, so the test skips with that
+// reason (as packed-readme-check does) instead of failing; `npm test` / `npm run check` and CI always run it.
+test('packed public consumer corpus and optional published differential', {timeout: 180_000, skip: !process.env.npm_execpath && 'run through npm (npm test / npm run check): npm_execpath identifies the npm CLI used to pack'}, t => {
   assert.ok(process.env.npm_execpath, 'Run through npm so npm_execpath identifies the cross-platform npm CLI');
   const scratch = mkdtempSync(join(tmpdir(), 'arc-compatibility-'));
   t.after(() => rmSync(scratch, {recursive: true, force: true}));
