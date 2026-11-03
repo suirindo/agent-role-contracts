@@ -10,12 +10,15 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const posix = p => relative(root, p).split(sep).join('/');
-const walk = (dir, out = []) => { for (const name of readdirSync(dir)) { const p = join(dir, name); statSync(p).isDirectory() ? walk(p, out) : out.push(p); } return out; };
+// An installed dependency (for example the adoption kit's locked published 1.0.0 consumer, #108) is not a vendored copy.
+const walk = (dir, out = []) => { for (const name of readdirSync(dir)) { if (name === 'node_modules') continue; const p = join(dir, name); statSync(p).isDirectory() ? walk(p, out) : out.push(p); } return out; };
 const digest = p => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 // Frozen snapshot of the core used by the D1 explanation prototype (PR #79); tree.json pins it so the explanation stays
 // reproducible against the exact bytes it was reviewed with. Remove an entry when the copy is removed.
-const ALLOWED = new Map(['contract-checks.mjs', 'core.mjs', 'report.mjs', 'schema.mjs', 'schemas.core.generated.mjs', 'strict-json.mjs', 'task-lifecycle.mjs', 'version.mjs']
+// strict-json.mjs is no longer listed: the source gained positioned JSON_INVALID detail (#110) while the frozen copy kept the
+// reviewed bytes that tree.json pins, so it is no longer byte-identical and no longer a review-input duplicate.
+const ALLOWED = new Map(['contract-checks.mjs', 'core.mjs', 'report.mjs', 'schema.mjs', 'schemas.core.generated.mjs', 'task-lifecycle.mjs', 'version.mjs']
  .map(f => ['experiments/d1-property/src/' + f, 'frozen D1 explanation snapshot (PR #79), pinned by experiments/d1-property/tree.json']));
 
 const canonical = new Map();

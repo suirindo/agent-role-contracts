@@ -25,6 +25,8 @@ The table uses `agent-role-contracts` as the installed CLI name. In the [consume
 | `1` | The supplied declarations were rejected. | Read the diagnostic and repair the intended declaration or obtain a properly reviewed policy change. |
 | `2` | A CLI argument or file-reading error occurred. | Fix the named path, input or invocation. It is not a policy decision. |
 
+Exit `0` and `1` results go to stdout in the requested `--format`. An exit `2` error goes to stderr: one `CLI_ERROR: <message>` line when `--format text` was given, otherwise one JSON line `{"valid":false,"execution_authorized":false,"error":"CLI_ERROR","message":"…"}`. The JSON form is also used when the `--format` value itself is invalid. In the published 1.0.0 package, exit `2` is always the JSON line regardless of `--format`.
+
 Do not turn an expected negative fixture's exit `1` into an exit `0` in the real command. A demonstration wrapper may itself exit `0` only after it confirms the expected rejection and its repair; that wrapper result is different from the underlying negative check.
 
 ## Run the next useful example

@@ -17,6 +17,7 @@ Usage:
   node bin/agent-role-contracts.mjs finance-execution --bundle B.json --task T.json --policy P.json --intent I.json --receipt R.json [--at UTC_TIME] [--format json|text]
   node bin/agent-role-contracts.mjs finance-safe --bundle B.json --task T.json --policy P.json --intent I.json --safe-proposal S.json [--at UTC_TIME] [--format json|text]
 The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.
+Installed as a dependency, run the same commands through the package bin, for example: npx --no-install agent-role-contracts explain --bundle .arc/bundle.json --task .arc/task.json --format text
 Exit 0: the invoked declaration check passed; it does not mean another operation passed. Exit 1: invalid declaration. Exit 2: CLI/file error.
 No command executes agents, evidence commands, network requests, or writes files.
 `;
@@ -37,8 +38,11 @@ function read(path) {
   return new TextDecoder('utf-8',{fatal:true}).decode(bytes.subarray(0,n));
  } finally {closeSync(fd);}
 }
+// Exit-2 errors follow the requested output format: one text line when --format text was given, otherwise one JSON line.
+let textErrors=false;
 try {
  const [cmd,...argv]=process.argv.slice(2);
+ textErrors=argv[argv.indexOf('--format')+1]==='text';
  if(cmd==='--help'||cmd==='help')console.log(HELP);
  else {
   if(!['validate','explain','handoff','action-subject','action-bind','adapter-filesystem-write','lifecycle-describe','lifecycle','finance-subject','finance','finance-execution','finance-safe'].includes(cmd))throw new Error('Unknown command; use --help');
@@ -84,11 +88,20 @@ try {
    if(r.execution)for(const line of [`Execution status: ${r.execution.status}`,`Transaction hash: ${r.execution.transaction_hash}`,`Block: ${r.execution.block_number}`])console.log(safeText(line));
    if(r.safe_proposal)for(const line of [`Safe: ${r.safe_proposal.safe_address}`,`Safe nonce: ${r.safe_proposal.safe_nonce}`,`Safe to: ${r.safe_proposal.transaction.to}`,`Safe CALL envelope matches intent: ${r.safe_call_envelope_matches_intent}`])console.log(safeText(line));
    for(const role of r.roles||[])console.log(safeText(`Role ${role.id}: ${role.authority_mode}; allowed=[${role.capabilities.join(', ')}]; prohibited=[${role.prohibited_capabilities.join(', ')}]`));
-   for(const e of r.errors)console.log(safeText(`${e.code} ${e.path}: ${e.message}`));
+   // Text output merges one missing input reported once per role into a single line; the JSON report keeps one entry per role.
+   const required=new Map(),lines=[];
+   for(const e of r.errors) {
+    const roleRequired=e.code==='TASK_INPUT_REQUIRED'&&e.message.startsWith('Required by role ');
+    const group=roleRequired?required.get(e.path):undefined;
+    if(group)group.roles.push(e.message.slice(17));
+    else {const line={e,roles:roleRequired?[e.message.slice(17)]:null};lines.push(line);if(roleRequired)required.set(e.path,line);}
+   }
+   for(const {e,roles} of lines)console.log(safeText(`${e.code} ${e.path}: ${roles?`Required by role${roles.length>1?'s':''} ${roles.join(', ')}`:e.message}`));
   }
   process.exitCode=r.valid?0:1;
  }
 } catch(e) {
- console.error(safeJson({valid:false,execution_authorized:false,error:'CLI_ERROR',message:String(e.message)}));
+ if(textErrors)console.error(safeText(`CLI_ERROR: ${e.message} (exit 2: CLI/file error; no declaration result)`));
+ else console.error(safeJson({valid:false,execution_authorized:false,error:'CLI_ERROR',message:String(e.message)}));
  process.exitCode=2;
 }

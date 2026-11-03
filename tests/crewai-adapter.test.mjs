@@ -107,6 +107,7 @@ test('strict JSON text rejects duplicate keys and executable objects', () => {
   const duplicate = validate(bundle, badCrew, agents, mapping);
   assert.equal(duplicate.valid, false);
   assert.equal(duplicate.errors[0].code, 'JSON_INVALID');
+  assert.equal(duplicate.errors[0].message, 'Duplicate key "name" at line 1, column 13');
 
   const objectInput = validate(bundle, freshCrew(), agents, mapping);
   assert.equal(objectInput.valid, false);

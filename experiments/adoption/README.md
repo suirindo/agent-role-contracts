@@ -136,7 +136,7 @@ This is an optional settings example, not an extension. The root-anchored matche
 | `TASK_TYPE_UNROUTED` at `task/type` (exit 1) | Use the intended existing route; the starter declares `code-change`. A new route needs a reviewed bundle change |
 | `TASK_WRITE_SCOPE_INVALID` at `task/inputs/scope` (exit 1) | Use the accurate portable relative path supported by the installed version; see the compatibility table above |
 | `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` at `task/inputs/scope` (exit 1) | Compare the real task with the reviewed authority. Correct a mistaken scope; route genuinely broader work through existing approval |
-| `CLI_ERROR` (exit 2) | Read `message`; correct the command/options or the named path, read access, and working directory. The checker did not reach a declaration result |
+| `CLI_ERROR` (exit 2) | Read `message`; correct the command/options or the named path, read access, and working directory. The checker did not reach a declaration result. In the pinned 1.0.0 checker this is always one JSON line on stderr, even with `--format text`; source main prints `CLI_ERROR: <message>` as text when `--format text` was given |
 | `ARC staged declaration check: Stage one resolved regular file for …` (exit 2) | Resolve conflicts and stage the reviewed `.arc/bundle.json` and `.arc/task.json`; changing only the worktree does not change the checked input |
 
 For conceptual role and handoff failures, use the existing [failure cases](../../docs/FAILURE-CASES.md). Keep the exact command, core version, exit, and redacted diagnostic when asking for help.
@@ -152,6 +152,17 @@ To stop, remove only the ARC job, script entries, hook invocation, instruction b
 Use the existing [workflow evaluation kit](../external-evaluation/README.md) for two genuine tasks. Record preparation, maintenance, and rechecking effort, contradictions found, and overlap with your existing controls. A local template test is not evidence of native agent behavior, hosted CI success, production adoption, or time saved.
 
 Report a first attempt, including `NOT_RUN` or `BLOCKED`, through the short [first-attempt form](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml). Share a real workflow through the existing [workflow feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml). Neither a setup check nor a first-attempt report substitutes for the two genuine tasks above. If you expect to return to the project, the repository's optional Star action remains available.
+
+## Run the kit tests from a source checkout
+
+The kit's tests under `tests/` exercise the consumer's locked installation of the **published 1.0.0** package, not the repository source. A fresh clone has no such installation, so install it once from the repository root with the same command as the `published-consumer` CI job, then run the tests:
+
+```sh
+npm ci --prefix experiments/adoption/consumer --ignore-scripts --include=dev --no-audit --no-fund
+node --test experiments/adoption/tests/*.test.mjs
+```
+
+Until that installation exists, every kit test skips and prints this instruction as its reason. The repository's `npm run check` does not include these tests. The install reads the consumer lockfile only; it does not change the repository source or the standalone `arc-check` copy from section 1.
 
 ## Sources and verification boundary
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — first-run diagnostics (source only; not in the published 1.0.0 package)
+
+- CLI: an exit `2` `CLI_ERROR` is one `CLI_ERROR: <message>` line on stderr when `--format text` was given. Without `--format`, with `--format json`, or when the `--format` value is invalid, the one-line JSON form is unchanged ([#109](https://github.com/suirindo/agent-role-contracts/issues/109)).
+- CLI: `--help` gains one reviewed line showing the package-bin form (`npx --no-install agent-role-contracts …`) that an installed consumer runs; the archived-package differential now permits this line in addition to the two 1.0.0 wording changes ([#110](https://github.com/suirindo/agent-role-contracts/issues/110)).
+- CLI text output: one missing input that several roles require is reported as one `TASK_INPUT_REQUIRED` line listing the roles. The JSON report keeps one entry per role ([#110](https://github.com/suirindo/agent-role-contracts/issues/110)).
+- Core and CrewAI adapter: `JSON_INVALID` keeps its code and path; its message now distinguishes a syntax error, empty input, a duplicate key (named) and nesting deeper than 64, with a 1-based line and column. `parseJsonRejectDuplicateKeys` still throws the code as the error message and adds the same text as `error.detail` ([#110](https://github.com/suirindo/agent-role-contracts/issues/110)).
+- Adoption kit: its tests skip with the exact `npm ci --prefix experiments/adoption/consumer …` instruction when the pinned 1.0.0 consumer dependency is not installed; CONTRIBUTING and the kit README document that prerequisite ([#108](https://github.com/suirindo/agent-role-contracts/issues/108)).
+- No schema, public API shape, machine-report field, exit class or package version changes. The published 1.0.0 tarball is immutable and does not contain these changes; they need the next reviewed release.
+
 ## 1.0.0 — compatibility commitment
 
 - Align package, lockfile, and public report metadata at `1.0.0`; at preparation on 2026-10-15 this candidate was unpublished. Current acceptance/publication is tracked in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52); external adoption is not inferred.

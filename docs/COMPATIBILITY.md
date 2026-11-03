@@ -142,3 +142,15 @@ unchanged until the 1.x compatibility process accepts a change.
 A real evaluation-onboarding task included `.github/ISSUE_TEMPLATE/workflow-feedback.yml`. The stable 1.0.0 grammar rejects that exact legitimate repository path as `WRITE_SCOPE_SYNTAX`. This source-only fix permits an explicitly declared **root** `.github` segment, for example that exact file or `.github/ISSUE_TEMPLATE/**`, while retaining the original exact/subtree containment rules. No runtime permission is granted.
 
 Other dot-prefixed segments including `.git`, `.env` and nested hidden paths, relative traversal, absolute paths and malformed separators remain unsupported. This is not present in the immutable npm v1.0.0 tarball. It does not authenticate reviewers, verify writes or enforce agent actions.
+
+## Unreleased source candidate: first-run diagnostics (#108, #109, #110)
+
+Source-only changes, absent from the immutable npm `1.0.0` tarball, that keep every machine observation of the 1.x floor:
+
+- Exit `2` with `--format text` prints one `CLI_ERROR: <message>` text line on stderr instead of the JSON line. Without `--format`, with `--format json`, or with an invalid `--format` value, stderr is the same one-line JSON as before. The corpus observes exit-2 errors without `--format`, so its raw bytes are unchanged.
+- `--help` adds one reviewed line showing the package-bin invocation. The archived-package differential permits exactly the two reviewed 1.0.0 wording changes plus this line; nothing else in the help text may differ.
+- Text output merges `TASK_INPUT_REQUIRED` entries that share a path into one line naming the roles. JSON reports, codes, paths, ordering and per-role entries are unchanged.
+- `JSON_INVALID` keeps its code and path. The message is now specific (syntax error, empty input, duplicate key, nesting depth, with line and column). Messages are human text under the compatibility commitment; the code/path pair is the machine contract. Consumers that compared the previous fixed message string must switch to the code.
+
+None of these authenticates identities, verifies writes or authorizes execution.
+

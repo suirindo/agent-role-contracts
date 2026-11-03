@@ -15,7 +15,7 @@ function read(text,schema,label) {
  if(text.length>MAX_INPUT_BYTES || new TextEncoder().encode(text).length>MAX_INPUT_BYTES) return {errors:[issue('INPUT_TOO_LARGE',label,'Input exceeds 1 MiB')]};
  let value;
  try {value=parseJsonRejectDuplicateKeys(text,'JSON_INVALID');}
- catch {return {errors:[issue('JSON_INVALID',label,'Invalid JSON, duplicate decoded keys, or nesting deeper than 64')]};}
+ catch(e) {return {errors:[issue('JSON_INVALID',label,e.detail||'Invalid JSON, duplicate decoded keys, or nesting deeper than 64')]};}
  let nodes=0;
  function inspect(v) {
   if(++nodes>50000) throw new Error('INPUT_NODE_LIMIT');
