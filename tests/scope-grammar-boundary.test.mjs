@@ -19,7 +19,7 @@ const table = [
  [['src/**'], 'src/a-b_c.d.txt', 'PASS'],
  [['src'], 'src', 'PASS'],                                   // exact scope matches only itself
  [['src'], 'src/a.txt', 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY'],
- [['.github/ISSUE_TEMPLATE/**'], '.github/ISSUE_TEMPLATE/x.yml', 'PASS'],   // source main only: explicitly declared root .github (not in npm 1.0.0)
+ [['.github/ISSUE_TEMPLATE/**'], '.github/ISSUE_TEMPLATE/x.yml', 'PASS'],   // from 1.0.1: explicitly declared root .github (rejected by npm 1.0.0)
  [['src/**'], '.github/x.yml', 'TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY'],       // a valid path outside the declared scope is a containment failure, not syntax
  [['src/**'], 'src/(ja)/page.tsx', 'TASK_WRITE_SCOPE_INVALID'],              // Next.js route group
  [['src/**'], 'src/[slug]/page.tsx', 'TASK_WRITE_SCOPE_INVALID'],            // dynamic segment

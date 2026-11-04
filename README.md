@@ -59,7 +59,7 @@ For a specific contradiction, try the [handoff repair](https://github.com/suirin
 
 ### Try the published stable package (no clone)
 
-To run the published `1.0.0` stable package without cloning the repository, start in an empty directory:
+To run the published `1.0.1` stable package without cloning the repository, start in an empty directory:
 
 For commands you can paste unchanged into **PowerShell** or a POSIX shell, use the [shell-specific installation and rejection check](docs/SHELL-COMMANDS.md).
 
@@ -67,7 +67,7 @@ For commands you can paste unchanged into **PowerShell** or a POSIX shell, use t
 mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 npx --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
@@ -85,7 +85,7 @@ If npm reports `EPERM`, `EACCES`, or `ENOENT` **while accessing or creating its 
 3. Use the same cache for installation and the CLI:
 
 ```sh
-npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 npx --cache ./.npm-cache --no-install agent-role-contracts explain \
   --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
   --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
@@ -96,7 +96,7 @@ Keep `--cache ./.npm-cache` on subsequent npm/npx commands in this environment. 
 
 If the error names an input file or another directory rather than the npm cache, check that path instead. Not every `ENOENT` is a cache problem.
 
-These commands pin the published `1.0.0` release instead of relying on the mutable `latest` dist-tag. To reproduce the historical `0.5.0` baseline, install that version explicitly; it is not the current stable recommendation.
+These commands pin the `1.0.1` release instead of relying on the mutable `latest` dist-tag. To reproduce the historical `0.5.0` baseline, install that version explicitly; it is not the current stable recommendation.
 
 ### Why it matters
 
@@ -153,11 +153,11 @@ Agent Role Contracts turns those contradictions into deterministic, offline pref
 
 No API key, agent runtime, or account is required for the starter. A PASS means the supplied declarations are internally consistent under the checks you ran; it does **not** grant runtime permission, authenticate an executor or reviewer, verify evidence, or authorize execution.
 
-**Stable release: `1.0.0` (npm `latest`, verified 2026-10-16).** The exact publication is documented in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). Node.js 22.5 or newer is required. The archived `0.5.0` release is the compatibility baseline; `1.0.0` preserves its public imports, synchronous/async API shapes, CLI behavior, twelve schema identities, fail-closed claims and G1 digest behavior. Publication does **not** authenticate an agent, enforce runtime permissions or establish production adoption.
+**Stable release: `1.0.1` (npm `latest`).** This README ships inside that package. `1.0.0` is the previous stable release; its exact publication is documented in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). Node.js 22.5 or newer is required. The archived `0.5.0` release is the compatibility baseline; the 1.x line preserves its public imports, synchronous/async API shapes, CLI behavior, twelve schema identities, fail-closed claims and G1 digest behavior. Publication does **not** authenticate an agent, enforce runtime permissions or establish production adoption.
 
 ## Migrating from 0.5.0
 
-No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to `1.0.0`; the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
+No declaration rewrite is required. Keep the existing schema versions—including lifecycle `0.4` and the existing v0.5.0-era schema IDs—and use the same imports, API calls, and CLI commands. The intentional machine-report change is the installed package `version`, from `0.5.0` to the installed 1.x release (`1.0.1` for this README); the compatibility corpus requires every other machine-report/API field, schema byte, fixed digest, and raw CLI output to remain equal except for the two reviewed human help lines. Supported 1.x releases follow semantic versioning: incompatible public-contract changes require a new major version, while deprecated behavior remains available through the applicable major line before removal.
 
 The published `1.0.0` package can be installed from npm using the [current stable instructions](#install) below. A reviewed local `.tgz` can reproduce historical prepublication evidence but is not required for ordinary installation. See the [compatibility commitment](docs/COMPATIBILITY.md), [release gates](docs/RELEASE_GATES.md) and [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52).
 
@@ -290,11 +290,11 @@ The package imports no company configuration and performs no application I/O at 
 
 ## Install
 
-**Published stable: `1.0.0` (npm `latest`, verified 2026-10-16).** Pin the exact version for reproducible installations:
+**Stable release: `1.0.1` (npm `latest`).** This README ships inside that package; `1.0.0` is the previous stable release. Pin the exact version for reproducible installations:
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
-npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 ```
 
 The registry's `latest` dist-tag may change. Check the current value when needed; this versioned README does not establish live registry state. To reproduce the archived `0.5.0` baseline, install `@netsujo/agent-role-contracts@0.5.0` explicitly. A declaration PASS does not grant runtime permission or execution authority.

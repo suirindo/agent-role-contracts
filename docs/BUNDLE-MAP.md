@@ -8,7 +8,7 @@ For a task with `type: "code-change"`, ARC selects the explicitly declared route
 
 | Property in the bundle | Value in this starter | What it means for the check |
 | --- | --- | --- |
-| `schema_version` | `"0.1"` | The bundle schema version. It is separate from the npm package version `1.0.0`. |
+| `schema_version` | `"0.1"` | The bundle schema version. It is separate from the npm package version (`1.0.1` for this document). |
 | `policy_version` | `"example-v1"` | A supplied policy label; it does not authenticate who approved it or prove freshness. |
 | `policy.capabilities` | `filesystem.read`, `filesystem.write.scoped`, `review.perform` | The declared capability vocabulary. Names alone do not give the checker tool semantics. |
 | `policy.read_only_forbids` | `filesystem.write.scoped` | Capabilities the policy forbids for a read-only role. |

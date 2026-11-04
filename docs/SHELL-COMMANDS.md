@@ -1,6 +1,6 @@
 # Copyable commands for the published package
 
-These commands use **Node.js 22.5 or newer**, npm, and the published **1.0.0** package. Run them in a new, writable directory. Installation needs access to npm; the subsequent declaration checks run locally. They do not start agents or open the files named in a task's scope.
+These commands use **Node.js 22.5 or newer**, npm, and the published **1.0.1** package. Run them in a new, writable directory. Installation needs access to npm; the subsequent declaration checks run locally. They do not start agents or open the files named in a task's scope.
 
 ## macOS / Linux: POSIX shell
 
@@ -8,7 +8,7 @@ These commands use **Node.js 22.5 or newer**, npm, and the published **1.0.0** p
 mkdir arc-first-check
 cd arc-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 node node_modules/@netsujo/agent-role-contracts/bin/agent-role-contracts.mjs explain --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json --format text
 echo $?
 ```
@@ -19,7 +19,7 @@ echo $?
 mkdir arc-first-check
 cd arc-first-check
 npm.cmd init --yes
-npm.cmd install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm.cmd install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 node node_modules/@netsujo/agent-role-contracts/bin/agent-role-contracts.mjs explain --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json --format text
 $LASTEXITCODE
 ```
@@ -41,7 +41,7 @@ It reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` and exits **1**. Immediately ins
 Only when the error names npm's cache directory, retry the failed npm command with `--cache ./.npm-cache`. For example:
 
 ```sh
-npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 ```
 
 In PowerShell, use `npm.cmd` in that line. If `npm init` was the command that failed, retry `npm --cache ./.npm-cache init --yes` first (`npm.cmd` in PowerShell). Do not commit the local cache. An error naming an input JSON file needs a path/permission repair instead.

@@ -121,7 +121,7 @@ A stronger signal is the same enforcement or evidence gap appearing in at least 
 
 ## What this project currently covers
 
-The public package checks declarations. The published stable `1.0.0` release and its archived `0.5.0` compatibility baseline cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
+The public package checks declarations. The published stable `1.0.1` release, its predecessor `1.0.0` and the archived `0.5.0` compatibility baseline cover task/action binding, a narrow filesystem-write mapping, and lifecycle declarations.
 
 It does not authenticate agents, grant runtime permission, verify output bytes, enforce any runtime, filesystem, SaaS or API permission, or prove that a reviewer was independent in the real execution environment. Check the README for the exact boundary of the version you are using.
 

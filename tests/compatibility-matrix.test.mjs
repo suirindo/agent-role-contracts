@@ -248,7 +248,7 @@ test('packed public consumer corpus and optional published differential', {timeo
   const baselineSHA256 = sha256(readFileSync(baselinePath)); assert.equal(baselineSHA256, publishedTarballSHA256, 'baseline tarball must be the reviewed published 0.5.0 bytes');
   const baseline = installAndObserve('baseline-consumer', baselinePath);
   assert.equal(baseline.installedVersion, '0.5.0');
-  assert.equal(candidate.installedVersion, '1.0.0');
+  assert.equal(candidate.installedVersion, '1.0.1');
   const oldHelp = 'Finance is a v0.2 preview. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nExit 0: declared contracts consistent.';
   // Reviewed help differences from the published 0.5.0 baseline: the two 1.0.0 wording changes plus the unreleased package-bin usage line (#110).
   const newHelp = 'The optional finance declaration profile uses schema version 0.2; this is independent of package stability. The CLI defaults --at to its current UTC clock; the API requires an explicit time.\nInstalled as a dependency, run the same commands through the package bin, for example: npx --no-install agent-role-contracts explain --bundle .arc/bundle.json --task .arc/task.json --format text\nExit 0: the invoked declaration check passed; it does not mean another operation passed.';
@@ -256,6 +256,6 @@ test('packed public consumer corpus and optional published differential', {timeo
   const {help: baselineHelp, ...baselineCli} = baseline.cli;
   const {help: candidateHelp, ...candidateCli} = candidate.cli;
   assert.deepEqual({...baselineHelp, stdout: baselineHelp.stdout.replace(oldHelp, newHelp)}, candidateHelp);
-  assertVersionOnlyCompatible({...baseline, cli: baselineCli}, {...candidate, cli: candidateCli}, '0.5.0', '1.0.0');
+  assertVersionOnlyCompatible({...baseline, cli: baselineCli}, {...candidate, cli: candidateCli}, '0.5.0', '1.0.1');
   console.log(JSON.stringify({type: 'ARC_COMPATIBILITY_DIAGNOSTIC', mode: 'DIFFERENTIAL', comparison: 'PASS', candidateVersion: candidate.installedVersion, baselineVersion: baseline.installedVersion, candidateTarballSHA256: candidateSHA256, baselineTarballSHA256: baselineSHA256, normalizationPolicy: 'exact installed metadata and top-level API/pretty-JSON report version only; raw non-report output unchanged', fixtureCount: Object.keys(fixtureHashes).length, schemaCount: Object.keys(schemaHashes).length, cliPositiveCount: Object.keys(candidate.cli.positive).length, cliMissingCount: Object.keys(candidate.cli.missing).length}));
 });

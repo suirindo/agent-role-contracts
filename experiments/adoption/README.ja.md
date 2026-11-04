@@ -70,7 +70,7 @@ ARC が読むのは宣言です。Git の差分や、scope が指すソースフ
 | `.github/workflows/arc.yml` | `.` で始まるパス要素として拒否する | ルートの `.github` を明示した、適切な許可範囲がある場合のみ扱える。同梱の `src/**` では範囲外 |
 | `src/.hidden`、`../src/file.mjs`、`/tmp/file.mjs` | scope の構文として拒否する | 同じ |
 
-ルートの `.github` を扱う例外は、[未リリースのソース変更（英語）](../../docs/COMPATIBILITY.md#unreleased-source-candidate-explicitly-scoped-root-github-paths)です。公開済みの 1.0.0 パッケージには入っていません。実際の `.github` の変更を隠すために別の scope を記述したり、PASS にするためだけに権限を広げたりしないでください。1.0.0 で表現できないパスが必要な場合は、既存のレビューを維持し、その制約を記録します。
+ルートの `.github` を扱う例外は、[1.0.1 での修正（英語）](../../docs/COMPATIBILITY.md#101-explicitly-scoped-root-github-paths)です。この consumer が固定している 1.0.0 パッケージには入っていません。実際の `.github` の変更を隠すために別の scope を記述したり、PASS にするためだけに権限を広げたりしないでください。1.0.0 で表現できないパスが必要な場合は、既存のレビューを維持し、その制約を記録します。
 
 ## 3. 連携先を一つ選ぶ
 
