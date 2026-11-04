@@ -39,13 +39,13 @@ npm --prefix agent-role-contracts run demo --silent
 | 自分のプログラムから呼びたい | [公開APIを使う実行可能な例](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md)があります（英語）。 |
 | 試した結果や、開始できなかった理由を残したい | [初回報告フォーム](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml)へ、実行した範囲を記録できます（英語）。 |
 
-cloneせず公開済み`1.0.0`を試す場合は、新しい空のディレクトリで次のコマンドを実行します。最後のコマンドは途中で改行せず、そのままコピーできます。
+cloneせず公開済み`1.0.1`を試す場合は、新しい空のディレクトリで次のコマンドを実行します。最後のコマンドは途中で改行せず、そのままコピーできます。
 
 ```sh
 mkdir arc-first-check
 cd arc-first-check
 npm init --yes
-npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 node node_modules/@netsujo/agent-role-contracts/bin/agent-role-contracts.mjs explain --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json --format text
 ```
 
@@ -59,7 +59,7 @@ npmの**キャッシュディレクトリへのアクセス・作成時**に`EPE
 - `npm init`で失敗した場合は、先に`npm --cache ./.npm-cache init --yes`を実行します。
 - 後続のnpm/npxコマンドにも同じ指定を付けます。キャッシュディレクトリはコミットしません。
 
-たとえばインストールで失敗した場合は、`npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.0`を実行します。PowerShellでは`npm.cmd`を使います。上の`node`による検査コマンドはnpmキャッシュを使いません。
+たとえばインストールで失敗した場合は、`npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.1`を実行します。PowerShellでは`npm.cmd`を使います。上の`node`による検査コマンドはnpmキャッシュを使いません。
 
 入力ファイルなど、キャッシュ以外のパスがエラーに出ている場合は、そのパスを確認してください。すべての`ENOENT`がキャッシュの問題とは限りません。
 
@@ -87,11 +87,11 @@ Netsujoは、**Building trustworthy infrastructure for AI agents in the real wor
 
 [公開v1.0.0を固定した外部評価キット](experiments/external-evaluation/README.md)では、実ワークフローの宣言と意図的な矛盾を再現し、[証拠記録テンプレート](experiments/external-evaluation/EVIDENCE_TEMPLATE.md)で結果を共有できます。合成例のPASSと第三者による実タスクの利用証拠は分けて扱います。
 
-**現在の安定版は`1.0.0`（npm `latest`、2026年10月16日確認）です。** npm公開と検証の正本は[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)にあります。`0.5.0`は互換性検証用の履歴版です。Node.js 22.5以上が必要で、既存のimport、同期・非同期API、CLI、12個のschema version/ID、fail-closedな宣言、G1 digestを維持します。ただし公開・PASSは実行者の本人確認、runtimeでのアクセス制御、本番導入を証明しません。
+**安定版は`1.0.1`（npm `latest`）です。** このREADMEはそのパッケージに同梱されています。`1.0.0`は前の安定版、`0.5.0`は互換性検証用の履歴版です。`1.0.0`のnpm公開と検証の記録は[issue #52](https://github.com/suirindo/agent-role-contracts/issues/52)にあります。Node.js 22.5以上が必要で、既存のimport、同期・非同期API、CLI、12個のschema version/ID、fail-closedな宣言、G1 digestを維持します。ただし公開・PASSは実行者の本人確認、runtimeでのアクセス制御、本番導入を証明しません。
 
 ## 0.5.0からの移行
 
-宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から`1.0.0`になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
+宣言の書き換えは不要です。lifecycle `0.4`とv0.5.0時代からのschema IDを含む既存schema versionを変更せず、同じimport、API call、CLI commandを利用できます。machine reportで意図的に変わるのは導入packageの`version`だけで、`0.5.0`から導入した1.x版（このREADMEでは`1.0.1`）になります。互換性corpusは、それ以外のmachine report/API field・schema bytes・固定digest・raw CLI outputが、review済みのhuman help 2行を除いて一致することを検査します。1.xはsemantic versioningに従い、互換性を壊すpublic contract変更には次のmajor versionが必要です。deprecatedな挙動は、削除前に該当major lineで移行期間を設けます。
 
 `1.0.0`の配布物には、`src/crewai-adapter.mjs`と`examples/crewai-adapter-spike/`内の7ファイルを追加しています。これらは未exportの実験用ファイルです。公開APIおよび1.xの互換性保証には含めず、CrewAI用のpackage subpathやCLI commandも提供しません。実験コードの同梱は、CrewAIの実行やruntime権限の強制を意味しません。
 
@@ -220,11 +220,11 @@ runtime固有宣言の検出は意図的に限定されています。汎用的�
 
 ## インストール
 
-**公開済みの安定版は`1.0.0`（npm `latest`、2026年10月16日確認）です。** 再現性のため、導入時は版を固定します。
+**安定版は`1.0.1`（npm `latest`）です。** 再現性のため、導入時は版を固定します。
 
 ```sh
 npm view @netsujo/agent-role-contracts dist-tags --json
-npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.0
+npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
 ```
 
 `latest`の参照先は将来変わるため、現在値はregistryで確認してください。過去の`0.5.0`を再現する場合だけ、`@netsujo/agent-role-contracts@0.5.0`を明示指定します。公開やPASSはruntime権限・実行許可を与えません。

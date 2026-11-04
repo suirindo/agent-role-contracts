@@ -1,12 +1,12 @@
 # Public compatibility surface
 
-This document is the canonical compatibility commitment for the published stable `1.0.0` release. The prepublication source snapshot was prepared on 2026-10-15; authorized npm publication and exact artifact verification completed on 2026-10-16 and are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). The compatibility floor is the genuinely published `0.5.0` package. Downstream adoption and runtime authorization are separate outcomes. Machine compatibility changes only installed package/report version metadata; exactly two reviewed human CLI-help lines also change wording.
+This document is the canonical compatibility commitment for the 1.x line, currently `1.0.1`. The `1.0.0` source snapshot was prepared on 2026-10-15; its authorized npm publication and exact artifact verification completed on 2026-10-16 and are recorded in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52). `1.0.1` is a patch release; see the `1.0.1` sections below and the CHANGELOG. The compatibility floor is the genuinely published `0.5.0` package. Downstream adoption and runtime authorization are separate outcomes. Machine compatibility changes only installed package/report version metadata; exactly two reviewed human CLI-help lines also change wording.
 
 ## Migrating from 0.5.0
 
-Upgrading requires no declaration rewrite. Node.js `>=22.5`, all public import paths, synchronous and promise-returning API shapes, CLI commands and exit classes, false limitation claims, the twelve schema files and their existing versions/IDs—including lifecycle schema `0.4` and IDs containing their historical lifecycle versions—and exact G1 digest behavior remain unchanged. Machine reports identify the installed package as `1.0.0`; that top-level `version` field is the sole approved machine-report differential from the archived `0.5.0` corpus. Separately, exactly two reviewed human CLI-help lines change wording.
+Upgrading requires no declaration rewrite. Node.js `>=22.5`, all public import paths, synchronous and promise-returning API shapes, CLI commands and exit classes, false limitation claims, the twelve schema files and their existing versions/IDs—including lifecycle schema `0.4` and IDs containing their historical lifecycle versions—and exact G1 digest behavior remain unchanged. Machine reports identify the installed package (`1.0.0`, then `1.0.1`); that top-level `version` field is the sole approved machine-report differential from the archived `0.5.0` corpus. Separately, exactly two reviewed human CLI-help lines change wording in `1.0.0`, and `1.0.1` adds one reviewed help line.
 
-The 1.x line follows semantic versioning. Compatible additions must preserve existing consumers; deprecations remain available with a documented migration period within the applicable major line before removal, and breaking public-contract changes require a new major version. The reviewed local `.tgz` was used for prepublication verification; users can now install `@netsujo/agent-role-contracts@1.0.0` from npm. See the accepted [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52) and [RELEASE_GATES.md](RELEASE_GATES.md).
+The 1.x line follows semantic versioning. Compatible additions must preserve existing consumers; deprecations remain available with a documented migration period within the applicable major line before removal, and breaking public-contract changes require a new major version. The reviewed local `.tgz` was used for prepublication verification; users can install `@netsujo/agent-role-contracts@1.0.1` (or the previous `1.0.0`) from npm. See the accepted [publication receipt](https://github.com/suirindo/agent-role-contracts/issues/52) and [RELEASE_GATES.md](RELEASE_GATES.md).
 
 The package is an offline declaration checker. A `valid: true` report means that the declarations passed the checks performed by the invoked operation; it is not a substitute for a different validation operation. In particular, `describeTaskLifecycle` and `lifecycle-describe` can return `valid: true` with `lifecycle_matches_subject: false` when route or phase semantics fail. Use `validateTaskLifecycle` or `lifecycle` for full lifecycle declaration validation. A valid lifecycle may still declare `blocked`, `denied`, `declared_failure` or `missing`; consistency is not work success. It never means that an action was authorized or executed, an identity or evidence was authenticated, a provider was called, a filesystem or chain was inspected, or a deployment or production adoption occurred.
 
@@ -16,7 +16,7 @@ Agent Role Contracts began as a bounded extraction and generalization of declara
 
 ## Package and API contract
 
-The published stable package is `@netsujo/agent-role-contracts@1.0.0`, requires Node.js `>=22.5`, and has these unchanged public mappings:
+The published stable package is `@netsujo/agent-role-contracts@1.0.1`, requires Node.js `>=22.5`, and has these unchanged public mappings:
 
 | Import | Target | Exports |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Every core and finance export on the root facade is the identical JavaScript val
 
 Physical package contents extend beyond this public API. The `1.0.0` tarball ships `src/crewai-adapter.mjs` and the seven files under `examples/crewai-adapter-spike/` as an unexported experiment. These eight additions to the archived `0.5.0` file inventory are excluded from the 1.x compatibility commitment. There is no supported CrewAI package subpath or CLI command; importing an internal file by its disk path does not make it public API.
 
-`VERSION` identifies the installed package version (`"1.0.0"` in the published stable release); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
+`VERSION` identifies the installed package version (`"1.0.1"` in the current stable release); it is deliberately not frozen to the archived package version. `MAX_INPUT_BYTES` is 1,048,576 bytes per input under the current profile. `validateBundle`, `explainTask`, and `validateHandoff` return report objects synchronously. The following existing APIs return promises: `describeTaskAction`, `validateTaskActionBinding`, `describeTaskLifecycle`, `validateTaskLifecycle`, `validateFilesystemWriteMapping`, `describeFinancialIntent`, `validateFinancialIntent`, `validateFinancialExecution`, and `validateSafeProposal`. All accept JSON text, perform declaration checks only, and make no provider calls.
 
 ## Schema contract
 
@@ -55,7 +55,7 @@ The seven core, one adapter, and four finance/Safe schemas remain disjoint. Thei
 
 ## Report and digest contract
 
-Machine reports are deterministic for identical explicit inputs. Every API report includes `tool: "agent-role-contracts"`, `version` equal to the installed package (`"1.0.0"` for this candidate), a stable `kind`, boolean `valid`, sorted `errors` containing `{code,path,message}`. Error `code` and `path` are machine compatibility fields; human message wording is not a byte-stable API. Reports also include these fail-closed fields set to `false`:
+Machine reports are deterministic for identical explicit inputs. Every API report includes `tool: "agent-role-contracts"`, `version` equal to the installed package (`"1.0.1"` for this candidate), a stable `kind`, boolean `valid`, sorted `errors` containing `{code,path,message}`. Error `code` and `path` are machine compatibility fields; human message wording is not a byte-stable API. Reports also include these fail-closed fields set to `false`:
 
 `execution_authorized`, `runtime_enforcement`, `identity_verified`, `evidence_verified`, `source_files_checked`, `sensitive_data_scanned`, and `output_schema_validated`.
 
@@ -122,7 +122,7 @@ carries the shape; it is an **applicability gap, not a security finding**. `test
 | Shape | Example | Result | Where |
 | --- | --- | --- | --- |
 | Hidden root other than `.github` | `.env`, `.vscode/**` | `WRITE_SCOPE_SYNTAX` | bundle `allowed_write_scopes` |
-| Root `.github` segment | `.github/ISSUE_TEMPLATE/x.yml` | PASS in **source main** only; `WRITE_SCOPE_SYNTAX` in published 1.0.0 | both |
+| Root `.github` segment | `.github/ISSUE_TEMPLATE/x.yml` | PASS from `1.0.1`; `WRITE_SCOPE_SYNTAX` in `1.0.0` | both |
 | Hidden segment below the root | `src/.env`, `src/x/.hidden/a` | `TASK_WRITE_SCOPE_INVALID` | task `inputs.scope` |
 | Parenthesised or bracketed segment (Next.js route group, dynamic segment) | `src/(ja)/page.tsx`, `src/[slug]/page.tsx` | `TASK_WRITE_SCOPE_INVALID` | task |
 | Whitespace, `@`, non-ASCII characters | `src/a b.txt`, `src/@scope/a`, `src/日本語.md` | `TASK_WRITE_SCOPE_INVALID` | task |
@@ -137,15 +137,15 @@ path in the evaluation evidence, and do not widen the bundle or rename the path 
 [literal-path profile](../experiments/literal-paths/README.md) is the explicit experiment for such paths; the stable grammar is
 unchanged until the 1.x compatibility process accepts a change.
 
-## Unreleased source candidate: explicitly scoped root .github paths
+## 1.0.1: explicitly scoped root .github paths
 
-A real evaluation-onboarding task included `.github/ISSUE_TEMPLATE/workflow-feedback.yml`. The stable 1.0.0 grammar rejects that exact legitimate repository path as `WRITE_SCOPE_SYNTAX`. This source-only fix permits an explicitly declared **root** `.github` segment, for example that exact file or `.github/ISSUE_TEMPLATE/**`, while retaining the original exact/subtree containment rules. No runtime permission is granted.
+A real evaluation-onboarding task included `.github/ISSUE_TEMPLATE/workflow-feedback.yml`. The stable 1.0.0 grammar rejects that exact legitimate repository path as `WRITE_SCOPE_SYNTAX`. This correction, shipped in `1.0.1`, permits an explicitly declared **root** `.github` segment, for example that exact file or `.github/ISSUE_TEMPLATE/**`, while retaining the original exact/subtree containment rules. No runtime permission is granted.
 
-Other dot-prefixed segments including `.git`, `.env` and nested hidden paths, relative traversal, absolute paths and malformed separators remain unsupported. This is not present in the immutable npm v1.0.0 tarball. It does not authenticate reviewers, verify writes or enforce agent actions.
+Other dot-prefixed segments including `.git`, `.env` and nested hidden paths, relative traversal, absolute paths and malformed separators remain unsupported. It is not present in the immutable npm `1.0.0` tarball. It does not authenticate reviewers, verify writes or enforce agent actions.
 
-## Unreleased source candidate: first-run diagnostics (#108, #109, #110)
+## 1.0.1: first-run diagnostics and distributed README correction
 
-Source-only changes, absent from the immutable npm `1.0.0` tarball, that keep every machine observation of the 1.x floor:
+Patch release `1.0.1` (#53, #108, #109, #110). Its distributed English/Japanese READMEs name `1.0.1` as the stable release; the immutable `1.0.0` tarball keeps its candidate-era README prose. The following changes keep every machine observation of the 1.x floor:
 
 - Exit `2` with `--format text` prints one `CLI_ERROR: <message>` text line on stderr instead of the JSON line. Without `--format`, with `--format json`, or with an invalid `--format` value, stderr is the same one-line JSON as before. The corpus observes exit-2 errors without `--format`, so its raw bytes are unchanged.
 - `--help` adds one reviewed line showing the package-bin invocation. The archived-package differential permits exactly the two reviewed 1.0.0 wording changes plus this line; nothing else in the help text may differ.

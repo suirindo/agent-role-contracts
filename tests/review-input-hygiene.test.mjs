@@ -16,9 +16,9 @@ const digest = p => createHash('sha256').update(readFileSync(p)).digest('hex');
 
 // Frozen snapshot of the core used by the D1 explanation prototype (PR #79); tree.json pins it so the explanation stays
 // reproducible against the exact bytes it was reviewed with. Remove an entry when the copy is removed.
-// strict-json.mjs is no longer listed: the source gained positioned JSON_INVALID detail (#110) while the frozen copy kept the
-// reviewed bytes that tree.json pins, so it is no longer byte-identical and no longer a review-input duplicate.
-const ALLOWED = new Map(['contract-checks.mjs', 'core.mjs', 'report.mjs', 'schema.mjs', 'schemas.core.generated.mjs', 'task-lifecycle.mjs', 'version.mjs']
+// strict-json.mjs (positioned JSON_INVALID detail, #110) and version.mjs (1.0.1 bump) are no longer listed: the source moved on
+// while the frozen copies kept the reviewed bytes that tree.json pins, so they are no longer byte-identical review-input duplicates.
+const ALLOWED = new Map(['contract-checks.mjs', 'core.mjs', 'report.mjs', 'schema.mjs', 'schemas.core.generated.mjs', 'task-lifecycle.mjs']
  .map(f => ['experiments/d1-property/src/' + f, 'frozen D1 explanation snapshot (PR #79), pinned by experiments/d1-property/tree.json']));
 
 const canonical = new Map();

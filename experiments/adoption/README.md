@@ -68,7 +68,7 @@ The consumer remains pinned to **published 1.0.0** even when you copy this kit f
 | `.github/workflows/arc.yml` | Rejected: dot-prefixed segment | Supported syntax only with matching, explicitly approved root `.github` authority; still outside the starter's `src/**` |
 | `src/.hidden`, `../src/file.mjs`, or `/tmp/file.mjs` | Rejected: invalid scope syntax | Same |
 
-The root `.github` exception is an [unreleased source change](../../docs/COMPATIBILITY.md#unreleased-source-candidate-explicitly-scoped-root-github-paths), absent from the immutable 1.0.0 package. Do not rename a task's scope to hide an actual `.github` change or widen authority to force a PASS. For a workflow whose paths 1.0.0 cannot express, keep the existing review controls and record the limitation.
+The root `.github` exception is a [1.0.1 correction](../../docs/COMPATIBILITY.md#101-explicitly-scoped-root-github-paths), absent from the immutable 1.0.0 package that this consumer pins. Do not rename a task's scope to hide an actual `.github` change or widen authority to force a PASS. For a workflow whose paths 1.0.0 cannot express, keep the existing review controls and record the limitation.
 
 ## 3. Choose an entry point
 

@@ -15,7 +15,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 If you already have the repository, run `npm run demo --silent` from its root. No dependencies need installing. The runner uses the bundled fixtures relative to its own file, so it also works when invoked by absolute path from a different working directory. It repairs the task in memory and leaves the fixtures unchanged.
 
-For the published stable `1.0.0` package without cloning, use [the no-clone instructions](../README.md#try-the-published-stable-package-no-clone), including [recovery when npm cannot use its cache](../README.md#if-npm-cannot-use-its-cache). The already published `0.5.0` release is an archived compatibility baseline. The current public release was accepted in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52).
+For the published stable `1.0.1` package without cloning, use [the no-clone instructions](../README.md#try-the-published-stable-package-no-clone), including [recovery when npm cannot use its cache](../README.md#if-npm-cannot-use-its-cache). The already published `0.5.0` release is an archived compatibility baseline. The `1.0.0` release was accepted in [issue #52](https://github.com/suirindo/agent-role-contracts/issues/52).
 
 ## Check your own edit
 
@@ -69,7 +69,7 @@ npm run demo:filesystem-adapter
 npm run demo:lifecycle
 ```
 
-The corresponding G1/G2/G3 code, examples, and subpaths are included in published stable `1.0.0`, with the previous `0.5.0` release retained as a compatibility baseline. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the packaged APIs, CLI, and example files rather than expecting those repository scripts to appear in its own `package.json`.
+The corresponding G1/G2/G3 code, examples, and subpaths are included in published stable `1.0.1` (and in `1.0.0`), with the previous `0.5.0` release retained as a compatibility baseline. The `npm run demo:*` script names above belong to this repository's `package.json`; a separate consumer project that installs the package should use the packaged APIs, CLI, and example files rather than expecting those repository scripts to appear in its own `package.json`.
 
 See the [integration sequence](INTEGRATION.md#integration-sequence) for G1 review binding, the explicit optional G2 adapter and G3 lifecycle declarations. These demos neither execute actions nor verify artifact bytes.
 

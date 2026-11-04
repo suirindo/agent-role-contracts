@@ -6,7 +6,7 @@ import * as core from '../src/core.mjs';
 import * as finance from '../src/finance-profile.mjs';
 import * as adapter from '../src/filesystem-write-adapter.mjs';
 const {validateFilesystemWriteMapping} = adapter;
-const candidateVersion = '1.0.0';
+const candidateVersion = '1.0.1';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const json = value => JSON.stringify(value);
@@ -23,7 +23,7 @@ const assertReport = (report, {kind, valid}) => {
   for (const error of report.errors) assert.deepEqual(Object.keys(error).sort(), ['code', 'message', 'path']);
 };
 
-test('package, lockfile and public constants pin the 1.0.0 candidate metadata', () => {
+test('package, lockfile and public constants pin the 1.0.1 candidate metadata', () => {
   const pkg = JSON.parse(read('package.json')), lock = JSON.parse(read('package-lock.json'));
   assert.equal(pkg.version, candidateVersion);
   assert.equal(pkg.version, core.VERSION);
