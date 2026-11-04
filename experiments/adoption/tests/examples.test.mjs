@@ -5,13 +5,18 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import test from 'node:test';
+import { test as nodeTest } from 'node:test';
+import { skipReason } from './consumer-install.mjs';
 
 const consumer = resolve(dirname(fileURLToPath(import.meta.url)), '../consumer');
 const installed = join(consumer, 'node_modules/@netsujo/agent-role-contracts');
-const manifest = JSON.parse(readFileSync(join(installed, 'package.json'), 'utf8'));
-assert.equal(manifest.name, '@netsujo/agent-role-contracts');
-assert.equal(manifest.version, '1.0.0');
+// One stated skip per test when the consumer dependency is absent, instead of a load-time crash (#108).
+const test = (name, fn) => nodeTest(name, { skip: skipReason(installed) }, fn);
+if (!skipReason(installed)) {
+  const manifest = JSON.parse(readFileSync(join(installed, 'package.json'), 'utf8'));
+  assert.equal(manifest.name, '@netsujo/agent-role-contracts');
+  assert.equal(manifest.version, '1.0.0');
+}
 const hash = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
 
 function run(name, args = [], status = 0, cwd = consumer) {

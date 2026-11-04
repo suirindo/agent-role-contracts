@@ -100,7 +100,7 @@ Git hook、各エージェントの指示ファイル、VS Code の詳細設定�
 | `TASK_TYPE_UNROUTED`、`task/type`、終了コード 1 | 意図した既存の経路を選ぶ。同梱例は `code-change`。新しい経路には bundle のレビューが必要 |
 | `TASK_WRITE_SCOPE_INVALID`、`task/inputs/scope`、終了コード 1 | 利用中のバージョンで扱える、実際の作業に即した相対パスを使う。上の scope 表を確認する |
 | `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`、`task/inputs/scope`、終了コード 1 | 誤記した scope を修正する。実際に広い範囲が必要なら、既存の権限承認へ戻す |
-| `CLI_ERROR`、終了コード 2 | `message` を読み、コマンド・オプション、対象パス、読取権限、作業ディレクトリを直す |
+| `CLI_ERROR`、終了コード 2 | `message` を読み、コマンド・オプション、対象パス、読取権限、作業ディレクトリを直す。固定した公開版 1.0.0 では `--format text` を指定しても stderr に 1 行の JSON で出る。source main では `--format text` のとき `CLI_ERROR: <message>` のテキストで出る |
 | `ARC staged declaration check: Stage one resolved regular file for …`、終了コード 2 | 競合を解消し、レビュー済みの `.arc/bundle.json` と `.arc/task.json` をステージする。作業ファイルだけの変更では入力は変わらない |
 
 役割や引継ぎの不整合は、既存の[失敗例（英語）](../../docs/FAILURE-CASES.md)も参照してください。相談するときは、実行したコマンド、コアのバージョン、終了コード、機密情報を除いた診断を残します。
@@ -116,6 +116,17 @@ Git hook、各エージェントの指示ファイル、VS Code の詳細設定�
 実際の有用性は、既存の[実務評価キット（英語）](../external-evaluation/README.md)を使い、異なる二つの実タスクで確かめます。準備・維持・再確認の手間、見つかった矛盾、既存の仕組みとの重複を記録してください。ローカルのテンプレート確認は、エージェントの実行、本番導入、時間短縮の証拠にはなりません。
 
 最初の試行は、`NOT_RUN` や `BLOCKED` も含めて[短い報告フォーム（英語）](https://github.com/suirindo/agent-role-contracts/issues/new?template=adoption-start.yml)から共有できます。実タスクの結果には[実務評価フォーム（英語）](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml)を使ってください。セットアップ確認や最初の報告で、二つの実タスクによる評価を代替することはできません。
+
+## source checkout からキットのテストを実行する
+
+`tests/` 配下のテストは、リポジトリのソースではなく、consumer に固定インストールした**公開版 1.0.0** を使います。clone 直後にはそのインストールがないため、リポジトリのルートで CI の `published-consumer` job と同じ次のコマンドを一度実行してから、テストを実行してください。
+
+```sh
+npm ci --prefix experiments/adoption/consumer --ignore-scripts --include=dev --no-audit --no-fund
+node --test experiments/adoption/tests/*.test.mjs
+```
+
+インストールがない間は、各テストはこの案内を理由として表示してスキップします（失敗にはなりません）。リポジトリの `npm run check` にこのテストは含まれません。このインストールは consumer の lockfile だけを読み、リポジトリのソースや、1 節で複製した `arc-check` には影響しません。
 
 ## 詳細資料と確認範囲
 

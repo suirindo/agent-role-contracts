@@ -95,6 +95,16 @@ test('malformed JSON rejected',()=>assert.equal(validateBundle('{').errors[0].co
 test('duplicate decoded member names rejected',()=>assert.equal(validateBundle('{"a":1,"\\u0061":2}').errors[0].code,'JSON_INVALID'));
 test('oversized JSON rejected',()=>assert.equal(validateBundle(' '.repeat(MAX_INPUT_BYTES+1)).errors[0].code,'INPUT_TOO_LARGE'));
 test('deep nesting bounded',()=>assert.equal(validateBundle('['.repeat(66)+'0'+']'.repeat(66)).errors[0].code,'JSON_INVALID'));
+// #110: the JSON_INVALID code and path are unchanged; the message distinguishes syntax, empty input, duplicate keys and depth with a 1-based line and column.
+test('JSON_INVALID message names the cause and position',()=>{
+ const first=text=>validateBundle(text).errors[0];
+ for(const [text,expected] of [['{','JSON_INVALID|Syntax error: unexpected end of input at line 1, column 2'],['','JSON_INVALID|Empty input'],['  \n ','JSON_INVALID|Empty input: only whitespace'],['{"a":1,"\\u0061":2}','JSON_INVALID|Duplicate key "a" at line 1, column 8'],['{"a":1,}','JSON_INVALID|Syntax error: trailing comma before "}" at line 1, column 7'],['[1,]','JSON_INVALID|Syntax error: trailing comma before "]" at line 1, column 3'],['{\n "a": @\n}','JSON_INVALID|Syntax error: unexpected character "@" at line 2, column 7'],['{} true','JSON_INVALID|Syntax error: unexpected content after the JSON value at line 1, column 4'],['\u00a0{}','JSON_INVALID|Syntax error: unexpected character U+00A0 at line 1, column 1'],['{"a":"\\x"}','JSON_INVALID|Syntax error: invalid escape \\x at line 1, column 7'],['['.repeat(66)+'0'+']'.repeat(66),'JSON_INVALID|Nesting deeper than 64 levels at line 1, column 66']]) {
+  const e=first(text);assert.equal(`${e.code}|${e.message}`,expected,JSON.stringify(text));assert.equal(e.path,'bundle');
+ }
+ const thrown=(()=>{try{parseJsonRejectDuplicateKeys('{"k":1,"k":2}');}catch(e){return e;}})();
+ assert.equal(thrown.message,'JSON_INVALID');assert.equal(thrown.detail,'Duplicate key "k" at line 1, column 8');
+ assert.equal((()=>{try{parseJsonRejectDuplicateKeys(new Uint8Array([0xff]));}catch(e){return e.detail;}})(),'Input is not valid UTF-8 text');
+});
 test('nonfinite numeric exponent rejected anywhere',()=>{const s=json(bundle()).replace('"version":1','"version":1e999');assert.equal(validateBundle(s).errors[0].code,'NONFINITE_NUMBER');});
 test('reserved JSON keys rejected anywhere',()=>assert.equal(validateBundle('{"__proto__":{}}').errors[0].code,'RESERVED_JSON_KEY'));
 test('strict lexical parser retains generic JSON syntax',()=>assert.deepEqual(parseJsonRejectDuplicateKeys('{"a":[true,false,null,-1.2e3,"a\\u0062"]}'),{a:[true,false,null,-1200,'ab']}));

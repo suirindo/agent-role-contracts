@@ -63,6 +63,17 @@ is not on `PATH`. A skip is not a failure, and a failure is not environment nois
 and treat any `not ok` as a regression to reproduce before you change a test. Run `npm test` or `npm run check` rather than
 `node --test` directly; one compatibility test needs `npm_execpath` and says so when it is missing.
 
+The adoption kit's own tests (`experiments/adoption/tests/*.test.mjs`) are not part of `npm run check`. They run the
+consumer's locked installation of the **published 1.0.0** package, which a source checkout does not contain. Install it once
+from the repository root, exactly as the `published-consumer` CI job does, then run the kit tests:
+
+```sh
+npm ci --prefix experiments/adoption/consumer --ignore-scripts --include=dev --no-audit --no-fund
+node --test experiments/adoption/tests/*.test.mjs
+```
+
+Without that installation every kit test skips with this instruction as its stated reason; it does not fail.
+
 ### Stopping a task
 
 An agent or contributor who cannot finish a task should leave a handoff that passes the
