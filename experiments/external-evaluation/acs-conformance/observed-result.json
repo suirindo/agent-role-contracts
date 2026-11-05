@@ -1,0 +1,162 @@
+{
+  "experiment": "ARC G1/G3 x ACS Guardian T4/T8",
+  "verdict": "EXPECTED_ARC_COLUMN_REPRODUCED",
+  "package": {
+    "name": "@netsujo/agent-role-contracts",
+    "version": "1.0.1",
+    "integrity": "sha512-4FSVVjOuNlvT+dBNsEkEZ5ILUfxmhoOdWWMDlCIbYGtZss9mVICT4Yuos5iS2fkJHh1OnAYs1F4PUZpc9NEdCQ==",
+    "integrity_verified": true,
+    "tarball_sha512": "e054955633ae365bd3f9d04db0490467920b51fc6686839d59630394221b606b59b2cf66548093e18ba8b39892d9f9091e1d4e9c062cd45e0f519a5cf4d11d09"
+  },
+  "runner_sha256": "99e27cce5d3c244b4f1c904c1fe3c006a91b9c542e62985d251392ae73f11f61",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "upstream": {
+    "repository": "Noctis-dev1/acs-conformance",
+    "commit": "53a61a1aea173372a998f1e1038c323e2fa4100b",
+    "comparison_url": "https://github.com/Noctis-dev1/acs-conformance/blob/53a61a1aea173372a998f1e1038c323e2fa4100b/COMPARISON.md"
+  },
+  "cases": [
+    {
+      "case_id": "t4-baseline-binding",
+      "upstream_row": "Declared change, in the bundle, task or action",
+      "declared_change": "None; prior binding created on the current fictional subject",
+      "ran": true,
+      "arc_command": "action-subject + action-bind",
+      "exit_code": 0,
+      "valid": true,
+      "diagnostic_codes": [],
+      "subject_digest": "sha256:4385fe4ae3a0a6a39f621ad7b0ff664575c81a57162c04c282b26312a11612f9",
+      "execution_authorized": false,
+      "expected": "PASS",
+      "classification": "PRECONDITION",
+      "match": true
+    },
+    {
+      "case_id": "t4-declared-bundle",
+      "upstream_row": "Declared change, in the bundle, task or action",
+      "declared_change": "bundle declaration changed; original review/approval binding reused",
+      "ran": true,
+      "arc_command": "action-bind",
+      "exit_code": 1,
+      "valid": false,
+      "diagnostic_codes": [
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH"
+      ],
+      "subject_digest": "sha256:474a2f085c718085f9d5980d65d3d5a023f547485f1e9b812cb56ec76af62dfb",
+      "execution_authorized": false,
+      "expected": "REJECT / G1_SUBJECT_MISMATCH",
+      "classification": "DETECTED",
+      "match": true
+    },
+    {
+      "case_id": "t4-declared-task",
+      "upstream_row": "Declared change, in the bundle, task or action",
+      "declared_change": "task declaration changed; original review/approval binding reused",
+      "ran": true,
+      "arc_command": "action-bind",
+      "exit_code": 1,
+      "valid": false,
+      "diagnostic_codes": [
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH"
+      ],
+      "subject_digest": "sha256:944b2cd0259e0e5c0837940aa035295a66bf84fdbc5369cfa34c21935a8ed05f",
+      "execution_authorized": false,
+      "expected": "REJECT / G1_SUBJECT_MISMATCH",
+      "classification": "DETECTED",
+      "match": true
+    },
+    {
+      "case_id": "t4-declared-action",
+      "upstream_row": "Declared change, in the bundle, task or action",
+      "declared_change": "action declaration changed; original review/approval binding reused",
+      "ran": true,
+      "arc_command": "action-bind",
+      "exit_code": 1,
+      "valid": false,
+      "diagnostic_codes": [
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH",
+        "G1_SUBJECT_MISMATCH"
+      ],
+      "subject_digest": "sha256:607246170fbdf931ca14ad4fe9006c974406c55d0a5f0af0927bc4dad5b4fe76",
+      "execution_authorized": false,
+      "expected": "REJECT / G1_SUBJECT_MISMATCH",
+      "classification": "DETECTED",
+      "match": true
+    },
+    {
+      "case_id": "t4-underlying-definition-only",
+      "upstream_row": "Underlying change, the tool or MCP definition changes while the declaration is unchanged",
+      "declared_change": "Fictional external tool definition changed; bundle/task/action not changed",
+      "ran": true,
+      "arc_command": "action-subject + action-bind",
+      "exit_code": 0,
+      "valid": true,
+      "diagnostic_codes": [],
+      "subject_digest": "sha256:4385fe4ae3a0a6a39f621ad7b0ff664575c81a57162c04c282b26312a11612f9",
+      "execution_authorized": false,
+      "expected": "G1 PASS / EXPECTED_MISS",
+      "classification": "EXPECTED_MISS",
+      "match": true,
+      "declared_inputs_sha256_before": "ddd7beaa153c9b1e7d44331dfa7b88f64334a8b912a9465272c3f7f665725384",
+      "declared_inputs_sha256_after": "ddd7beaa153c9b1e7d44331dfa7b88f64334a8b912a9465272c3f7f665725384",
+      "fictional_definition_sha256_before": "b0056593ae74e4a62b4f8c8985e79bc7317a44281fbf8673fcd6a3dfaa5c383b",
+      "fictional_definition_sha256_after": "330ab1351638feab7d94008657d669f1999c0602491df82c9ed2104af2b22aa2",
+      "measured_by": "arc-column.mjs (not ARC)"
+    },
+    {
+      "case_id": "t8-g3-lifecycle-declared",
+      "upstream_row": "Partial fulfilment (20 of 40 confirmed), then a fill after the key closes",
+      "declared_change": "Fictional review, approval and declared-success lifecycle; no real event or quantity",
+      "ran": true,
+      "arc_command": "lifecycle",
+      "exit_code": 0,
+      "valid": true,
+      "diagnostic_codes": [],
+      "subject_digest": "sha256:4385fe4ae3a0a6a39f621ad7b0ff664575c81a57162c04c282b26312a11612f9",
+      "execution_authorized": false,
+      "expected": "G3 declaration consistency PASS",
+      "classification": "IN_SCOPE_CONSISTENT",
+      "match": true,
+      "runtime_acceptance_verified": false,
+      "event_authenticity_verified": false,
+      "execution_verified": false,
+      "state_machine_enforced": false,
+      "replay_protection_enforced": false
+    },
+    {
+      "case_id": "t8-runtime-reconciliation",
+      "upstream_row": "Partial fulfilment (20 of 40 confirmed), then a fill after the key closes",
+      "declared_change": "External confirmation, partial fill quantities, late-arriving effects and ledger state",
+      "ran": false,
+      "arc_command": null,
+      "exit_code": null,
+      "valid": null,
+      "diagnostic_codes": [],
+      "subject_digest": null,
+      "execution_authorized": false,
+      "expected": "N/A / NOT_RUN",
+      "classification": "NOT_APPLICABLE",
+      "match": true,
+      "limitation": "ARC G3 validates declaration consistency only; runtime reconciliation has not been performed."
+    }
+  ],
+  "provenance": "MAINTAINER_RUN",
+  "volatile": [
+    "environment"
+  ],
+  "limitations": [
+    "ARC checks declaration consistency offline and grants no runtime execution authority.",
+    "Underlying tool/MCP definition bytes are outside G1 subject; T4 underlying change is an expected miss.",
+    "G3 declarations do not authenticate events, external effects, partial fulfilment, or late-arrival reconciliation.",
+    "Guardian and independent ledger are measured in upstream conformance suite, NOT_RUN by this fixture."
+  ]
+}
