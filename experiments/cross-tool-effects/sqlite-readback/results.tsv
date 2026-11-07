@@ -1,0 +1,7 @@
+allowed	APPLIED	after	before	1
+declaration_only	APPLIED	before	after	1
+changed_target	AUTHORITY_MISMATCH	before	before	0
+stale_revision	AUTHORITY_MISMATCH	before	before	0
+response_lost	READBACK_CONFIRMED	after	before	1
+reader_unavailable	HOLD_UNKNOWN	after	before	1
+6/6 matched; network=0; resend=0

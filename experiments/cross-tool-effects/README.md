@@ -97,3 +97,7 @@ properties, trusted host obligations and #69's existing stages. It preserves the
 stable core/profile boundaries and #47's human-value gates. The design is not a
 formal proof or new admission authority; current reports retain
 SUPPLIED_SNAPSHOTS_ONLY, UNKNOWN authority and NOT_PERFORMED execution.
+
+## Related fixture
+
+- [SQLite readback fixture](sqlite-readback/README.md) compares a write-time target check with result readback using synthetic data offline. It is separate from D1 and D2 acceptance.
