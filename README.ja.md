@@ -67,6 +67,14 @@ npmの**キャッシュディレクトリへのアクセス・作成時**に`EPE
 
 プロンプトで`src/**`への限定を指示していても、次のタスクが別の場所を要求することがあります。役割とタスクの宣言を検査器へ渡すと、その不整合を具体的な診断コードで確認できます。実装役とレビュー役の兼務宣言も検知します。PASSは宣言の整合を示し、実際の権限制御やレビュー担当者の独立性確認は実行側で行う必要があります。
 
+**外部開発者による試用報告（ARC 1.0.0 のstandalone consumer starterを架空・非機密のタスクで試した本人の評価）：**
+
+> It still catches declaration vs write-scope mismatches that prompt instructions alone miss.
+
+— Prashant Chaurasiya, founder of Aryabhatt AI
+
+このコメントは宣言と書き込み範囲の不一致検出に関する本人の感想です。本番導入、独立した再現検証、実行時の権限制御を証明するものではありません。
+
 ### プロジェクトの方向性
 
 Netsujoは、**Building trustworthy infrastructure for AI agents in the real world.** を技術的な旗印にしています。Agent Role Contractsは、その中で役割・権限・作業範囲・レビュー分離・引き継ぎの宣言を、実行前に検査できるようにする公開レイヤーです。
