@@ -102,6 +102,14 @@ These commands pin the `1.0.1` release instead of relying on the mutable `latest
 
 A prompt can ask an agent to stay in `src/**`, while the next task requests a change elsewhere. This package turns those declarations into a repeatable check with a specific diagnostic. It also checks that the declared implementer and reviewer are different roles. A PASS means the declarations agree; your runtime must still enforce permissions and verify actual reviewer independence.
 
+**Developer feedback (self-reported synthetic-task trial of the ARC 1.0.0 standalone consumer starter):**
+
+> It still catches declaration vs write-scope mismatches that prompt instructions alone miss.
+
+— Prashant Chaurasiya, founder of Aryabhatt AI
+
+This feedback describes the author's non-sensitive, fictional task checks. It is not evidence of production adoption, independent reproduction, or runtime permission enforcement.
+
 ### Project direction
 
 Netsujo is building trustworthy infrastructure for AI agents in the real world. Agent Role Contracts is the public, narrow declaration-checking layer of that direction: make role, authority, scope, review separation and handoffs explicit enough to validate before relying on them.
