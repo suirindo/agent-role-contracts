@@ -139,7 +139,7 @@ The video shows the core preflight flow: declare **role**, **permissions**, and 
 **PASS ≠ execution authority.** A passing ARC check means the supplied declarations are internally consistent under the checks that ran. Runtime identity, actual permissions, side-effect enforcement, evidence verification, and execution approval remain separate responsibilities.
 
 - [Try the three-minute quick start](#quick-start--three-minutes)
-- [Read the v1.0.0 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v1.0.0)
+- [Read the v1.0.1 stable release](https://github.com/suirindo/agent-role-contracts/releases/tag/v1.0.1)
 - [Evaluate one real workflow](docs/EVALUATE-WORKFLOW.md)
 - [Run the pinned v1.0.0 external evaluation kit](experiments/external-evaluation/README.md)
 
