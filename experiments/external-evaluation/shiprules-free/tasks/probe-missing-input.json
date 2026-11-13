@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-probe-missing-input",
+  "type": "code-change",
+  "objective": "Probe: declare an in-scope path for which no file exists on disk.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/cases/does-not-exist/player.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}

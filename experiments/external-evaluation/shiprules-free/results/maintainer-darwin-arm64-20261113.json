@@ -1,0 +1,704 @@
+{
+  "profile": "ARC_SHIPRULES_FREE_FOUR_CASE_V2",
+  "evidence_class": "MAINTAINER_EXECUTED_PUBLIC_REPOSITORY_SYNTHETIC_COMPARISON",
+  "observed_at_utc": "2026-11-13T13:41:42.383Z",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "os_type": "Darwin",
+    "os_release": "25.6.0",
+    "git": "git version 2.51.2",
+    "bash": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)",
+    "grep_resolved_by_bash": {
+      "path": "/usr/bin/grep",
+      "version": "grep (BSD grep, GNU compatible) 2.6.0-FreeBSD"
+    },
+    "grep_note": "The scanner calls whatever grep its bash resolves; the recorded 2026-10-26 run was Linux x64, this profile records the actual grep used."
+  },
+  "pinned_sources": {
+    "arc_v1_commit": "9f6771056c47de971202360952af6d41941f7625",
+    "arc_v1_verified_blob_count": 33,
+    "arc_v1_package_version": "1.0.0",
+    "shiprules_free_commit": "8b8302e9551fb8784d7cbe7fa61eeecf127bf247",
+    "shiprules_scanner_path": "godot4/scripts/check-godot3.sh",
+    "shiprules_scanner_sha256": "58b650402c321d69cdeddc3b71abcb55ad882585a9bdad00929b1f545c61b8d7"
+  },
+  "kit": {
+    "commit_at_run": "20d95cadddb8660a43e88ace3df257e3d4c62804",
+    "fixture_dir_uncommitted_entries_at_run": [],
+    "runner": "experiments/external-evaluation/shiprules-free/run-four-case.mjs",
+    "runner_sha256": "e629563d59dea6f299dc9b8f54f61dbdc4b1264fdf841cb1ed05f7caf2b48def"
+  },
+  "fixture_sha256": {
+    "bundle.json": "726cf696a48351801c55433c81ad64750b72c39f8b549dc44b2299cbe00ef7b0",
+    "bundle.role-violation.json": "29fb67fd57971cad25a1362698a5d32c5a19369d12e42f291f909a26556a7952",
+    "tasks/baseline.json": "5b20211083c04078f9e9c1620c5c4a0e3f3cb473bb920f0177f3b9211cb6ab05",
+    "tasks/outside-scope.json": "01edcb5380a056666f9f3e855bee933ff2215bb350efcb37c50bb4cceb4d2680",
+    "tasks/syntax-regression.json": "49e46bd70df0fb8d1e298532e7ec0d2c864f38c5439d216f452630ebcccce4db",
+    "tasks/syntax-repaired.json": "e51c6a3a7a0bd657b5b4b206f396a6759ba45b8160c83c186cda9c9bf79f7ba8",
+    "tasks/probe-outside-scope-godot3.json": "e156f98e22bf5fc5a1cc043c1b45c4c3c385cc6fa0cd6dbcbb9092e3f9177884",
+    "tasks/probe-missing-input.json": "10c21c023c80d7750f4d283e84da1698b11833d260924dbb4768410a9d7e3f2d",
+    "tasks/probe-comment.json": "88289caf09877f6b28e8cd354506e3dbe7a2724224e17e042e796615d26dba25",
+    "tasks/probe-space-in-path.json": "2ec79d8bfaabd2bafc59dc9224344557a430fb77bcc39565597ccc56cd2d7f9a",
+    "cases/baseline/player.gd": "fc63a5ed5a40fa439e3b93fe3c8b47e2d219ebe89cb42e9715b369d02e21af02",
+    "cases/syntax-regression/player.gd": "987c55599120d13d06bac69a7bcb6a3855a184dd91ae3d80e4fb7b655c9fcc78",
+    "cases/syntax-repaired/player.gd": "38bdecbf5e8681499b8b56caa0d70f5773148f626e4be453d3ce015448d54aa4",
+    "cases/probe-comment/player.gd": "81926574ecd286b3633bf2d2e04bfdded2e356f381544323c9715bcab5ef9b50",
+    "cases/level one/hud.gd": "38533a25b0b66ba9e711e6243c64e9a99a9a97b90efe4dbeed895fc179f95b34",
+    "outside-scope/game_settings.gd": "f1db0eb6e256e01e2473cb834ce3eaaff0edfcd61026820f07bf46b3a43da2a1",
+    "outside-scope-godot3/enemy.gd": "3525a2fff16605e78023c74a240261dd48e24f737cc335ea47f369592a92b74f"
+  },
+  "display_substitutions": {
+    "<ARC_V1>": "pinned ARC v1.0.0 checkout",
+    "<SHIPRULES_FREE>": "pinned ShipRules-free checkout",
+    "<KIT>": "agent-role-contracts checkout holding this runner",
+    "node": "process.execPath"
+  },
+  "rows": [
+    {
+      "id": "case1_normal",
+      "kind": "case",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/baseline.json",
+        "scanner_dir": "cases/baseline"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/baseline.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 0,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-clean-baseline\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "stdout_sha256": "04caf983bd61264ea6efd6dece15272f5c410b5acb42ef4e831d8f3735a1efe8",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 27.619
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/baseline"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 38.402
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": [],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": []
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "case2a_scope_violation",
+      "kind": "case",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/outside-scope.json",
+        "scanner_dir": "outside-scope"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/outside-scope.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 1,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-outside-scope\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY\",\n      \"path\": \"task/inputs/scope\",\n      \"message\": \"Task scope is outside declared write scopes for role fixture-implementer: experiments/external-evaluation/shiprules-free/outside-scope/game_settings.gd\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "stdout_sha256": "5b785f48fae44f40212940801b801303872aeaeddad8e929f24f5830a64c7d94",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 30.834
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "outside-scope"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 35.203
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY"
+          ],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY"
+          ]
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "case2b_role_violation",
+      "kind": "case",
+      "inputs": {
+        "bundle": "bundle.role-violation.json",
+        "task": "tasks/baseline.json",
+        "scanner_dir": "cases/baseline"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.role-violation.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/baseline.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 1,
+        "stdout": "{\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"REVIEWER_NOT_READ_ONLY\",\n      \"path\": \"bundle/routes/0\",\n      \"message\": \"Reviewer must declare read_only: fixture-implementer\"\n    },\n    {\n      \"code\": \"SELF_REVIEW_DECLARED\",\n      \"path\": \"bundle/routes/0\",\n      \"message\": \"Role is both implementer and reviewer: fixture-implementer\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "stdout_sha256": "bd29deba0126e199a786fb544f2b5c97a11c4d9fcb93480bc353cf6dac860880",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 28.244
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/baseline"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 33.56
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "REVIEWER_NOT_READ_ONLY",
+            "SELF_REVIEW_DECLARED"
+          ],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "SELF_REVIEW_DECLARED",
+            "REVIEWER_NOT_READ_ONLY"
+          ]
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "case3_in_scope_syntax_violation",
+      "kind": "case",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/syntax-regression.json",
+        "scanner_dir": "cases/syntax-regression"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/syntax-regression.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 0,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-syntax-regression\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "stdout_sha256": "782fe71b564fb5ad205c0d3ef93b1c871bc55aaa0f0f00d273662c6187f0cd31",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 27.82
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/syntax-regression"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 1,
+        "stdout": "Godot 3 syntax (^[[:space:]]*export[[:space:]]*(\\(|var[[:space:]])):\ncases/syntax-regression/player.gd:3:export var speed = 120\n\nGodot 3 syntax (\\byield[[:space:]]*\\():\ncases/syntax-regression/player.gd:6:\tyield(get_tree().create_timer(0.1), \"timeout\")\n\n",
+        "stderr": "",
+        "stdout_sha256": "94c553be84cc22173ccf01d53b6f4a46005eafaa29884d400dd2660e6a4ea664",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 30.18
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": [],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "cases/syntax-regression/player.gd:3",
+            "cases/syntax-regression/player.gd:6"
+          ]
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": []
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "cases/syntax-regression/player.gd:3",
+            "cases/syntax-regression/player.gd:6"
+          ]
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "case4_repaired",
+      "kind": "case",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/syntax-repaired.json",
+        "scanner_dir": "cases/syntax-repaired"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/syntax-repaired.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 0,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-syntax-repaired\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "stdout_sha256": "f9d0857eb234dd0f9e8dfa5c7b83515aab5d132c3e2f46a4916bec08cb1596cf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 29.408
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/syntax-repaired"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 31.79
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": [],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": []
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "probe_overlap_outside_scope_godot3",
+      "kind": "probe",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/probe-outside-scope-godot3.json",
+        "scanner_dir": "outside-scope-godot3"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/probe-outside-scope-godot3.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 1,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-probe-outside-scope-godot3\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY\",\n      \"path\": \"task/inputs/scope\",\n      \"message\": \"Task scope is outside declared write scopes for role fixture-implementer: experiments/external-evaluation/shiprules-free/outside-scope-godot3/enemy.gd\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "stdout_sha256": "bb82f18b4fce9fbadbdc20277ca0bcad3ffa65a25d93d5ccbac1369bd99c7743",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 26.667
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "outside-scope-godot3"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 1,
+        "stdout": "Godot 3 syntax (^[[:space:]]*onready[[:space:]]+var):\noutside-scope-godot3/enemy.gd:3:onready var sprite = $Sprite\n\nGodot 3 syntax ((\\b(extends|is|as)[[:space:]]+|:[[:space:]]*)(KinematicBody2D|KinematicBody|Spatial|Sprite|Position2D|Particles2D)\\b):\noutside-scope-godot3/enemy.gd:1:extends KinematicBody2D\n\n",
+        "stderr": "",
+        "stdout_sha256": "05c23a74965510bd36ceb10038ffb21c0f5b3aadbaf1652eb2766d0b7fe07b70",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 31.418
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY"
+          ],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "outside-scope-godot3/enemy.gd:1",
+            "outside-scope-godot3/enemy.gd:3"
+          ]
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY"
+          ]
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "outside-scope-godot3/enemy.gd:1",
+            "outside-scope-godot3/enemy.gd:3"
+          ]
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "probe_missing_input",
+      "kind": "probe",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/probe-missing-input.json",
+        "scanner_dir": "cases/does-not-exist"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/probe-missing-input.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 0,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-probe-missing-input\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "stdout_sha256": "936eb6811ef0377a1be3dca14d195433bc81e93e641ac3664d005df4cb7cd1cb",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 29.224
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/does-not-exist"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 32.836
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": [],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": []
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "probe_comment_mention",
+      "kind": "probe",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/probe-comment.json",
+        "scanner_dir": "cases/probe-comment"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/probe-comment.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 0,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-probe-comment\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": true,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": []\n}\n",
+        "stderr": "",
+        "stdout_sha256": "ccf35dd3d5c3d51acd3d3ec681b2309e2f718d45087ae4f17b92143bb38246d2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 27.936
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/probe-comment"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 1,
+        "stdout": "Godot 3 syntax (\\byield[[:space:]]*\\():\ncases/probe-comment/player.gd:6:\t# Migrated from Godot 3: yield(timer, \"timeout\") became await timer.timeout.\n\n",
+        "stderr": "",
+        "stdout_sha256": "94bb28ea0503f714964707fbcf9992bcf15f92e79dc87fe5ea89a78559250f3f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 36.803
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": [],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "cases/probe-comment/player.gd:6"
+          ]
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 0,
+          "valid": true,
+          "codes": []
+        },
+        "scanner": {
+          "exit_code": 1,
+          "hits": [
+            "cases/probe-comment/player.gd:6"
+          ]
+        }
+      },
+      "matches_expectation": true
+    },
+    {
+      "id": "probe_space_in_path",
+      "kind": "probe",
+      "inputs": {
+        "bundle": "bundle.json",
+        "task": "tasks/probe-space-in-path.json",
+        "scanner_dir": "cases/level one"
+      },
+      "arc": {
+        "argv": [
+          "node",
+          "<ARC_V1>/bin/agent-role-contracts.mjs",
+          "explain",
+          "--bundle",
+          "experiments/external-evaluation/shiprules-free/bundle.json",
+          "--task",
+          "experiments/external-evaluation/shiprules-free/tasks/probe-space-in-path.json",
+          "--format",
+          "json"
+        ],
+        "cwd": "<KIT>",
+        "exit_code": 1,
+        "stdout": "{\n  \"policy_version\": \"shiprules-free-comparison-v1\",\n  \"task_id\": \"shiprules-probe-space-in-path\",\n  \"task_type\": \"code-change\",\n  \"accountable\": \"fixture-implementer\",\n  \"executors\": [\n    \"fixture-implementer\"\n  ],\n  \"reviewers\": [\n    \"fixture-reviewer\"\n  ],\n  \"human_approval_required\": true,\n  \"roles\": [\n    {\n      \"id\": \"fixture-implementer\",\n      \"authority_mode\": \"write_scoped\",\n      \"capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"prohibited_capabilities\": [\n        \"review.perform\"\n      ],\n      \"allowed_write_scopes\": [\n        \"experiments/external-evaluation/shiprules-free/cases/**\"\n      ],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    },\n    {\n      \"id\": \"fixture-reviewer\",\n      \"authority_mode\": \"read_only\",\n      \"capabilities\": [\n        \"filesystem.read\",\n        \"review.perform\"\n      ],\n      \"prohibited_capabilities\": [\n        \"filesystem.write.scoped\"\n      ],\n      \"allowed_write_scopes\": [],\n      \"required_inputs\": [\n        \"scope\"\n      ],\n      \"missing_inputs\": [],\n      \"knowledge_references\": []\n    }\n  ],\n  \"tool\": \"agent-role-contracts\",\n  \"version\": \"1.0.0\",\n  \"kind\": \"explain\",\n  \"valid\": false,\n  \"execution_authorized\": false,\n  \"runtime_enforcement\": false,\n  \"identity_verified\": false,\n  \"evidence_verified\": false,\n  \"source_files_checked\": false,\n  \"sensitive_data_scanned\": false,\n  \"output_schema_validated\": false,\n  \"errors\": [\n    {\n      \"code\": \"TASK_WRITE_SCOPE_INVALID\",\n      \"path\": \"task/inputs/scope\",\n      \"message\": \"Write executor fixture-implementer requires one portable relative task scope\"\n    }\n  ]\n}\n",
+        "stderr": "",
+        "stdout_sha256": "f61a85f15db48b16048c1f26753dcf02e4085717bd92f63d6fb71d62f7c53798",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 27.556
+      },
+      "scanner": {
+        "argv": [
+          "bash",
+          "<SHIPRULES_FREE>/godot4/scripts/check-godot3.sh",
+          "cases/level one"
+        ],
+        "cwd": "<KIT>/experiments/external-evaluation/shiprules-free",
+        "exit_code": 0,
+        "stdout": "No Godot 3 syntax found.\n",
+        "stderr": "",
+        "stdout_sha256": "95d07ade6f5d08b120ad27a8e4a1afb44c845a7c3f2018be534cefa137f2dff4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "elapsed_ms": 37.282
+      },
+      "observed": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_INVALID"
+          ],
+          "execution_authorized": false
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "expected": {
+        "arc": {
+          "exit_code": 1,
+          "valid": false,
+          "codes": [
+            "TASK_WRITE_SCOPE_INVALID"
+          ]
+        },
+        "scanner": {
+          "exit_code": 0,
+          "hits": []
+        }
+      },
+      "matches_expectation": true
+    }
+  ],
+  "all_expectations_matched": true,
+  "automated_wall_ms": 697.269,
+  "human_setup_minutes": "UNMEASURED",
+  "godot_engine_parse_check": "NOT_RUN",
+  "external_operator_reviewed_or_executed": false,
+  "completed_external_hands_on_evaluations_added": 0,
+  "paid_shiprules_controls_evaluated": false
+}

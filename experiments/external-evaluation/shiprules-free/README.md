@@ -41,6 +41,25 @@ The runner refuses a wrong commit, tracked modifications in either pinned checko
 
 The first maintainer run is recorded in [`results/maintainer-linux-20261026.json`](results/maintainer-linux-20261026.json). Its observed command exited `0`; all four expected outcomes matched. Machine wall time is recorded separately from unmeasured human setup time.
 
+The V1 runner keeps that result reproducible and is unchanged. In V1 the out-of-scope row is an in-memory change of the
+task scope (no out-of-scope file exists and the scanner result is the baseline's), there is no role-violation row, and
+`cases/repaired` is byte-identical to `cases/baseline`.
+
+## Four-case V2 (2026-11-13)
+
+[`run-four-case.mjs`](run-four-case.mjs) runs both pinned tools on real files for every row: normal, scope violation (a
+real file outside the declared scope), role violation (the implementer declared as its own reviewer,
+`bundle.role-violation.json`), in-scope Godot 3 syntax, a genuine repair of that file (`cases/syntax-repaired`), and four
+probes (overlap, missing input, comment mention, space in path). It records argv, cwd, exit code, raw stdout/stderr and
+their SHA-256, durations, tool versions and fixture/runner hashes. The observed matrix, overlaps, what neither tool
+detects, false refusals and limitations are in [COMPARISON.md](COMPARISON.md); the recorded macOS run is
+[`results/maintainer-darwin-arm64-20261113.json`](results/maintainer-darwin-arm64-20261113.json) and the negative
+controls are [`results/negative-controls-darwin-arm64-20261113.json`](results/negative-controls-darwin-arm64-20261113.json).
+`tests/shiprules-four-case.test.mjs` pins the matrix in CI.
+
+V2 was run on the repository owner's explicit request as an exception to the 2026-11-13 #47 pause on counterpart
+comparisons. It is maintainer-executed and adds zero external evaluations.
+
 ## Evidence boundary
 
 This is a maintainer-executed, public-repository synthetic comparison until an independent ShipRules maintainer or another external operator reviews or runs it. A successful run adds zero completed external hands-on evaluations. Human setup time, independent keep/remove judgment and actual agent execution remain unverified.

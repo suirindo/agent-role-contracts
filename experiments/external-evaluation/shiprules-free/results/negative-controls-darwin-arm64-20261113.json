@@ -1,0 +1,110 @@
+{
+  "profile": "ARC_SHIPRULES_FREE_FOUR_CASE_V2_NEGATIVE_CONTROLS",
+  "observed_at_utc": "2026-11-13T13:42:03.589Z",
+  "environment": {
+    "node": "v24.22.1",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "runner_sha256": "e629563d59dea6f299dc9b8f54f61dbdc4b1264fdf841cb1ed05f7caf2b48def",
+  "driver_sha256": "568893de20de0765ae2bcec9e86389e4c724734ef12e7d5de6e995dc8e21c9de",
+  "controls": [
+    {
+      "id": "no_arguments",
+      "argv": [
+        "node",
+        "<KIT>/experiments/external-evaluation/shiprules-free/run-four-case.mjs"
+      ],
+      "cwd": "<KIT>",
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "{\n  \"profile\": \"ARC_SHIPRULES_FREE_FOUR_CASE_V2\",\n  \"verdict\": \"COMPARISON_ERROR\",\n  \"error\": \"--arc-v1 and --shiprules are required\",\n  \"external_operator_reviewed_or_executed\": false\n}\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_ms": 24.462,
+      "expected_exit_code": 2,
+      "expected_stderr_fragment": "--arc-v1 and --shiprules are required",
+      "matches_expectation": true
+    },
+    {
+      "id": "wrong_arc_commit",
+      "argv": [
+        "node",
+        "<KIT>/experiments/external-evaluation/shiprules-free/run-four-case.mjs",
+        "--arc-v1",
+        "<KIT>",
+        "--shiprules",
+        "<SHIPRULES_FREE>"
+      ],
+      "cwd": "<KIT>",
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "{\n  \"profile\": \"ARC_SHIPRULES_FREE_FOUR_CASE_V2\",\n  \"verdict\": \"COMPARISON_ERROR\",\n  \"error\": \"ARC v1.0.0 commit 20d95cadddb8660a43e88ace3df257e3d4c62804 differs from pinned 9f6771056c47de971202360952af6d41941f7625\",\n  \"external_operator_reviewed_or_executed\": false\n}\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_ms": 36.927,
+      "expected_exit_code": 2,
+      "expected_stderr_fragment": "ARC v1.0.0 commit",
+      "matches_expectation": true
+    },
+    {
+      "id": "wrong_shiprules_commit",
+      "argv": [
+        "node",
+        "<KIT>/experiments/external-evaluation/shiprules-free/run-four-case.mjs",
+        "--arc-v1",
+        "<ARC_V1>",
+        "--shiprules",
+        "<KIT>"
+      ],
+      "cwd": "<KIT>",
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "{\n  \"profile\": \"ARC_SHIPRULES_FREE_FOUR_CASE_V2\",\n  \"verdict\": \"COMPARISON_ERROR\",\n  \"error\": \"ShipRules-free commit 20d95cadddb8660a43e88ace3df257e3d4c62804 differs from pinned 8b8302e9551fb8784d7cbe7fa61eeecf127bf247\",\n  \"external_operator_reviewed_or_executed\": false\n}\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_ms": 60.942,
+      "expected_exit_code": 2,
+      "expected_stderr_fragment": "ShipRules-free commit",
+      "matches_expectation": true
+    },
+    {
+      "id": "missing_fixture_file",
+      "argv": [
+        "node",
+        "<TMP>/fixture-copy/run-four-case.mjs",
+        "--arc-v1",
+        "<ARC_V1>",
+        "--shiprules",
+        "<SHIPRULES_FREE>"
+      ],
+      "cwd": "<KIT>",
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "{\n  \"profile\": \"ARC_SHIPRULES_FREE_FOUR_CASE_V2\",\n  \"verdict\": \"COMPARISON_ERROR\",\n  \"error\": \"Fixture missing: <TMP>/fixture-copy/cases/syntax-repaired/player.gd\",\n  \"external_operator_reviewed_or_executed\": false\n}\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_ms": 25.943,
+      "expected_exit_code": 2,
+      "expected_stderr_fragment": "Fixture missing",
+      "matches_expectation": true
+    },
+    {
+      "id": "modified_scanner_checkout",
+      "argv": [
+        "node",
+        "<KIT>/experiments/external-evaluation/shiprules-free/run-four-case.mjs",
+        "--arc-v1",
+        "<ARC_V1>",
+        "--shiprules",
+        "<TMP>/shiprules-modified"
+      ],
+      "cwd": "<KIT>",
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "{\n  \"profile\": \"ARC_SHIPRULES_FREE_FOUR_CASE_V2\",\n  \"verdict\": \"COMPARISON_ERROR\",\n  \"error\": \"ShipRules-free checkout is not clean\",\n  \"external_operator_reviewed_or_executed\": false\n}\n",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "elapsed_ms": 66.991,
+      "expected_exit_code": 2,
+      "expected_stderr_fragment": "ShipRules-free checkout is not clean",
+      "matches_expectation": true
+    }
+  ],
+  "all_controls_matched": true
+}

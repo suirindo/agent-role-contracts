@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-probe-comment",
+  "type": "code-change",
+  "objective": "Probe: an in-scope Godot 4 file whose comment mentions the replaced Godot 3 call.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/cases/probe-comment/player.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}
