@@ -2,7 +2,7 @@
 // Negative controls for run-four-case.mjs (ARC issue #75): each must stop with exit 2 before any comparison is reported.
 // Usage: node run-negative-controls.mjs --arc-v1 /path/to/arc-v1.0.0 --shiprules /path/to/shiprules-free [--out file.json]
 import { createHash } from 'node:crypto';
-import { cpSync, mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, rmSync, appendFileSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +24,7 @@ if (!arcV1 || !shiprules) {
 }
 
 const tmp = mkdtempSync(join(tmpdir(), 'arc75-negative-'));
-const map = [[tmp, '<TMP>'], [arcV1, '<ARC_V1>'], [shiprules, '<SHIPRULES_FREE>'], [KIT, '<KIT>'], [process.execPath, 'node']]
+const map = [[realpathSync(tmp), '<TMP>'], [tmp, '<TMP>'],[arcV1, '<ARC_V1>'], [shiprules, '<SHIPRULES_FREE>'], [KIT, '<KIT>'], [process.execPath, 'node']]
   .sort((a, b) => b[0].length - a[0].length).map(([f, t]) => [f.split(sep).join('/'), t]);
 const show = s => map.reduce((acc, [f, t]) => acc.split(f).join(t), s.split(sep).join('/'));
 
@@ -75,6 +75,7 @@ const report = {
   observed_at_utc: new Date().toISOString(),
   environment: { node: process.version, platform: process.platform, architecture: process.arch },
   runner_sha256: sha256(readFileSync(RUNNER)),
+  driver_sha256: sha256(readFileSync(fileURLToPath(import.meta.url))),
   controls: results,
   all_controls_matched: results.every(r => r.matches_expectation)
 };
