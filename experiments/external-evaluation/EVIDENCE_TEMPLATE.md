@@ -29,3 +29,13 @@
 - Known limits:
 
 **Do not count a synthetic example or the kit's in-memory second declaration as actual external adoption or genuine second-task execution. A declaration PASS also does not prove real runtime authorization, reviewer identity, writes, effects or business outcome.**
+
+## Compact result summary (detailed reports only)
+
+Optional. A first report does not need this block, and the feedback form is unchanged. For a detailed report, add the five lines below so that the result still reads correctly when it is copied without this page. The values, their meanings and a worked example are defined in one place: [Compact result summary for a detailed report](README.md#compact-result-summary-for-a-detailed-report). This block defines nothing itself. Leave no line blank: provenance that is not stated is `UNKNOWN`, and a check nobody performed is `NOT_RUN` (`NOT RUN` in the fields above means the same).
+
+- Implementation provenance, and the source of that classification:
+- Execution scope, with the actual execution date and environment; if a recorded report was checked later, both dates:
+- Stage and result, one line per stage that applies (declaration check, receiver or workflow execution, report checker, external-effect observation):
+- Verification: the evidence classification above, then independent reproduction and independent code review or QC, each as a separate fact with a link:
+- Provenance links: tested revision, and the reference or SHA-256 of each original artifact:

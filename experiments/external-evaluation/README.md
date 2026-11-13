@@ -71,6 +71,43 @@ Misreadings recur in reports, so the vocabulary is fixed here.
 A recap of an earlier report is not a new run; say which it is. A declaration PASS on a second task file is not a second real task;
 that needs a distinct commit or operation record.
 
+### Compact result summary for a detailed report
+
+A results table is often copied without the discussion around it. A row such as "24 pass" then no longer says who built the implementation that was evaluated, which stage produced the count, or which checks nobody performed. A detailed report therefore carries the five lines below. This section is the single definition; [EVIDENCE_TEMPLATE.md](EVIDENCE_TEMPLATE.md) links here.
+
+A first report does not need this summary. The [workflow-feedback form](https://github.com/suirindo/agent-role-contracts/issues/new?template=workflow-feedback.yml) and its fields are unchanged.
+
+| Line | Record | Values |
+| --- | --- | --- |
+| Implementation provenance | How the evaluated implementation came to exist, and who states that. | `REFERENCE_IMPLEMENTATION` (the reference implementation itself), `LOCALLY_AUTHORED_REFERENCE_INFORMED` (written by the evaluator with the reference source as input to some or all of it), `PROFILE_ONLY` (written from the published profile without the reference source), or `UNKNOWN`. Name the source of the classification. |
+| Execution scope | Whether anything real was contacted, when the run happened, and whether this summary reports a new run. | `OFFLINE_SYNTHETIC` (local fixtures, no external party) or `LIVE` (a real external counterpart or system), with the actual execution date and environment. State `RECAP` or `NEW_RUN`. If a report was recorded earlier and only checked later, say so and give both dates. |
+| Stage and result | Each stage on its own line, in this order, when it applies: declaration check, receiver or workflow execution, report checker, external-effect observation. | `EXECUTED` with the date, the exact command or revision, and the result. Otherwise `NOT_RUN`, `NOT_APPLICABLE` with the reason, or `UNKNOWN`. |
+| Verification | Self-report, independent reproduction, and independent code review or QC, as three separate facts. | The evidence classification recorded in the evidence template (the table above says what each class means), then a link, `NOT_RUN` or `UNKNOWN` for each independent check. A result that was not sent to an upstream project's official process is `NOT_SUBMITTED`. |
+| Provenance links | What a reader needs to find the exact subject. | The tested revision, and the reference or SHA-256 of each original artifact. If an artifact is private, say so and give its digest. Do not publish it to fill the line. |
+
+Three rules keep the summary honest:
+
+- Provenance that is not stated stays `UNKNOWN`. A classification taken from the author's own statement names that source, and independent confirmation of it stays `UNKNOWN` until someone shows it. A check nobody performed stays `NOT_RUN`. Use `NOT_APPLICABLE` only when the stage cannot exist for this evaluation, and give the reason.
+- A result count or an exit code never upgrades another line. "24 pass" from a report checker describes that checker's run over a recorded report. It does not say that the receiver ran again, that it ran live, or that anyone else verified it.
+- `PROFILE_ONLY` is a provenance claim until something supports it. It does not establish independent verification by itself.
+
+#### Worked example: restating a published checkpoint
+
+This example restates the [checkpoint published on #105](https://github.com/suirindo/agent-role-contracts/issues/105#issuecomment-6674923035). It is a `RECAP` of existing evidence: it adds no receiver run and no adoption. Every value comes from that comment unless the line says it was assigned in this restatement.
+
+| Line | Value |
+| --- | --- |
+| Implementation provenance | `LOCALLY_AUTHORED_REFERENCE_INFORMED`: a locally authored receiver with a reference-source-informed grant kernel. Source: the author's own statement in the checkpoint. Independent confirmation of this origin: `UNKNOWN`. It is not described as a clean-room implementation. |
+| Execution scope | `OFFLINE_SYNTHETIC`, `RECAP`. The receiver run was recorded on 2026-11-05 with local synthetic input artifacts and supplier effects. The checker ran on 2026-11-06 in an isolated environment with networking disabled. No external client or server was contacted. |
+| Stage: declaration check | `NOT_RUN` in this step. The earlier six-presentation ARC comparison is a separate observation. |
+| Stage: receiver execution | `EXECUTED` on 2026-11-05, as recorded in the original report: 24 cases and 26 presentations, with the fixed authorization-evaluation instant `2026-11-02T09:00:00Z`. Not observed or re-run in this step. |
+| Stage: report checker | `EXECUTED` on 2026-11-06: the official `python -m aae_a2a.crossrun check` at commit `08f41146ac0d24d0d3e6212256fd9f3f58079adb`, run once against the existing report. Result `valid (24 pass, 0 fail, 0 skipped)`, exit code 0. |
+| Stage: external-effect observation | `NOT_RUN`. Supplier effects were local synthetic fixtures. |
+| Verification | `SELF_REPORTED` (assigned in this restatement; the checkpoint states no class). Independent reproduction: `UNKNOWN` (not stated in the checkpoint). Formal independent QC: `NOT_RUN`. Remote interoperability: `NOT_RUN`. Official upstream cross-run: `NOT_SUBMITTED`. No upstream acceptance, production readiness or new ARC adoption is claimed. |
+| Provenance links | Checker revision `08f41146ac0d24d0d3e6212256fd9f3f58079adb`. Original report SHA-256 `2e2609d6bfcc69469e2d6df8547980e4fc80f80920681e2d16aa1c9f34b1b8d1`. Receiver revision: not stated. The report and the receiver-code archive are private and unchanged. |
+
+From this table alone a reader can tell that the count belongs to the checker, that the receiver is locally authored with a grant kernel informed by the reference source, and that formal independent QC and remote interoperability have not been performed. Writing the same result as "the receiver passed 24 live interoperability runs" would be wrong on three lines at once: stage, execution scope and verification.
+
 ## Common setup errors
 
 Seen in the recorded evaluations; each is an input problem, not a security finding.
