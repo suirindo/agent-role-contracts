@@ -1,0 +1,33 @@
+{
+  "purpose": "Netsujo-side F1 candidate inputs for the T4 joint pilot (ARC #117), persisted byte-exact. Declaration evidence only.",
+  "contract_reference": {
+    "document": "boris-ai-sec/ai-security-lab labs/aimm-p2-executable-evidence/TEST_CONTRACT_V0.3.4.md",
+    "commit": "1c2d59060b97da8a2ea29bc4bf9faaf8035a064c",
+    "document_sha256": "e42e29e016126a9c66fc9c7df0aa22038243f1f15366419ab1a9a7a8a2f82611",
+    "annex": "Annex D",
+    "state": "FINAL_FREEZE_CANDIDATE / NOT_FROZEN / LAB_NOT_AUTHORIZED / ERP_NOT_RUN"
+  },
+  "arc_package": "@netsujo/agent-role-contracts@1.0.1",
+  "inputs": {
+    "bundle.json": "648ad076f29d7768383059e2b740e7db8d8cf15ba925e9204d7712d9a21177e1",
+    "task.json": "0d3994f5315c10abf89ac0e707d8a34d6ab40a90e5cbd1e40f343ecf87477b2c",
+    "action.json": "733b7814b6d924da783ac79ef2195280c95939fdf455722955bc0dc1279cb370",
+    "binding.json": "2a262ddf4f081db76dcec44478a2d3836cdb6e927c29b82595a56816bdbd075a",
+    "action.c1.json": "013cf0aaca515d15ea78e71e099e936c28cc57e4aa5c2e30270fd6feb030f33c"
+  },
+  "g1_subject": {
+    "C0_C2_C3": "sha256:57279a3e6404743fbe77ed00b86cfc276e269eab30a21921f1b965fc8bcd1d79",
+    "C1": "sha256:85c802e52c85e70ce54ff9d93cdb3755f2c4c5918772336cd871a0a898e6ec75"
+  },
+  "expected_action_bind": {
+    "C0_C2_C3": { "exit": 0, "valid": true, "execution_authorized": false },
+    "C1": { "exit": 1, "valid": false, "code": "G1_SUBJECT_MISMATCH", "execution_authorized": false }
+  },
+  "not_claimed": [
+    "joint freeze or participant acceptance of these inputs",
+    "authenticated reviewer or approver (binding.json is a fictional unauthenticated declaration)",
+    "ARC-to-ERP correlation receipt, issuer keys or Run Controller (pending joint F1 decision)",
+    "any Guardian, Gateway, MCP, ERP or PostgreSQL execution",
+    "ERP forwarding permission: G1 PASS is declaration consistency only"
+  ]
+}

@@ -1,0 +1,1 @@
+{"schema_version":"0.3","id":"t4-erp-synthetic-action-001","kind":"software-change","parameters":{"target":"demo_erp_create_order","method":"mcp-tool-call","quantity":41,"resource_id":"COMP-17","supplier_id":"SUP-A"}}
