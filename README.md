@@ -68,10 +68,7 @@ mkdir agent-role-contracts-first-check
 cd agent-role-contracts-first-check
 npm init --yes
 npm install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
-npx --no-install agent-role-contracts explain \
-  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
-  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
-  --format text
+node node_modules/@netsujo/agent-role-contracts/bin/agent-role-contracts.mjs explain --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json --format text
 ```
 
 The last command prints `PASS: explain`. It checks the bundled two-role declaration; it does not authorize either role to run. To see the intended fail-closed result, replace `starter-task.json` with `starter-task-outside-scope.json`: the command reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` and exits **1**.
@@ -82,17 +79,13 @@ If npm reports `EPERM`, `EACCES`, or `ENOENT` **while accessing or creating its 
 
 1. Stay in your consumer project's writable directory.
 2. Retry the command that failed with `--cache ./.npm-cache`. If `npm init` failed, run `npm --cache ./.npm-cache init --yes` first.
-3. Use the same cache for installation and the CLI:
+3. Use the same cache for installation:
 
 ```sh
 npm --cache ./.npm-cache install --ignore-scripts @netsujo/agent-role-contracts@1.0.1
-npx --cache ./.npm-cache --no-install agent-role-contracts explain \
-  --bundle node_modules/@netsujo/agent-role-contracts/examples/starter-bundle.json \
-  --task node_modules/@netsujo/agent-role-contracts/examples/starter-task.json \
-  --format text
 ```
 
-Keep `--cache ./.npm-cache` on subsequent npm/npx commands in this environment. The flag works in PowerShell too; enter the multiline `npx` command on one line there, without the trailing backslashes. Do not commit the local cache directory.
+Keep `--cache ./.npm-cache` on subsequent npm/npx commands in this environment. The flag works in PowerShell too. The `node` check command above does not use the npm cache, so run it again unchanged. Do not commit the local cache directory.
 
 If the error names an input file or another directory rather than the npm cache, check that path instead. Not every `ENOENT` is a cache problem.
 
