@@ -33,7 +33,7 @@ npm --prefix agent-role-contracts run demo --silent
 
 | 今の状態 | 次に進む手順 |
 | --- | --- |
-| デモが動いたので、自分のタスクを試したい | [日本語の導入手順](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)から、[最初のタスクと修復](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.ja.md)へ進みます。 |
+| デモが動いたので、自分のタスクを試したい | [日本語の導入手順](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)から、[最初のタスクと修復](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.ja.md)へ進みます。starterとCIテンプレートはcore 1.0.0に固定されています（上の安定版は1.0.1）。コピーする際もこの固定を維持してください。 |
 | 導入中にコマンドが失敗した | [日本語の導入手順](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.ja.md)のセットアップ確認と診断に沿って、失敗した入力・設定を確認します。 |
 | bundleの各項目やコマンドの違いを知りたい | [bundleの対応表](docs/BUNDLE-MAP.md)と[コマンド選択表](docs/COMMANDS.md)を参照できます（英語）。 |
 | 自分のプログラムから呼びたい | [公開APIを使う実行可能な例](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md)があります（英語）。 |

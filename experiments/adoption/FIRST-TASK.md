@@ -33,6 +33,8 @@ In the consumer root, create a new `.arc/task-first.json` with your editor; choo
 | `inputs.scope` | One accurate, repository-relative path or subtree inside the approved `src/**`; compare it with the actual change yourself |
 | `acceptance_criteria` | Observable checks for the outcome and required review; text here does not run those checks |
 
+A scope is one repository-relative file, or a directory followed by `/**` (for example `src/**`). `./`, `*`, braces and arrays are rejected. If one change touches both `src/` and `tests/`, describe it as two tasks.
+
 Keep `schema_version` at `0.1`. You do not need to create the example source file to check this declaration. A PASS cannot establish that the file exists, tests passed, approval happened, or the work was performed.
 
 ## Check, reject, and repair the declaration
