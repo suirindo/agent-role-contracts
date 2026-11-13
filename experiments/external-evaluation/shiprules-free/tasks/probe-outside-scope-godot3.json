@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "shiprules-probe-outside-scope-godot3",
+  "type": "code-change",
+  "objective": "Probe: edit a file outside declared fixture authority that also contains Godot 3 syntax.",
+  "inputs": {
+    "scope": "experiments/external-evaluation/shiprules-free/outside-scope-godot3/enemy.gd"
+  },
+  "acceptance_criteria": [
+    "The requested file stays inside declared fixture authority.",
+    "The independent syntax scanner reports its own result."
+  ]
+}
