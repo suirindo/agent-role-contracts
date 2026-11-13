@@ -25,7 +25,7 @@ From the repository root (`cd agent-role-contracts` after the clone above), make
 cp examples/starter-task.json task.demo.json
 ```
 
-The command prints nothing when it succeeds. `task.demo.json` is a scratch file: `git status` lists it as untracked, and you can delete it when you are done. `cp` is the POSIX copy command; in a shell without it, copy the file with that shell's own command. If this page's commands do not work in your shell, the [copyable POSIX/PowerShell commands](SHELL-COMMANDS.md) run the starter pass and rejection checks from the published package.
+The command prints nothing when it succeeds. `task.demo.json` is a scratch file: `git status` lists it as untracked, and you can delete it when you are done. `cp` is the POSIX copy command. In Windows `cmd.exe` the equivalent is `copy examples\starter-task.json task.demo.json` (not tested on Windows in this repository). If this page's commands do not work in your shell, the [copyable POSIX/PowerShell commands](SHELL-COMMANDS.md) run the starter pass and rejection checks from the published package.
 
 Keep the bundle unchanged so the declared write authority remains `src/**`. Run the task through the CLI:
 

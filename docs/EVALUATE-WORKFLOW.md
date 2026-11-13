@@ -79,7 +79,7 @@ Expected: no output; exit code 0. `task.demo.json` is a scratch file: `git statu
 
 Use the step that actually covers the assumption you are testing.
 
-**Step 1: scope containment.** Run the line, then edit `inputs.scope` in `task.demo.json` and run the same line again.
+**Step 1: scope containment.** Run the line, then edit `inputs.scope` in `task.demo.json` (for example to `README.md`) and run the same line again.
 
 ```sh
 node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task task.demo.json --format text
@@ -140,9 +140,9 @@ Do not convert an Agent Role Contracts PASS into execution permission.
 
 On two real tasks of your own, run the [evaluation kit's helper](../experiments/external-evaluation/README.md#adapt-to-a-real-workflow) and record by hand whether the check added anything and whether you would keep it; "our existing controls are enough" is a valid result, and better evidence than forcing a new layer into the workflow.
 
-Rules: time with a clock while you work. Do not rebuild minutes from logs. Write `UNMEASURED`, never 0, for any value you did not time or count, and `none` only if you looked and found nothing.
+Rules: time with a clock while you work. Do not rebuild minutes from logs. Write `UNMEASURED`, not 0, for any value you did not time or count (field 2's 0 means you did not edit the bundle), and `none` only if you looked and found nothing.
 
-1. Before task 1, copy the record into a text file. Start a clock when you copy the starter files.
+1. Before task 1, copy the record into a text file. Start a clock when you copy the starter files into your own project (the helper also needs the pinned clone described in the kit README).
 2. On each task, run the helper on your own bundle and that task's file, saving the reports as `evaluation-1.json` and `evaluation-2.json`. Use the same bundle file for task 2, editing it only if the task requires it, and time any edit. Copy `source_files.bundle_sha256` from each report into field 8.
 3. After task 2, fill fields 7–9. REMOVE and "our existing controls are enough" are valid results. Do not subtract minutes or report time saved.
 
