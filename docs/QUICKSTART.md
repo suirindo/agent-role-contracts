@@ -19,9 +19,15 @@ For the published stable `1.0.1` package without cloning, use [the no-clone inst
 
 ## Check your own edit
 
-From the repository root, copy `examples/starter-task.json` to `task.demo.json` using your editor or file manager. Keep the bundle unchanged so the declared write authority remains `src/**`.
+From the repository root (`cd agent-role-contracts` after the clone above), make a copy of the starter task to edit:
 
-Run the task through the CLI:
+```sh
+cp examples/starter-task.json task.demo.json
+```
+
+The command prints nothing when it succeeds. `task.demo.json` is a scratch file: `git status` lists it as untracked, and you can delete it when you are done. `cp` is the POSIX copy command; in a shell without it, copy the file with that shell's own command. If this page's commands do not work in your shell, the [copyable POSIX/PowerShell commands](SHELL-COMMANDS.md) run the starter pass and rejection checks from the published package.
+
+Keep the bundle unchanged so the declared write authority remains `src/**`. Run the task through the CLI:
 
 ```sh
 node bin/agent-role-contracts.mjs explain --bundle examples/starter-bundle.json --task task.demo.json --format text
@@ -53,7 +59,7 @@ Prompt instructions alone do not provide a diagnostic when a task and its role's
 | `node` or `npm` is not found | Install [Node.js](https://nodejs.org/en/download) with npm. Run `node --version` and ensure it is 22.5 or newer. |
 | Cloning fails | Check network access and whether the destination directory already exists. Use `npm --prefix agent-role-contracts run demo --silent` if it already contains this repository. |
 | `DEMO_ERROR: Cannot read examples/...` | Restore the bundled fixture named in the message. Use a copy for your own edits. |
-| `DEMO_ERROR` reports an unexpected check result | Restore the starter fixtures, rerun `npm run check`, and report the diagnostic if it still fails. |
+| `DEMO_ERROR` reports an unexpected check result | From the repository root, run `git restore examples`, rerun `npm run demo --silent`, and report the diagnostic if it still fails. |
 | npm reports `EPERM`, `EACCES`, or `ENOENT` for its cache directory | Use the [local-cache recovery](../README.md#if-npm-cannot-use-its-cache). Errors naming other paths need a different diagnosis. |
 | The CLI exits 2 | Check file paths, file encoding and options. Run `node bin/agent-role-contracts.mjs --help`. |
 
