@@ -146,6 +146,14 @@ Rules: time with a clock while you work. Do not rebuild minutes from logs. Write
 2. On each task, run the helper on your own bundle and that task's file, saving the reports as `evaluation-1.json` and `evaluation-2.json`. Use the same bundle file for task 2, editing it only if the task requires it, and time any edit. Copy `source_files.bundle_sha256` from each report into field 8.
 3. After task 2, fill fields 7–9. REMOVE and "our existing controls are enough" are valid results. Do not subtract minutes or report time saved.
 
+The helper command for task 1, run from the directory that holds the `arc-kit` and `arc-v1` clones described in the kit README (use `task-2.json` and `evaluation-2.json` for task 2):
+
+```sh
+node arc-kit/experiments/external-evaluation/evaluate.mjs --arc arc-v1 --bundle your-bundle.json --task task-1.json > evaluation-1.json
+```
+
+The JSON report goes to `evaluation-1.json`; the plain summary stays on the screen.
+
 ```text
 ARC two-task record
 Time with a clock while you work. Do not rebuild
