@@ -23,7 +23,7 @@ Full hashes and the expected results are in [manifest.json](manifest.json). `tes
 ## Reproduce
 
 ```sh
-npm test -- tests/t4-f1-inputs.test.mjs
+node --test tests/t4-f1-inputs.test.mjs
 sha256sum experiments/external-evaluation/t4-f1-inputs/inputs/*
 ```
 
