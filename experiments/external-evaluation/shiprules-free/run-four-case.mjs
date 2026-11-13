@@ -6,7 +6,7 @@
 // the first run; an observation that differs is reported (exit 1), never tuned away.
 // The V1 runner (run-comparison.mjs) and its recorded Linux result are kept unchanged.
 import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { release, type as osType } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -287,7 +287,13 @@ function main() {
   if (!allMatch) process.exitCode = 1;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// Compare real paths: on macOS the temp directory is reached through a symlink (/var -> /private/var), and a plain
+// path comparison made the runner exit 0 with no output there (caught by the missing_fixture_file negative control).
+const invokedDirectly = () => {
+  try { return !!process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url)); }
+  catch { return false; }
+};
+if (invokedDirectly()) {
   try {
     main();
   } catch (error) {
