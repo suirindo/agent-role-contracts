@@ -87,7 +87,7 @@ The demo exits **2** and prints nothing to stdout, so a partial result is never 
 
 1. Declare write authority in your bundle's `allowed_write_scopes` at the granularity you intend to allow, as in [FIRST-TASK](../adoption/FIRST-TASK.md). The wider the scope, the less ARC can flag.
 2. List the changed paths with your own reviewed method. This demo's listing handles only added and modified files; decide how you treat untracked, ignored, renamed, deleted and submodule paths, and stop on any kind you have not decided.
-3. Run `explain` for each path. Treat exit 1 as outside the declaration and exit 2 as an input error, and record the path with each.
+3. Run `explain` for each path. Exit 1 means the path did not pass the declaration check, for one of two reasons. `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` means the path is outside the authority you declared. `TASK_WRITE_SCOPE_INVALID` means ARC does not accept the path as a portable scope: each segment must begin with an ASCII letter or digit and then use only letters, digits, `.`, `_` and `-`, and a leading dot is allowed only for `.github` as the first segment. Paths with spaces, Japanese names, `@` or a name such as `.env` are INVALID, and widening the declaration does not fix that. Stop on either code. The text output of an INVALID result can omit the path, so log the path yourself with each result. Exit 2 is an input or CLI error, not a verdict on the path.
 4. Keep running your tests. ARC does not replace them, and they do not replace ARC.
 5. For CI and hooks, use the [entry points](../adoption/README.md#3-choose-an-entry-point). The consumer starter pins core 1.0.0.
 6. [CLAUDE.md.example and arc.mdc.example](../adoption/integrations/) are instruction-guided templates; verify actual execution yourself.

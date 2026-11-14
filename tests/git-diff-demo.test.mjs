@@ -126,6 +126,18 @@ test('EN and JA READMEs carry the same commands, transcript, order, codes and bo
   assert.match(ja, /\]\(README\.md\)/);
 });
 
+test('own-repo step 3 tells both exit 1 codes apart in EN and JA and says exit 2 is an input error', () => {
+  for (const [name, inputError] of [['README.md', /exit 2 is an input or CLI error/i], ['README.ja.md', /終了コード2は入力またはCLIのエラー/]]) {
+    const step = readme(name).split(/^## /m).at(-1).split('\n').find(l => /^3\. /.test(l));
+    assert.ok(step, `${name} must have own-repo step 3`);
+    assert.match(step, /TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY/);
+    assert.match(step, /TASK_WRITE_SCOPE_INVALID/);
+    assert.match(step, /\.github/);
+    assert.match(step, /\.env/);
+    assert.match(step, inputError);
+  }
+});
+
 test('READMEs make no positive enforcement, guarantee or diff-reading claim and give no unverified editor steps', () => {
   const en = readme('README.md'), ja = readme('README.ja.md');
   const proseEn = en.replace(/```[\s\S]*?```/g, '');

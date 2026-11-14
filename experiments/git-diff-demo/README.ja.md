@@ -87,7 +87,7 @@ Not checked: code correctness, who made the change, or whether any write was blo
 
 1. [FIRST-TASK](../adoption/FIRST-TASK.ja.md)に沿って、bundleの`allowed_write_scopes`を、実際に許す粒度で書きます。広く書くほど、ARCが検知できるものは減ります。
 2. 変更パスは、自分でレビューした方法で列挙します。このデモの列挙は、追加と変更だけに対応しています。未追跡、ignore対象、rename、削除、submoduleをどう扱うかを決め、決めていない種別では止めてください。
-3. パスごとに`explain`を実行します。終了コード1は宣言の範囲外、2は入力エラーとして扱い、どちらもパスと一緒に記録します。
+3. パスごとに`explain`を実行します。終了コード1は、そのパスが宣言の検査を通らなかったことを表し、理由は二つあります。`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`は、宣言した権限の外のパスです。`TASK_WRITE_SCOPE_INVALID`は、ARCがportable scopeとして受け付けないパスです。各セグメントはASCIIの英数字で始まり、その後は英数字と`.`、`_`、`-`だけを使えます。先頭のドットは、最初のセグメントが`.github`の場合だけ許されます。空白、日本語名、`@`を含むパスや`.env`のような名前はINVALIDで、宣言を広げても解決しません。どちらのコードでも止めてください。INVALIDのtext出力はパスを示さないことがあるため、結果ごとにパスを自分で記録します。終了コード2は入力またはCLIのエラーで、パスに対する判定ではありません。
 4. テストは今までどおり流します。ARCはテストの代わりにならず、テストもARCの代わりになりません。
 5. CIとhookは[入口の一覧](../adoption/README.ja.md)を使います。consumer starterはcore 1.0.0に固定されています。
 6. [CLAUDE.md.exampleとarc.mdc.example](../adoption/integrations/)は指示ベースのテンプレートです。実際に実行されるかは自分で確認してください。
