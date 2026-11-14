@@ -126,8 +126,8 @@ test('EN and JA READMEs carry the same commands, transcript, order, codes and bo
   assert.match(ja, /\]\(README\.md\)/);
 });
 
-test('own-repo step 3 tells both exit 1 codes apart in EN and JA and says exit 2 is an input error', () => {
-  for (const [name, inputError] of [['README.md', /exit 2 is an input or CLI error/i], ['README.ja.md', /終了コード2は入力またはCLIのエラー/]]) {
+test('own-repo step 3 accepts only exit 0 with valid true, lists codes as examples and stops on exit 2 in EN and JA', () => {
+  for (const [name, inputError, onlyZero] of [['README.md', /exit 2 is an input or CLI\/file error/i, /\*\*only\*\* when the exit status is 0.*valid: true.*not an exhaustive list/s], ['README.ja.md', /終了コード2は入力またはCLI\/ファイルのエラー/, /終了コードが0で.*valid: true.*だけ.*網羅した一覧ではありません/s]]) {
     const step = readme(name).split(/^## /m).at(-1).split('\n').find(l => /^3\. /.test(l));
     assert.ok(step, `${name} must have own-repo step 3`);
     assert.match(step, /TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY/);
@@ -135,6 +135,9 @@ test('own-repo step 3 tells both exit 1 codes apart in EN and JA and says exit 2
     assert.match(step, /\.github/);
     assert.match(step, /\.env/);
     assert.match(step, inputError);
+    assert.match(step, onlyZero);
+    for (const code of ['JSON_INVALID', 'TASK_TYPE_UNROUTED', 'TASK_INPUT_REQUIRED']) assert.match(step, new RegExp(code));
+    assert.doesNotMatch(step, /one of two|二つあります/);
   }
 });
 
@@ -185,7 +188,7 @@ test('working-tree-only edit is refused', t => refuses(t, /change outside the in
 test('edit staged and then changed again is refused', t => refuses(t, /change outside the index \(status MM\)/, { afterApply: ({ caseId, repoDir }) => { if (caseId === 'A') writeFileSync(join(repoDir, 'src', 'greet.mjs'), '// changed again\n'); } }));
 test('empty enumeration is refused', t => refuses(t, /Git reported no changed paths/, { afterApply: ({ caseId, git: g }) => { if (caseId === 'A') g(['reset', '-q', '--hard', 'HEAD']); } }));
 test('unexpected extra staged path is refused', t => refuses(t, /case A changed paths \["extra\.txt","src\/greet\.mjs"\], expected \["src\/greet\.mjs"\]/, { afterApply: ({ caseId, repoDir, git: g }) => { if (caseId === 'A') { writeFileSync(join(repoDir, 'extra.txt'), 'x'); g(['add', 'extra.txt']); } } }));
-test('index-only mode change is refused', t => refuses(t, /change outside the index \(status MM\) for "src\/greet\.mjs"/, { afterApply: ({ caseId, git: g }) => { if (caseId === 'A') g(['update-index', '--chmod=+x', 'src/greet.mjs']); } }));
+test('index-only mode change is refused', t => refuses(t, /change outside the index \(status MM\) for "src\/greet\.mjs"/, { afterApply: ({ caseId, git: g }) => { if (caseId === 'A') { g(['config', 'core.fileMode', 'true']); g(['update-index', '--chmod=+x', 'src/greet.mjs']); } } }));
 test('case B path reset out of the index is refused', t => refuses(t, /change outside the index \(status \.M\) for "config\/release\.json"/, { afterApply: ({ caseId, git: g }) => { if (caseId === 'B') g(['reset', '-q', '--', 'config/release.json']); } }, () => {}));
 
 test('git missing from PATH is refused', t => refuses(t, /git was not found on PATH/, env => ({ gitBin: join(env.dir, 'no-such-git') })));
