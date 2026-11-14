@@ -31,6 +31,8 @@ npm install --ignore-scripts
 npm run arc:check
 ```
 
+If your environment blocks inline `node -e`, use `cp -R agent-role-contracts/experiments/adoption/consumer arc-check` (POSIX) or `Copy-Item -Recurse agent-role-contracts/experiments/adoption/consumer arc-check` (PowerShell) instead, then continue with `cd arc-check`. Unlike the `node -e` command, these do not refuse an existing `arc-check`, so the requirement above still applies: run them only where `arc-check` does not exist.
+
 Record the source commit printed above separately from the fixed core version. The install resolves only the pinned core dependency for this standalone consumer. Review and retain the resulting lockfile. The last command should return 0 and report PASS for the supplied declarations.
 
 Try the negative fixture without replacing the normal task:

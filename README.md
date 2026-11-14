@@ -49,7 +49,7 @@ The demo calls the real contract checker, repairs only the task JSON in memory a
 
 | Where you are | Next useful step |
 | --- | --- |
-| The demo passed; I want to check my own task. | [Use the consumer starter](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md), then [describe one task and repair a rejection](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.md). |
+| The demo passed; I want to check my own task. | [Use the consumer starter](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md), then [describe one task and repair a rejection](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/FIRST-TASK.md). The starter and its CI template pin core 1.0.0, while the stable release above is 1.0.1; keep that pin when you copy them. |
 | I copied the starter but a command failed. | [Verify the setup](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md#1-try-a-standalone-consumer) and [find the repair](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/README.md#find-the-failed-input-before-changing-authority). |
 | I want to understand or change the declarations. | [Read the bundle map](docs/BUNDLE-MAP.md) and [choose the right command](docs/COMMANDS.md). |
 | I want to call ARC from code. | [Run the complete published API example](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/adoption/API-EXAMPLE.md). |

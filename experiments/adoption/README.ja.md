@@ -31,6 +31,8 @@ npm install --ignore-scripts
 npm run arc:check
 ```
 
+インラインの`node -e`が使えない環境では、代わりに`cp -R agent-role-contracts/experiments/adoption/consumer arc-check`（POSIX）または`Copy-Item -Recurse agent-role-contracts/experiments/adoption/consumer arc-check`（PowerShell）を実行し、続けて`cd arc-check`へ進みます。これらは`node -e`の手順と違い、既存の`arc-check`があっても止まりません。上の前提どおり、`arc-check`が存在しないディレクトリで実行してください。
+
 表示されたソースのコミットを、固定されたコアのバージョン `1.0.0` とは分けて記録します。この試用用プロジェクトは、固定したコアの依存だけをインストールします。生成された lockfile を確認して保存してください。最後のコマンドは、同梱の宣言に対して PASS を表示し、終了コード 0 を返す想定です。
 
 通常のタスクを上書きせず、範囲外の例も確認します。
