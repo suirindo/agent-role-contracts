@@ -45,6 +45,21 @@ Next: docs/QUICKSTART.md (change the scope and rerun the checker).
 
 The demo calls the real contract checker, repairs only the task JSON in memory and exits **0** when all three outcomes match. A missing fixture or unexpected result exits **2** with an actionable diagnostic. It opens no requested task-scope files and starts no agents.
 
+### Next: unit tests pass, ARC still flags a path
+
+After cloning, one more offline command applies two real patches in a temporary Git repository. Both pass the same unit tests; the ARC declaration check flags the one changed path outside the declared write authority.
+
+```sh
+node agent-role-contracts/experiments/git-diff-demo/run.mjs
+```
+
+| Patch | Unit tests | ARC (per changed path) |
+| --- | --- | --- |
+| A: `src/greet.mjs` | PASS | PASS |
+| B: A + `config/release.json` | PASS | `config/release.json`: FAIL `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` |
+
+The demo lists the paths from Git; ARC does not read Git or block writes. See the [full output, limits and error table](experiments/git-diff-demo/README.md).
+
 ### After the demo: check one task of your own
 
 | Where you are | Next useful step |

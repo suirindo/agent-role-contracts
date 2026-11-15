@@ -29,6 +29,21 @@ npm --prefix agent-role-contracts run demo --silent
 
 期待出力の全文は英語正本の[Expected output](README.md#expected-output)に記載しています。
 
+### 次に：単体テストはPASSするが、ARCは1つのパスを検知する
+
+clone後、オフラインのコマンドをもう1つ実行できます。一時Gitリポジトリで実際のパッチを2つ当てます。どちらも同じ単体テストにPASSしますが、ARCの宣言検査は、宣言済みの書込み権限の外にある変更パス1件を検知します。
+
+```sh
+node agent-role-contracts/experiments/git-diff-demo/run.mjs
+```
+
+| パッチ | 単体テスト | ARC（変更パス別） |
+| --- | --- | --- |
+| A：`src/greet.mjs` | PASS | PASS |
+| B：A＋`config/release.json` | PASS | `config/release.json`：FAIL `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY` |
+
+パスを列挙するのはデモです。ARCはGitを読まず、書込みも止めません。[出力全文・限界・エラー表](experiments/git-diff-demo/README.ja.md)を参照してください。
+
 ### デモの次に、自分のタスクを検査する
 
 | 今の状態 | 次に進む手順 |

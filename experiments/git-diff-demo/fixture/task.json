@@ -1,0 +1,13 @@
+{
+  "schema_version": "0.1",
+  "id": "demo-change-1",
+  "type": "code-change",
+  "objective": "Change one file, src/greet.mjs, and send it to an independent reviewer.",
+  "inputs": {
+    "scope": "src/greet.mjs"
+  },
+  "acceptance_criteria": [
+    "The changed path stays inside declared write authority.",
+    "The reviewer remains independent from the implementer."
+  ]
+}
