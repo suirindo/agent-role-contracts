@@ -146,7 +146,7 @@ export async function runDemo(options = {}) {
       const test = spawn(process.execPath, ['--test', '--test-reporter=tap', 'test/greet.test.mjs'], repo);
       const tap = String(test.stdout ?? '');
       // Node reports a file that defines no tests as one passing file-level entry, so count named tests only.
-      const passed = (tap.match(/^ok \d+ - (?!test\/greet\.test\.mjs$)/gm) ?? []).length, failed = Number(/^# fail (\d+)$/m.exec(tap)?.[1] ?? NaN);
+      const passed = (tap.match(/^ok \d+ - (?:greets a name|keeps a name with a space intact)\r?$/gm) ?? []).length, failed = Number(/^# fail (\d+)$/m.exec(tap)?.[1] ?? NaN);
       if (test.error || test.status !== 0 || failed !== 0) fail(`case ${spec.id} unit tests failed (node --test exit ${test.status ?? test.error?.code}).`, 'The demo needs both cases to pass tests before comparing ARC results.');
       if (passed < 1) fail(`case ${spec.id} unit tests ran no passing test.`, 'A run with zero tests proves nothing, so the demo stops.');
 
