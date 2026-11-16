@@ -1,4 +1,4 @@
-# 単体テストは両方PASS、片方は宣言外のファイルを変更
+# テストは両方PASS、片方は宣言外も変更
 
 [English](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/failure-lab/01-green-tests-out-of-scope-file.md)
 
@@ -19,9 +19,9 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 | ケース | 単体テスト | ARC（変更パス別） |
 | --- | --- | --- |
 | A：`src/greet.mjs`のみ | PASS | PASS |
-| B：A＋`config/release.json` | PASS | `config/release.json`：FAIL (exit 1) |
+| B：A＋1ファイル | PASS | 1パスがFAIL (exit 1) |
 
-このパスについて、ARCは`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を報告します。
+ケースBでは、ARCは`config/release.json`を指摘し、`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を報告します。
 
 ## ARCがここでしないこと
 
@@ -43,7 +43,7 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 
 計測は1回です。2026-11-17に、macOS 26.6.2、Git 2.51.2、Node.js 24.22.1で、上の3つのコマンドがcloneを含めて1.2秒で終わりました。GitやNode.jsの導入と、出力を読む時間は含みません。回線によって変わります。この計測はLinuxとWindowsでは行っていません。
 
-このラボを開いたIssueには、メンテナーが別の1台で再実行した記録があります。これは内部での再現であり、第三者による検証ではありません。
+このラボを開いたIssueには、メンテナーが公開リポジトリをクリーンにcloneして再実行した記録が1件あります（2026-11-15、macOS）。これは内部での再現であり、第三者による検証ではありません。
 
 ## 失敗例を1つ追加する
 

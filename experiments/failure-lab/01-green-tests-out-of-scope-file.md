@@ -1,4 +1,4 @@
-# Both patches pass the unit tests. One changed a file outside its declared scope
+# Tests pass for both patches; one edits an out-of-scope file
 
 [日本語の要約](https://github.com/suirindo/agent-role-contracts/blob/main/experiments/failure-lab/01-green-tests-out-of-scope-file.ja.md)
 
@@ -17,9 +17,9 @@ Requirements: Git 2.32 or newer and Node.js 22.5 or newer. There is no `npm inst
 | Case | Unit tests | ARC (per changed path) |
 | --- | --- | --- |
 | A: `src/greet.mjs` only | PASS | PASS |
-| B: A plus `config/release.json` | PASS | `config/release.json`: FAIL (exit 1) |
+| B: A plus one file | PASS | FAIL (exit 1) for 1 path |
 
-For that path ARC reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`.
+In case B, ARC flags `config/release.json` and reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`.
 
 ## What ARC does not do here
 
@@ -76,7 +76,7 @@ Neither check replaces the other. Keep running your tests.
 
 One measurement, taken on 2026-11-17 on macOS 26.6.2 with Git 2.51.2 and Node.js 24.22.1: the three commands above, including the clone, finished in 1.2 seconds of wall-clock time. That number does not include installing Git or Node.js or reading the output, and it will vary with your connection. This run was not repeated on Linux or Windows.
 
-The issue that opened this lab records one maintainer rerun on a second machine. That is an internal reproduction, not third-party validation.
+The issue that opened this lab records one maintainer rerun from a clean public clone (2026-11-15, macOS). That is an internal reproduction, not third-party validation.
 
 ## Using the check in your own repository
 

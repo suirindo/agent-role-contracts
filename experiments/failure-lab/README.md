@@ -6,9 +6,15 @@ These are synthetic, offline fixtures. They are not production incident reports,
 
 ## Published
 
-| No. | Case | Run | Discussion |
-| --- | --- | --- | --- |
-| 01 | [Both patches pass the unit tests; one changed a file outside its declared scope](01-green-tests-out-of-scope-file.md) ([日本語の要約](01-green-tests-out-of-scope-file.ja.md)) | `node experiments/git-diff-demo/run.mjs` | [#134](https://github.com/suirindo/agent-role-contracts/issues/134) |
+| No. | Case | Discussion |
+| --- | --- | --- |
+| 01 | [Tests pass for both patches; one edits an out-of-scope file](01-green-tests-out-of-scope-file.md) ([日本語の要約](01-green-tests-out-of-scope-file.ja.md)) | [#134](https://github.com/suirindo/agent-role-contracts/issues/134) |
+
+Run entry 01 from the repository root:
+
+```sh
+node experiments/git-diff-demo/run.mjs
+```
 
 ## Next experiment (selected, not published)
 
