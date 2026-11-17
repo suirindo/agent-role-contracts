@@ -14,10 +14,12 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 
 Requirements: Git 2.32 or newer and Node.js 22.5 or newer. There is no `npm install`. Only cloning uses the network.
 
-| Case | Unit tests | ARC (per changed path) |
+Patch A changes only `src/greet.mjs`. Patch B makes the same change and also edits `config/release.json`.
+
+| Case | Unit tests | ARC |
 | --- | --- | --- |
-| A: `src/greet.mjs` only | PASS | PASS |
-| B: A plus one file | PASS | FAIL (exit 1) for 1 path |
+| A | PASS | PASS |
+| B | PASS | FAIL (exit 1) |
 
 In case B, ARC flags `config/release.json` and reports `TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`.
 

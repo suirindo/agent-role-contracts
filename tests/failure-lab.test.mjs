@@ -64,7 +64,10 @@ test('entry 01 uses only Markdown that renders the same on GitHub and on a repub
     assert.equal([...text.matchAll(/^```$/gm)].length, [...text.matchAll(/^```(sh|text)$/gm)].length, 'every fence names a language');
     for (const row of text.split('\n').filter(l => l.startsWith('| '))) {
       assert.equal(row.split('|').length - 2, 3, `three columns: ${row}`);
+      assert.doesNotMatch(row, /`/, `no unbreakable inline code in a table cell (narrow screens): ${row}`);
     }
+    const resultRows = text.split(/^## /m)[0].split('\n').filter(l => l.startsWith('| ')).slice(2);
+    assert.deepEqual(resultRows, ['| A | PASS | PASS |', '| B | PASS | FAIL (exit 1) |'], 'result rows stay short and identical in both languages');
     for (const link of prose(text).matchAll(/\]\(([^)]+)\)/g)) assert.match(link[1], /^https:\/\//, `absolute link: ${link[1]}`);
     for (const command of text.matchAll(/```sh\n([\s\S]*?)\n```/g)) assert.doesNotMatch(command[1], /^\$ |\\$/m);
   }
