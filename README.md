@@ -60,6 +60,8 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 
 The demo lists the paths from Git; ARC does not read Git or block writes. See the [full output, limits and error table](experiments/git-diff-demo/README.md).
 
+If you have a case like this from your own workflow, add one synthetic, reproducible example to [ARC Failure Lab #1 (#134)](https://github.com/suirindo/agent-role-contracts/issues/134), including cases ARC cannot detect.
+
 ### After the demo: check one task of your own
 
 | Where you are | Next useful step |

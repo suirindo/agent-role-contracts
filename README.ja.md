@@ -44,6 +44,8 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 
 パスを列挙するのはデモです。ARCはGitを読まず、書込みも止めません。[出力全文・限界・エラー表](experiments/git-diff-demo/README.ja.md)を参照してください。
 
+自分のワークフローで同じような例があれば、公開できる合成の再現例を1つ、[ARC Failure Lab #1（#134）](https://github.com/suirindo/agent-role-contracts/issues/134)へ投稿できます（英語、日本語の説明あり）。ARCで検知できない例も対象です。
+
 ### デモの次に、自分のタスクを検査する
 
 | 今の状態 | 次に進む手順 |
