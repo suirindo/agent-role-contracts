@@ -16,10 +16,12 @@ node agent-role-contracts/experiments/git-diff-demo/run.mjs
 
 前提条件はGit 2.32以上とNode.js 22.5以上です。`npm install`は不要で、ネットワークを使うのはcloneのときだけです。
 
-| ケース | 単体テスト | ARC（変更パス別） |
+パッチAは`src/greet.mjs`だけを変更します。パッチBは同じ変更に加えて、`config/release.json`も変更します。
+
+| ケース | 単体テスト | ARC |
 | --- | --- | --- |
-| A：`src/greet.mjs`のみ | PASS | PASS |
-| B：A＋1ファイル | PASS | 1パスがFAIL (exit 1) |
+| A | PASS | PASS |
+| B | PASS | FAIL (exit 1) |
 
 ケースBでは、ARCは`config/release.json`を指摘し、`TASK_WRITE_SCOPE_OUTSIDE_AUTHORITY`を報告します。
 
