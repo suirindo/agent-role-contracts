@@ -54,6 +54,8 @@ The wrapper exit is the CLI exit passed through. A rejection (C1) therefore exit
 
 The runner does **not** grade the result against the case expectation. `case_expectation` (from `manifest.json`) and `observed` are recorded side by side. `matches_manifest_expectation` is informational and never changes the exit code. A well-formed unexpected outcome is an observation, not a runner error. The comparison belongs to the verifier.
 
+The CLI reads private snapshots of the exact input bytes that were hash-verified (written to the run's temporary directory under the same file names), not the original input paths, so a later change to the originals cannot alter what the CLI consumes. The runner also treats CLI output as a runner error unless `subject_digest` is `sha256:` plus 64 hex characters, `binding_matches_subject` is a boolean, every `errors` entry is an object with a non-empty string `code`, and the result is internally consistent (PASS: exit 0, `valid:true`, binding true, no errors; `G1_SUBJECT_MISMATCH`: exit 1, `valid:false`, binding false). A well-formed unexpected digest or outcome is still only an observation.
+
 ### Evidence
 
 `g1-run-evidence.json` is evidence, not a receipt. `g1_verdict` has scope `declaration_consistency_only`. `prior_binding` is `{synthetic:true, authenticated:false}`. The limitation flags are copied from the parsed raw `stdout.bin`, with the SHA-256 of those bytes. `sequence` records `pins_checked`, `inputs_hashed`, `cli_spawned`, `cli_exited` with monotonic counters; the wall-clock time is informational. The unsigned output, `execution_authorized:false` and a `not_claimed` list are always present (no ERP effect or no-effect claim, no partner format, no joint acceptance).
@@ -110,6 +112,8 @@ C1の拒否は`1`で終わり、`0`にはなりません。
 ランナーはケースの期待値で結果を採点しません。
 `case_expectation` と `observed` を並べて記録するだけです。
 `matches_manifest_expectation` は参考情報で、終了コードを変えません。
+CLIは、ハッシュ検証済みの入力バイト列そのものを実行用の一時ディレクトリに同じファイル名で書き出したスナップショットから読みます。元の入力パスは読まないため、後から元ファイルを変更してもCLIが読むバイト列は変わりません。
+CLIの出力は、`subject_digest` が `sha256:` と16進64文字でない、`binding_matches_subject` が真偽値でない、`errors` の要素が空でない文字列 `code` を持つオブジェクトでない、または結果が内部で矛盾する場合（PASSは終了コード0・`valid:true`・binding真・エラーなし、`G1_SUBJECT_MISMATCH` は終了コード1・`valid:false`・binding偽）に、ランナーエラーとします。形式が正しい想定外のdigestや結果は、これまでどおり観測値として扱います。
 形式が正しい想定外の結果は観測であり、ランナーエラーではありません。
 照合は検証器の役割です。
 

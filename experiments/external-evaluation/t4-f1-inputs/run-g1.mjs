@@ -106,11 +106,13 @@ function classify(cliExit, signal, stdout, stderr) {
   if (parsed.execution_authorized !== false) return bad('EXECUTION_AUTHORIZED_NOT_FALSE');
   const flags = {};
   for (const k of FLAG_KEYS) { if (typeof parsed[k] !== 'boolean') return bad(`FLAG_MISSING_${k}`); flags[k] = parsed[k]; }
-  const codes = Array.isArray(parsed.errors) ? parsed.errors.map(e => e && e.code) : null;
-  if (!codes) return bad('CLI_OUTPUT_UNRECOGNISED');
-  const observed = { cli_exit_code: cliExit, valid: parsed.valid, codes: [...new Set(codes)], subject_digest: parsed.subject_digest ?? null, binding_matches_subject: parsed.binding_matches_subject ?? null };
-  if (cliExit === 0 && parsed.valid === true && codes.length === 0) return { status: 'OK', verdict: 'PASS', observed, flags };
-  if (cliExit === 1 && parsed.valid === false && codes.includes('G1_SUBJECT_MISMATCH')) return { status: 'OK', verdict: 'G1_SUBJECT_MISMATCH', observed, flags };
+  if (typeof parsed.subject_digest !== 'string' || !/^sha256:[0-9a-fA-F]{64}$/.test(parsed.subject_digest)) return bad('SUBJECT_DIGEST_MALFORMED');
+  if (typeof parsed.binding_matches_subject !== 'boolean') return bad('BINDING_MATCHES_SUBJECT_NOT_BOOLEAN');
+  if (!Array.isArray(parsed.errors) || parsed.errors.some(e => e === null || typeof e !== 'object' || Array.isArray(e) || typeof e.code !== 'string' || e.code === '')) return bad('ERRORS_MALFORMED');
+  const codes = parsed.errors.map(e => e.code);
+  const observed = { cli_exit_code: cliExit, valid: parsed.valid, codes: [...new Set(codes)], subject_digest: parsed.subject_digest, binding_matches_subject: parsed.binding_matches_subject };
+  if (cliExit === 0 && parsed.valid === true && parsed.binding_matches_subject === true && codes.length === 0) return { status: 'OK', verdict: 'PASS', observed, flags };
+  if (cliExit === 1 && parsed.valid === false && parsed.binding_matches_subject === false && codes.includes('G1_SUBJECT_MISMATCH')) return { status: 'OK', verdict: 'G1_SUBJECT_MISMATCH', observed, flags };
   return { ...bad(cliExit === 1 && parsed.valid === false ? 'CLI_INVALID_WITHOUT_G1_SUBJECT_MISMATCH' : 'CLI_EXIT_CONTRADICTS_OUTPUT'), observed, flags };
 }
 
@@ -160,17 +162,25 @@ function main() {
     const actionName = CASES[parsed.caseId];
     ev.inputs = { 'manifest.json': { sha256: sha256(manifestBytes) } };
     const roles = { bundle: 'bundle.json', task: 'task.json', action: actionName, binding: 'binding.json' };
-    const paths = {};
+    const verified = {};
     for (const [role, name] of Object.entries(roles)) {
-      paths[role] = join(here, 'inputs', name);
-      const got = sha256(readRegular(paths[role], MAX_INPUT));
+      const bytes = readRegular(join(here, 'inputs', name), MAX_INPUT);
+      const got = sha256(bytes);
       ev.inputs[name] = { role, sha256: got };
       if (got !== manifest.inputs[name]) throw new Refusal('INPUT_HASH_MISMATCH', name);
+      verified[role] = [name, bytes];
     }
     step('inputs_hashed');
 
     tmp = mkdtempSync(join(tmpdir(), 'arc-t4-f1-'));
     const { cliPath, cliSha256 } = unpack(tgz, tmp);
+    // The CLI reads private snapshots of the exact verified bytes, never the original input paths.
+    const paths = {};
+    mkdirSync(join(tmp, 'inputs'));
+    for (const [role, [name, bytes]] of Object.entries(verified)) {
+      paths[role] = join(tmp, 'inputs', name);
+      writeFileSync(paths[role], bytes, { flag: 'wx', mode: 0o600 });
+    }
     ev.observed_identity.cli_sha256 = cliSha256;
     const cliArgv = [process.execPath, cliPath, 'action-bind', '--bundle', paths.bundle, '--task', paths.task, '--action', paths.action, '--binding', paths.binding, '--format', 'json'];
     const requested = Number(process.env.ARC_T4_F1_TIMEOUT_MS);

@@ -32,7 +32,7 @@ const realPackage = () => [['package/package.json', readFileSync(join(root, 'pac
   ['package/bin/agent-role-contracts.mjs', readFileSync(join(root, 'bin/agent-role-contracts.mjs'))],
   ...readdirSync(join(root, 'src')).map(f => [`package/src/${f}`, readFileSync(join(root, 'src', f))])];
 const stub = body => [['package/bin/agent-role-contracts.mjs', body]];
-const valid = { kind: 'task-action-binding', valid: true, execution_authorized: false, subject_digest: 'sha256:x', errors: [], runtime_enforcement: false, identity_verified: false, evidence_verified: false, source_files_checked: false, sensitive_data_scanned: false, output_schema_validated: false, subject_authenticated: false, review_authenticated: false, human_approval_authenticated: false, action_executed: false, replay_protection_enforced: false };
+const valid = { kind: 'task-action-binding', valid: true, execution_authorized: false, subject_digest: 'sha256:' + 'a'.repeat(64), binding_matches_subject: true, errors: [], runtime_enforcement: false, identity_verified: false, evidence_verified: false, source_files_checked: false, sensitive_data_scanned: false, output_schema_validated: false, subject_authenticated: false, review_authenticated: false, human_approval_authenticated: false, action_executed: false, replay_protection_enforced: false };
 const emit = (obj, code) => stub(`console.log(${JSON.stringify(JSON.stringify(obj))});process.exitCode=${code};`);
 
 // Copy the runner directory so pins/inputs can be altered without touching the committed files.
@@ -80,7 +80,10 @@ for (const [caseId, exit, verdict, action] of [['C0', 0, 'PASS', 'action.json'],
       assert.equal(ev.matches_manifest_expectation, true);
       assert.equal(ev.execution_authorized, false);
       assert.deepEqual(ev.prior_binding, { file: 'binding.json', synthetic: true, authenticated: false });
-      assert.ok(x.cli.argv_resolved.at(-1) === 'json' && x.cli.argv_resolved.includes(join(realpathSync(env.run), 'inputs', action)));
+      assert.equal(x.cli.argv_resolved.at(-1), 'json');
+      const consumed = x.cli.argv_resolved[x.cli.argv_resolved.indexOf('--action') + 1];
+      assert.equal(consumed.split('/').at(-1), action);
+      assert.ok(!x.cli.argv_resolved.some(a => a.startsWith(join(realpathSync(env.run), 'inputs'))));
       assert.ok(x.wrapper.argv_resolved.includes(caseId));
       // Flags come from the raw bytes, with the hash of those bytes recorded.
       const parsed = JSON.parse(stdout.toString('utf8'));
@@ -116,7 +119,54 @@ test('well-formed unexpected outcome is an observation: C1 label over a PASS stu
   } finally { env.done(); }
 });
 
+const mismatch = { ...valid, valid: false, binding_matches_subject: false, errors: [{ code: 'G1_SUBJECT_MISMATCH' }] };
+test('well-formed unexpected digest stays an observation (matches=false), not a runner error', () => {
+  const env = setup(emit({ ...valid, subject_digest: 'sha256:' + 'b'.repeat(64) }, 0));
+  try {
+    assert.equal(exec(env, 'C0').status, 0);
+    const ev = evidence(env.out);
+    assert.equal(ev.runner_status, 'OK');
+    assert.equal(ev.matches_manifest_expectation, false);
+  } finally { env.done(); }
+});
+
+test('the CLI consumes snapshots of the verified bytes even if the originals are replaced meanwhile', () => {
+  const env = setup([]);
+  const original = join(env.run, 'inputs', 'action.json');
+  const cli = `import{readFileSync,writeFileSync}from'node:fs';import{createHash}from'node:crypto';
+const a=process.argv;const at=n=>a[a.indexOf(n)+1];
+writeFileSync(${JSON.stringify(original)},'{"replaced":true}');
+const seen={};for(const n of['--bundle','--task','--action','--binding'])seen[n]=createHash('sha256').update(readFileSync(at(n))).digest('hex');
+console.log(JSON.stringify({...${JSON.stringify(valid)},seen}));`;
+  try {
+    const t = tarball(stub(cli));
+    writeFileSync(env.tgz, t);
+    const pinsPath = join(env.run, 'runner-pins.json');
+    const p = JSON.parse(readFileSync(pinsPath, 'utf8')); p.pins.package_integrity = sri(t); writeFileSync(pinsPath, JSON.stringify(p));
+    const manifest = JSON.parse(readFileSync(join(env.run, 'manifest.json'), 'utf8'));
+    assert.equal(exec(env, 'C0').status, 0);
+    assert.equal(readFileSync(original, 'utf8'), '{"replaced":true}');
+    const seen = JSON.parse(readFileSync(join(env.out, 'stdout.bin'), 'utf8')).seen;
+    assert.deepEqual(seen, { '--bundle': manifest.inputs['bundle.json'], '--task': manifest.inputs['task.json'], '--action': manifest.inputs['action.json'], '--binding': manifest.inputs['binding.json'] });
+    const ev = evidence(env.out);
+    assert.equal(ev.inputs['action.json'].sha256, manifest.inputs['action.json']);
+    assert.equal(ev.runner_status, 'OK');
+  } finally { env.done(); }
+});
+
 const errorFixtures = [
+  ['subject_digest missing', emit({ ...valid, subject_digest: undefined }, 0), 3, 'SUBJECT_DIGEST_MALFORMED', 0],
+  ['subject_digest not sha256:+64 hex', emit({ ...valid, subject_digest: 'sha256:x' }, 0), 3, 'SUBJECT_DIGEST_MALFORMED', 0],
+  ['subject_digest non-hex', emit({ ...valid, subject_digest: 'sha256:' + 'g'.repeat(64) }, 0), 3, 'SUBJECT_DIGEST_MALFORMED', 0],
+  ['binding_matches_subject missing', emit({ ...valid, binding_matches_subject: undefined }, 0), 3, 'BINDING_MATCHES_SUBJECT_NOT_BOOLEAN', 0],
+  ['binding_matches_subject not boolean', emit({ ...valid, binding_matches_subject: 'true' }, 0), 3, 'BINDING_MATCHES_SUBJECT_NOT_BOOLEAN', 0],
+  ['PASS with binding false', emit({ ...valid, binding_matches_subject: false }, 0), 3, 'CLI_EXIT_CONTRADICTS_OUTPUT', 0],
+  ['G1 mismatch with binding true', emit({ ...mismatch, binding_matches_subject: true }, 1), 3, 'CLI_INVALID_WITHOUT_G1_SUBJECT_MISMATCH', 1],
+  ['errors not an array', emit({ ...valid, errors: {} }, 0), 3, 'ERRORS_MALFORMED', 0],
+  ['errors entry is null', emit({ ...valid, errors: [null] }, 0), 3, 'ERRORS_MALFORMED', 0],
+  ['errors entry without code', emit({ ...mismatch, errors: [{ code: 'G1_SUBJECT_MISMATCH' }, {}] }, 1), 3, 'ERRORS_MALFORMED', 1],
+  ['errors entry with empty code', emit({ ...mismatch, errors: [{ code: '' }] }, 1), 3, 'ERRORS_MALFORMED', 1],
+  ['errors entry with non-string code', emit({ ...mismatch, errors: [{ code: 7 }] }, 1), 3, 'ERRORS_MALFORMED', 1],
   ['CLI exit 0 but valid:false', emit({ ...valid, valid: false }, 0), 3, 'CLI_EXIT_CONTRADICTS_OUTPUT', 0],
   ['CLI exit 1 but valid:true', emit(valid, 1), 3, 'CLI_EXIT_CONTRADICTS_OUTPUT', 1],
   ['CLI exit 1 with a non-G1 error code', emit({ ...valid, valid: false, errors: [{ code: 'OTHER' }] }, 1), 3, 'CLI_INVALID_WITHOUT_G1_SUBJECT_MISMATCH', 1],

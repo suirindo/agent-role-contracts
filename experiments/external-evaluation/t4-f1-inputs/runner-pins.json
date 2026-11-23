@@ -2,7 +2,7 @@
   "schema": "arc-owned-runner-pins/0 (ARC layout; the partner --runner-pins format was not available and was not guessed)",
   "status": "ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED",
   "pins": {
-    "wrapper_sha256": "6955664d65d0d63c0199d8b51ccca54f3c997e5b774b7dd8547328b284ff5826",
+    "wrapper_sha256": "5c3b53ef80897031cdb83bab743e7da0cf802b1533348d906ef552e413d28e31",
     "package_integrity": "sha512-4FSVVjOuNlvT+dBNsEkEZ5ILUfxmhoOdWWMDlCIbYGtZss9mVICT4Yuos5iS2fkJHh1OnAYs1F4PUZpc9NEdCQ==",
     "node_version": "v24.22.1",
     "command": {
