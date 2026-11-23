@@ -283,10 +283,10 @@ test('the runner leaves no extraction directory behind', () => {
   assert.deepEqual(after.filter(n => !before.includes(n)), []);
 });
 
-// Against the actual published package; skipped (not passed) where the tarball is not present, e.g. in CI.
-const published = process.env.ARC_T4_F1_TARBALL || '/Users/tomohiro/netsujo/preparation/arc115-package-20261104/netsujo-agent-role-contracts-1.0.1.tgz';
+// Against the actual published package; skipped (not passed) unless ARC_T4_F1_TARBALL names an existing tarball, e.g. in CI.
+const published = process.env.ARC_T4_F1_TARBALL;
 const pinned = JSON.parse(readFileSync(join(srcDir, 'runner-pins.json'), 'utf8'));
-const canRunPublished = existsSync(published) && process.version === pinned.pins.node_version;
+const canRunPublished = Boolean(published) && existsSync(published) && process.version === pinned.pins.node_version;
 for (const [caseId, exit, verdict] of [['C0', 0, 'PASS'], ['C1', 1, 'G1_SUBJECT_MISMATCH'], ['C2', 0, 'PASS'], ['C3', 0, 'PASS']]) {
   test(`published @netsujo/agent-role-contracts@1.0.1 with the committed pins: ${caseId}`, { skip: !canRunPublished && 'published tarball or pinned node v24.22.1 not available' }, () => {
     const dir = mkdtempSync(join(tmpdir(), 't4-f1-pub-'));

@@ -35,11 +35,32 @@ This does not freeze the inputs or show partner acceptance. The ARC-to-ERP corre
 
 **`NOT_FROZEN / LAB_NOT_AUTHORIZED / ERP_NOT_RUN`.** ARC-owned candidate; it is not interoperable with the partner verifier. The latest companion ZIP (`e0c0ef52…`, 134284 B) was not available, so integration with it is **blocked**. The partner `--runner-pins` format and the check 4 evidence index paths were not available and were **not guessed**.
 
-```sh
-node run-g1.mjs --case C0|C1|C2|C3 --tarball netsujo-agent-role-contracts-1.0.1.tgz --out <new directory>
+```text
+node experiments/external-evaluation/t4-f1-inputs/run-g1.mjs --case <C0|C1|C2|C3> --tarball <npm .tgz> --out <new directory>
 ```
 
-It runs the published `@netsujo/agent-role-contracts@1.0.1` CLI `action-bind` over the fixed `inputs/` (C1 uses `action.c1.json`). Offline: no network, no signing, no ERP forwarding. The tarball is read in memory and unpacked to a temporary directory that is removed on exit.
+It runs the published `@netsujo/agent-role-contracts@1.0.1` CLI `action-bind` over the fixed `inputs/` (C1 uses `action.c1.json`). No signing and no ERP forwarding. The runner makes no network requests, and network isolation is not enforced. The tarball is read in memory and unpacked to a temporary directory that is removed on exit.
+
+### Run C0 and C1 (from the repository root)
+
+Prerequisites: Node `v24.22.1` (the pinned `node_version`), and the package tarball already acquired. Acquiring the tarball is a separate, earlier step that needs the network and is not part of the offline runner. Run it in a directory outside the checkout:
+
+```text
+npm pack --ignore-scripts @netsujo/agent-role-contracts@1.0.1
+```
+
+Set `ARC_T4_F1_TARBALL` to the path of the resulting `.tgz`, then run the block below from the repository root. The flags are `--case`, `--tarball`, `--out`, each once and in this order. `--out` must be a new directory, so the block creates its own temporary directory outside the checkout and uses a new subdirectory per case.
+
+```sh
+ARC_T4_F1_WORK="$(mktemp -d "${TMPDIR:-/tmp}/arc-t4-f1.XXXXXX")"
+node --version
+node experiments/external-evaluation/t4-f1-inputs/run-g1.mjs --case C0 --tarball "$ARC_T4_F1_TARBALL" --out "$ARC_T4_F1_WORK/c0"
+echo "C0 wrapper exit: $?"
+node experiments/external-evaluation/t4-f1-inputs/run-g1.mjs --case C1 --tarball "$ARC_T4_F1_TARBALL" --out "$ARC_T4_F1_WORK/c1"
+echo "C1 wrapper exit: $?"
+```
+
+Expected wrapper exit codes: C0 exits `0` and C1 exits `1`. C2 and C3 use the same command with `--case` changed, and the expected exit code is `0`. Exit `1` for C1 is the expected rejection (`G1_SUBJECT_MISMATCH`), not a failure. The evidence is in `g1-run-evidence.json` under each output directory.
 
 ### Exit codes (two layers, recorded separately)
 
@@ -73,13 +94,24 @@ Status: `ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED`. This is ARC's o
 
 The tarball SHA-256 (`09dca994…125b`, 146449 B) and the extracted CLI SHA-256 (`0a02e469…3052`) are recorded as `observed_identity`, not as pins. The `wrapper_sha256` self-check only guards against accidents. A modified wrapper can skip it. The wrapper's identity is established only when someone outside the runner hashes `run-g1.mjs` and compares it with the pin.
 
+### Errors and what the self-checks cover
+
+An exit code outside `{0,1}` means `REFUSED` or `RUNNER_ERROR`. There is no G1 result in that case. A `RUNNER_INTERNAL_ERROR` before the CLI ran (`cli.spawned:false`) can mean a missing file, so read `detail` in `g1-run-evidence.json`.
+
+The hash self-checks only guard against accidents. The limitation described for `wrapper_sha256` applies in the same way to `manifest.json`, `inputs/` and `runner-pins.json`: a modified runner can skip the checks, and a modified pin file can agree with a modified file. Identity is established only by an outside comparison of the actual bytes with a value obtained separately.
+
+- Full wrapper SHA-256 (`run-g1.mjs`): `5c3b53ef80897031cdb83bab743e7da0cf802b1533348d906ef552e413d28e31`.
+- Full companion ZIP SHA-256: `e0c0ef52d39cb8a252c6ca33b18dd4c972ab1bc91d2fc5616eb735be0c5b445f`, 134284 B. The ZIP was not available, so nothing here was checked against it.
+
+`reference_identity_not_a_pin` in `runner-pins.json` holds reference values that are **not** pins and are not enforced. `observed_identity` in `g1-run-evidence.json` holds what the run actually measured. Compare the two from outside; neither one replaces the pins.
+
 ### Tests
 
 ```sh
 node --test tests/t4-f1-runner.test.mjs
 ```
 
-The positive C0–C3 tests against a package built from the repo sources run everywhere. The tests against the actual published tarball are **skipped, not passed**, when the tarball or Node v24.22.1 is missing (set `ARC_T4_F1_TARBALL` to the tarball path).
+The positive C0–C3 tests against a package built from the repo sources run everywhere. The four tests against the actual published tarball are **skipped, not passed**, when `ARC_T4_F1_TARBALL` is not set, the file does not exist, or Node is not v24.22.1. There is no default tarball path; set `ARC_T4_F1_TARBALL` to the tarball path to run them.
 
 ### 日本語
 
@@ -89,8 +121,37 @@ ARC側の候補です。パートナーの検証器とは相互運用できま�
 パートナーの `--runner-pins` 形式とcheck 4の証跡パスは未入手で、**推測していません**。
 
 公開済みの `@netsujo/agent-role-contracts@1.0.1` のCLI `action-bind` を、固定の `inputs/` に対して実行します（C1は `action.c1.json`）。
-ネットワーク・署名・ERP転送はありません。
+署名とERP転送はありません。
+ランナーはネットワーク要求を行いませんが、ネットワークの遮断は強制していません。
 tarballはメモリ上で読み、一時ディレクトリへ展開して終了時に削除します。
+
+#### C0とC1の実行（リポジトリのルートから）
+
+前提はNode `v24.22.1`（固定値の `node_version`）と、取得済みのパッケージtarballです。
+tarballの取得は、オフラインのランナーとは別の事前の手順で、ネットワークが必要です。
+チェックアウトの外のディレクトリで実行します。
+
+```text
+npm pack --ignore-scripts @netsujo/agent-role-contracts@1.0.1
+```
+
+できた `.tgz` のパスを `ARC_T4_F1_TARBALL` に設定し、下のブロックをリポジトリのルートから実行します。
+フラグは `--case`、`--tarball`、`--out` を、それぞれ一度だけ、この順で指定します。
+`--out` は新しいディレクトリでなければならないため、ブロックはチェックアウトの外に一時ディレクトリを作り、ケースごとに新しい下位ディレクトリを使います。
+
+```sh
+ARC_T4_F1_WORK="$(mktemp -d "${TMPDIR:-/tmp}/arc-t4-f1.XXXXXX")"
+node --version
+node experiments/external-evaluation/t4-f1-inputs/run-g1.mjs --case C0 --tarball "$ARC_T4_F1_TARBALL" --out "$ARC_T4_F1_WORK/c0"
+echo "C0 wrapper exit: $?"
+node experiments/external-evaluation/t4-f1-inputs/run-g1.mjs --case C1 --tarball "$ARC_T4_F1_TARBALL" --out "$ARC_T4_F1_WORK/c1"
+echo "C1 wrapper exit: $?"
+```
+
+ラッパーの終了コードは、C0が`0`、C1が`1`の想定です。
+C2とC3は `--case` だけを変えた同じコマンドで、想定の終了コードは`0`です。
+C1の`1`は想定どおりの拒否（`G1_SUBJECT_MISMATCH`）であり、失敗ではありません。
+証跡は各出力ディレクトリの `g1-run-evidence.json` にあります。
 
 #### 終了コード（2層を分けて記録）
 
@@ -144,6 +205,23 @@ tarballのSHA-256（`09dca994…125b`、146449 B）と展開したCLIのSHA-256�
 改変したラッパーはこの照合を飛ばせます。
 ラッパーの同一性は、ランナーの外の人が `run-g1.mjs` のハッシュを固定値と突き合わせて初めて確かめられます。
 
+#### エラーと自己チェックの範囲
+
+`{0,1}` の外の終了コードは `REFUSED` または `RUNNER_ERROR` で、G1の結果はありません。
+CLI実行前の `RUNNER_INTERNAL_ERROR`（`cli.spawned:false`）はファイル欠落を意味することがあるため、`g1-run-evidence.json` の `detail` を確認します。
+
+ハッシュの自己チェックは、うっかりミスを防ぐだけです。
+`wrapper_sha256` について述べた限界は、`manifest.json`、`inputs/`、`runner-pins.json` にも同じく当てはまります。
+改変したランナーはチェックを飛ばせ、改変した固定値ファイルは改変したファイルと一致できます。
+同一性は、別に入手した値と実バイト列をランナーの外で照合して初めて確かめられます。
+
+- ラッパー（`run-g1.mjs`）の完全なSHA-256は `5c3b53ef80897031cdb83bab743e7da0cf802b1533348d906ef552e413d28e31` です。
+- 同梱ZIPの完全なSHA-256は `e0c0ef52d39cb8a252c6ca33b18dd4c972ab1bc91d2fc5616eb735be0c5b445f`、134284 B です。ZIPは入手できていないため、ZIPとの照合はしていません。
+
+`runner-pins.json` の `reference_identity_not_a_pin` は参照値で、固定値ではなく、強制もされません。
+`g1-run-evidence.json` の `observed_identity` は、その実行で実測した値です。
+両者の照合はランナーの外で行い、どちらも固定値の代わりにはなりません。
+
 #### テスト
 
 ```sh
@@ -151,4 +229,5 @@ node --test tests/t4-f1-runner.test.mjs
 ```
 
 リポジトリのソースから作ったパッケージに対するC0〜C3の正常系は、どの環境でも動きます。
-公開済みtarballに対するテストは、tarballまたはNode v24.22.1がなければ、合格ではなく**スキップ**になります（`ARC_T4_F1_TARBALL` でtarballを指定できます）。
+公開済みtarballに対する4件のテストは、`ARC_T4_F1_TARBALL` が未設定、ファイルがない、またはNodeがv24.22.1でない場合、合格ではなく**スキップ**になります。
+既定のtarballパスはなく、実行するには `ARC_T4_F1_TARBALL` にtarballのパスを設定します。
