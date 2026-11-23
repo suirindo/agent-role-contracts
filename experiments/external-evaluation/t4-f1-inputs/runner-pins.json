@@ -1,0 +1,27 @@
+{
+  "schema": "arc-owned-runner-pins/0 (ARC layout; the partner --runner-pins format was not available and was not guessed)",
+  "status": "ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED",
+  "pins": {
+    "wrapper_sha256": "6955664d65d0d63c0199d8b51ccca54f3c997e5b774b7dd8547328b284ff5826",
+    "package_integrity": "sha512-4FSVVjOuNlvT+dBNsEkEZ5ILUfxmhoOdWWMDlCIbYGtZss9mVICT4Yuos5iS2fkJHh1OnAYs1F4PUZpc9NEdCQ==",
+    "node_version": "v24.22.1",
+    "command": {
+      "names_layer": "wrapper (run-g1.mjs invocation); the inner CLI argv is recorded per run as cli.argv_resolved",
+      "template": [
+        "node",
+        "run-g1.mjs",
+        "--case",
+        "{case}",
+        "--tarball",
+        "{tarball}",
+        "--out",
+        "{out}"
+      ]
+    }
+  },
+  "reference_identity_not_a_pin": {
+    "tarball_sha256": "09dca9949d22aaad7d77bf6ec7b51774421f28b666bc34f8a0ab666c9007125b",
+    "tarball_bytes": 146449,
+    "extracted_cli_sha256": "0a02e4691da5110588a1b16b43ff6dd6ac1804b9c4b3baac971a940276fb3052"
+  }
+}
