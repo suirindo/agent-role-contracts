@@ -133,8 +133,8 @@ const pidWriter = (file, tail) => script('import { appendFileSync } from "node:f
 
 for (const [name, tail, match] of [
  ['second receiver exits immediately', 'process.exit(3);', /exited early/],
- ['second receiver hangs without handshake (startup deadline)', 'process.on("SIGTERM", () => {}); setInterval(() => {}, 1000);', /startup timeout/],
- ['second receiver prints a malformed handshake then hangs', 'process.stdout.write("garbage\\n"); setInterval(() => {}, 1000);', /./],
+ ['second receiver hangs without handshake (startup deadline)', 'process.on("SIGTERM", () => {}); setInterval(() => {}, 1000);', /receiver recv-b startup timeout/],
+ ['second receiver prints a malformed handshake then hangs', 'process.stdout.write("garbage\\n"); setInterval(() => {}, 1000);', SyntaxError],
  ['second receiver prints an out-of-range port', 'process.stdout.write(JSON.stringify({ port: 0 }) + "\\n"); setInterval(() => {}, 1000);', /bad handshake/],
 ]) {
  test('construction cleanup: ' + name + ' leaks neither the first child nor the tempdir', opts, async () => {
@@ -145,8 +145,9 @@ for (const [name, tail, match] of [
   const first = await script('import { appendFileSync } from "node:fs"; appendFileSync(' + JSON.stringify(file) + ', process.pid + "\\n"); await import(' + JSON.stringify(real) + ');');
   const second = await pidWriter(file, tail);
   const before = new Set(await leftovers());
+  // Leave time for both fixture processes to start under the full-suite load.
   const t0 = Date.now();
-  await assert.rejects(createTestHost({ receiverOptions: { startupTimeoutMs: 400, stopTimeoutMs: 200, killTimeoutMs: 1000, byId: { 'recv-a': { script: first }, 'recv-b': { script: second } } } }), match);
+  await assert.rejects(createTestHost({ receiverOptions: { startupTimeoutMs: 2000, stopTimeoutMs: 200, killTimeoutMs: 1000, byId: { 'recv-a': { script: first }, 'recv-b': { script: second } } } }), match);
   assert.ok(Date.now() - t0 < 5000, 'bounded');
   const pids = (await readFile(file, 'utf8')).split('\n').filter(Boolean).map(Number);
   assert.equal(pids.length, 2);

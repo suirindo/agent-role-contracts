@@ -31,7 +31,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test --test-concurrency=2 tests/*.test.mjs",
     "schemas:check": "node scripts/build-schemas.mjs --check",
     "schemas:build": "node scripts/build-schemas.mjs",
     "check": "npm run schemas:check && npm test",

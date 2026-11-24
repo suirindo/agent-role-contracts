@@ -155,8 +155,11 @@ for (const policy of ['permissive', 'mismatch', 'global-known-hosts', 'proxyjump
 
 test('offline fake SSH: synchronous helper timeout is finite and exact nonce-root cleanup is attempted', sshOpts, async () => {
  const started = Date.now();
- const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 200, trialTimeoutMs: 1000, hangOn: 'mkdir -p' });
+ // Preflight must finish before the intended hung mkdir helper consumes its budget.
+ const { result, calls, out } = await fakeSshTrial('strict', { helperTimeoutMs: 1000, trialTimeoutMs: 10000, cleanupReserveMs: 2000, hangOn: 'mkdir -p' });
  assert.equal(result.ok, false); assert.ok(Date.now() - started < 10000);
+ assert.ok(calls.some(c => c.args.at(-1).includes('mkdir -p ')), 'hung mkdir helper was not reached');
+ assert.match(result.stderr, /trial failed: ssh timed out after \d+ms/);
  assert.ok(calls.some(c => c.args.at(-1).startsWith("test -e '")), 'nonce-root existence probe missing');
  const cleanup = JSON.parse(await readFile(join(out, 'cleanup.json'), 'utf8'));
  assert.equal(cleanup.removed, true); assert.equal(cleanup.records_retained, false);
