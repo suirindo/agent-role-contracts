@@ -4,13 +4,14 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const srcDir = join(root, 'experiments/external-evaluation/t4-f1-inputs');
+const isWindows = process.platform === 'win32';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const sri = bytes => 'sha512-' + createHash('sha512').update(bytes).digest('base64');
 
@@ -82,7 +83,7 @@ for (const [caseId, exit, verdict, action] of [['C0', 0, 'PASS', 'action.json'],
       assert.deepEqual(ev.prior_binding, { file: 'binding.json', synthetic: true, authenticated: false });
       assert.equal(x.cli.argv_resolved.at(-1), 'json');
       const consumed = x.cli.argv_resolved[x.cli.argv_resolved.indexOf('--action') + 1];
-      assert.equal(consumed.split('/').at(-1), action);
+      assert.equal(basename(consumed), action);
       assert.ok(!x.cli.argv_resolved.some(a => a.startsWith(join(realpathSync(env.run), 'inputs'))));
       assert.ok(x.wrapper.argv_resolved.includes(caseId));
       // Flags come from the raw bytes, with the hash of those bytes recorded.
@@ -175,9 +176,10 @@ const errorFixtures = [
   ['non-JSON stdout', stub('console.log("not json");'), 3, 'CLI_OUTPUT_NOT_JSON', 0],
   ['CLI exit 2', stub('console.error("CLI_ERROR");process.exitCode=2;'), 2, 'CLI_EXIT_2_CLI_OR_FILE_ERROR', 2],
   ['CLI exit 7', stub('process.exitCode=7;'), 3, 'CLI_EXIT_UNEXPECTED', 7],
-  ['CLI killed by signal', stub('process.kill(process.pid,"SIGKILL");'), 3, 'CLI_SIGNAL', null]
+  // Windows self-kill is reported to the parent as exit 1 without a signal.
+  ['CLI forcibly terminated', stub('process.kill(process.pid,"SIGKILL");'), 3, isWindows ? 'CLI_OUTPUT_NOT_JSON' : 'CLI_SIGNAL', isWindows ? 1 : null, isWindows ? null : 'SIGKILL']
 ];
-for (const [label, entries, wrapperExit, reason, cliExit] of errorFixtures) {
+for (const [label, entries, wrapperExit, reason, cliExit, cliSignal = null] of errorFixtures) {
   test(`RUNNER_ERROR keeps raw bytes and exits outside {0,1}: ${label}`, () => {
     const env = setup(entries);
     try {
@@ -189,6 +191,7 @@ for (const [label, entries, wrapperExit, reason, cliExit] of errorFixtures) {
       assert.equal(ev.g1_verdict, 'NOT_OBSERVED');
       assert.equal(ev.runner_error_reason, reason);
       assert.equal(x.cli.exit_code, cliExit);
+      assert.equal(x.cli.signal, cliSignal);
       assert.equal(x.wrapper.exit_code, wrapperExit);
       assert.ok(existsSync(join(env.out, 'stdout.bin')) && existsSync(join(env.out, 'stderr.bin')));
       assert.equal(ev.raw_files['stdout.bin'].sha256, sha256(readFileSync(join(env.out, 'stdout.bin'))));
