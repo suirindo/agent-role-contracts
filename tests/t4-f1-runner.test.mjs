@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { gzipSync } from 'node:zlib';
@@ -55,13 +55,16 @@ function setup(entries, mutatePins) {
 const exec = (env, caseId, extra = {}, tgz = env.tgz, out = env.out) => spawnSync(process.execPath, [join(env.run, 'run-g1.mjs'), '--case', caseId, '--tarball', tgz, '--out', out], { encoding: 'utf8', env: { ...process.env, ...extra } });
 const evidence = out => JSON.parse(readFileSync(join(out, 'g1-run-evidence.json'), 'utf8'));
 const exitJson = out => JSON.parse(readFileSync(join(out, 'exit.json'), 'utf8'));
+const readJson = (out, name) => JSON.parse(readFileSync(join(out, name), 'utf8'));
+const commonCliArgv = [process.execPath, 'package/bin/agent-role-contracts.mjs', 'action-bind', '--bundle', 'inputs/bundle.json', '--task', 'inputs/task.json', '--action', 'inputs/action.json', '--binding', 'inputs/binding.json', '--format', 'json'];
+const retainedInputNames = ['bundle.json', 'task.json', 'action.json', 'binding.json', 'action.c1.json'];
 
 test('committed runner-pins.json names the committed wrapper and is labelled as an ARC proposal', () => {
   const p = JSON.parse(readFileSync(join(srcDir, 'runner-pins.json'), 'utf8'));
   assert.equal(p.pins.wrapper_sha256, sha256(readFileSync(join(srcDir, 'run-g1.mjs'))));
   assert.deepEqual(Object.keys(p.pins), ['wrapper_sha256', 'package_integrity', 'node_version', 'command']);
   assert.equal(p.status, 'ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED');
-  assert.match(p.schema, /not guessed/);
+  assert.match(p.schema, /internal wrapper configuration/);
   assert.equal(p.pins.node_version, 'v24.22.1');
   assert.equal(p.pins.package_integrity, 'sha512-4FSVVjOuNlvT+dBNsEkEZ5ILUfxmhoOdWWMDlCIbYGtZss9mVICT4Yuos5iS2fkJHh1OnAYs1F4PUZpc9NEdCQ==');
 });
@@ -83,7 +86,9 @@ for (const [caseId, exit, verdict, action] of [['C0', 0, 'PASS', 'action.json'],
       assert.deepEqual(ev.prior_binding, { file: 'binding.json', synthetic: true, authenticated: false });
       assert.equal(x.cli.argv_resolved.at(-1), 'json');
       const consumed = x.cli.argv_resolved[x.cli.argv_resolved.indexOf('--action') + 1];
-      assert.equal(basename(consumed), action);
+      assert.equal(consumed, 'inputs/action.json');
+      assert.equal(ev.cli.input_files.action, action);
+      assert.deepEqual(x.cli.argv_resolved, commonCliArgv);
       assert.ok(!x.cli.argv_resolved.some(a => a.startsWith(join(realpathSync(env.run), 'inputs'))));
       assert.ok(x.wrapper.argv_resolved.includes(caseId));
       // Flags come from the raw bytes, with the hash of those bytes recorded.
@@ -98,6 +103,27 @@ for (const [caseId, exit, verdict, action] of [['C0', 0, 'PASS', 'action.json'],
       for (let i = 1; i < 4; i++) assert.ok(BigInt(ev.sequence[i].monotonic_ns) >= BigInt(ev.sequence[i - 1].monotonic_ns));
       assert.ok(ev.not_claimed.some(s => s.includes('no signature')) && ev.not_claimed.some(s => s.includes('no claim about ERP effect or no-effect')));
       assert.deepEqual(Object.keys(ev.pins).filter(k => ['wrapper_sha256', 'package_integrity', 'node_version', 'command'].includes(k)).length, 4);
+      const partnerPins = readJson(env.out, 'partner-runner-pins.json');
+      assert.deepEqual(Object.keys(partnerPins), ['wrapper_sha256', 'package_integrity', 'node_version', 'command']);
+      assert.deepEqual(partnerPins, { wrapper_sha256: ev.observed_identity.wrapper_sha256, package_integrity: ev.observed_identity.tarball.integrity, node_version: process.version, command: commonCliArgv });
+      assert.deepEqual(readJson(env.out, 'arc-runner.json'), { source_commit: '873b4104a95e443ba22367cf8378deb7dcbe6cfd', package: '@netsujo/agent-role-contracts', version: '1.0.1', ...partnerPins });
+      assert.deepEqual(readFileSync(join(env.out, 'arc/g1.stdout')), stdout);
+      assert.deepEqual(readFileSync(join(env.out, 'arc/g1.stderr')), readFileSync(join(env.out, 'stderr.bin')));
+      assert.equal(readFileSync(join(env.out, 'arc/g1.exit'), 'utf8'), `${exit}\n`);
+      const manifest = readJson(env.run, 'manifest.json');
+      assert.deepEqual(readJson(env.out, 'arc-inputs.json'), Object.fromEntries(['bundle', 'task', 'action', 'binding'].map(role => [`${role}_sha256`, manifest.inputs[`${role}.json`]])));
+      assert.deepEqual(readJson(env.out, 'arc-c1-variant.json'), caseId === 'C1' ? { action_sha256: manifest.inputs['action.c1.json'], subject: parsed.subject_digest } : null);
+      for (const name of retainedInputNames) assert.deepEqual(readFileSync(join(env.out, 'arc/inputs', name)), readFileSync(join(env.run, 'inputs', name)));
+      const artifacts = readJson(env.out, 'arc-artifacts.json');
+      assert.equal(artifacts.scope, 'ARC_PARTIAL_ONLY');
+      assert.equal(artifacts.status, 'ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED');
+      assert.deepEqual(artifacts.artifacts.map(x => x.path).sort(), ['arc/g1.stdout', 'arc/g1.stderr', 'arc/g1.exit', ...retainedInputNames.map(n => `arc/inputs/${n}`)].sort());
+      for (const artifact of artifacts.artifacts) {
+        const bytes = readFileSync(join(env.out, artifact.path));
+        assert.deepEqual(artifact, { path: artifact.path, sha256: sha256(bytes), size_bytes: bytes.length });
+      }
+      assert.equal(ev.partner_export.scope, 'UNSIGNED_ARC_COMPONENTS_ONLY');
+      assert.equal(ev.partner_export.c5_acceptance, 'NOT_EVALUATED');
     } finally { env.done(); }
   });
 }
@@ -116,6 +142,7 @@ test('well-formed unexpected outcome is an observation: C1 label over a PASS stu
     assert.equal(ev.runner_status, 'OK');
     assert.equal(ev.g1_verdict, 'PASS');
     assert.equal(ev.matches_manifest_expectation, false);
+    assert.equal(readJson(env.out, 'arc-c1-variant.json').subject, valid.subject_digest);
     assert.equal(exitJson(env.out).wrapper.exit_code, exitJson(env.out).cli.exit_code);
   } finally { env.done(); }
 });
@@ -151,6 +178,7 @@ console.log(JSON.stringify({...${JSON.stringify(valid)},seen}));`;
     assert.deepEqual(seen, { '--bundle': manifest.inputs['bundle.json'], '--task': manifest.inputs['task.json'], '--action': manifest.inputs['action.json'], '--binding': manifest.inputs['binding.json'] });
     const ev = evidence(env.out);
     assert.equal(ev.inputs['action.json'].sha256, manifest.inputs['action.json']);
+    assert.equal(sha256(readFileSync(join(env.out, 'arc/inputs/action.json'))), manifest.inputs['action.json']);
     assert.equal(ev.runner_status, 'OK');
   } finally { env.done(); }
 });
@@ -195,6 +223,33 @@ for (const [label, entries, wrapperExit, reason, cliExit, cliSignal = null] of e
       assert.equal(x.wrapper.exit_code, wrapperExit);
       assert.ok(existsSync(join(env.out, 'stdout.bin')) && existsSync(join(env.out, 'stderr.bin')));
       assert.equal(ev.raw_files['stdout.bin'].sha256, sha256(readFileSync(join(env.out, 'stdout.bin'))));
+      assert.deepEqual(readFileSync(join(env.out, 'arc/g1.stdout')), readFileSync(join(env.out, 'stdout.bin')));
+      assert.equal(ev.partner_export, null);
+      for (const name of ['partner-runner-pins.json', 'arc-runner.json', 'arc-inputs.json', 'arc-c1-variant.json', 'arc-artifacts.json']) assert.equal(existsSync(join(env.out, name)), false);
+      if (Number.isInteger(cliExit)) assert.equal(readFileSync(join(env.out, 'arc/g1.exit'), 'utf8'), `${cliExit}\n`);
+      else assert.equal(existsSync(join(env.out, 'arc/g1.exit')), false);
+    } finally { env.done(); }
+  });
+}
+
+for (const blocked of ['arc-artifacts.json', 'g1-run-evidence.json']) {
+  test(`an evidence write failure at ${blocked} rolls back only this run's positive components`, () => {
+    const env = setup([]);
+    try {
+      const cli = `import{mkdirSync}from'node:fs';mkdirSync(${JSON.stringify(join(env.out, blocked))});console.log(${JSON.stringify(JSON.stringify(valid))});`;
+      const t = tarball(stub(cli)); writeFileSync(env.tgz, t);
+      const pinsPath = join(env.run, 'runner-pins.json');
+      const p = readJson(env.run, 'runner-pins.json'); p.pins.package_integrity = sri(t); writeFileSync(pinsPath, JSON.stringify(p));
+      const r = exec(env, 'C0');
+      assert.equal(r.status, 3);
+      assert.match(r.stderr, /evidence write failed.*incomplete output must not be used/);
+      for (const name of ['partner-runner-pins.json', 'arc-runner.json', 'arc-inputs.json', 'arc-c1-variant.json', 'arc-artifacts.json']) {
+        if (name === blocked) assert.deepEqual(readdirSync(join(env.out, name)), []); // Foreign collision is not removed.
+        else assert.equal(existsSync(join(env.out, name)), false);
+      }
+      assert.deepEqual(readFileSync(join(env.out, 'arc/g1.stdout')), readFileSync(join(env.out, 'stdout.bin')));
+      assert.equal(readFileSync(join(env.out, 'arc/g1.exit'), 'utf8'), '0\n');
+      for (const name of retainedInputNames) assert.deepEqual(readFileSync(join(env.out, 'arc/inputs', name)), readFileSync(join(env.run, 'inputs', name)));
     } finally { env.done(); }
   });
 }
@@ -228,6 +283,7 @@ const refusals = [
   ['wrong command pin', env => env.pin(p => { p.pins.command.template = ['node', 'run-g1.mjs', '--case', '{case}']; }), 'COMMAND_PIN_MISMATCH'],
   ['input differs from manifest', env => writeFileSync(join(env.run, 'inputs', 'task.json'), '{}'), 'INPUT_HASH_MISMATCH'],
   ['C1 action bytes differ from manifest', env => writeFileSync(join(env.run, 'inputs', 'action.c1.json'), readFileSync(join(env.run, 'inputs', 'action.json'))), 'INPUT_HASH_MISMATCH', 'C1'],
+  ['C1 also requires the original action bytes', env => writeFileSync(join(env.run, 'inputs', 'action.json'), '{}'), 'INPUT_HASH_MISMATCH', 'C1'],
   ['wrapper edited after pinning', env => writeFileSync(join(env.run, 'run-g1.mjs'), readFileSync(join(env.run, 'run-g1.mjs'), 'utf8') + '\n// edited\n'), 'WRAPPER_SHA256_MISMATCH'],
   ['unknown case', () => {}, 'CASE_UNKNOWN', 'C9'],
   ['tarball is a symlink', env => { symlinkSync(env.tgz, join(env.dir, 'link.tgz')); env.tarball = join(env.dir, 'link.tgz'); }, 'SYMLINK_REFUSED'],
@@ -246,6 +302,7 @@ for (const [label, mutate, reason, caseId = 'C0'] of refusals) {
       assert.equal(ev.runner_status, 'REFUSED');
       assert.equal(ev.refusal_reason, reason);
       assert.equal(ev.g1_verdict, 'NOT_OBSERVED');
+      assert.equal(ev.partner_export, null);
       assert.equal(ev.cli.spawned, false);
       assert.equal(ev.observed, null);
       assert.equal(x.cli.exit_code, null);

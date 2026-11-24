@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ARC-owned offline G1 runner candidate for T4 F1 (ARC #117). Declaration evidence only.
-// NOT_FROZEN / LAB_NOT_AUTHORIZED / ERP_NOT_RUN. Not signed, not a run receipt, not interoperable with the partner verifier.
+// NOT_FROZEN / LAB_NOT_AUTHORIZED / ERP_NOT_RUN. Unsigned ARC components, not a run receipt or a complete C5 package.
 // Usage: node run-g1.mjs --case C0|C1|C2|C3 --tarball <npm .tgz> --out <new directory>
 // Exit: 0 = CLI exit 0 (PASS), 1 = CLI exit 1 (G1_SUBJECT_MISMATCH), 2 = CLI exit 2 (CLI/file error),
 //       3 = wrapper refusal or runner error. The runner never grades the result against the case expectation.
@@ -17,6 +17,10 @@ const MAX_TARBALL = 8 * 1024 * 1024, MAX_UNPACKED = 32 * 1024 * 1024, MAX_INPUT 
 const DEFAULT_TIMEOUT_MS = 30000;
 const STATE = 'NOT_FROZEN / LAB_NOT_AUTHORIZED / ERP_NOT_RUN';
 const CASES = { C0: 'action.json', C1: 'action.c1.json', C2: 'action.json', C3: 'action.json' };
+const INPUT_NAMES = ['bundle.json', 'task.json', 'action.json', 'binding.json', 'action.c1.json'];
+const PIN_STATUS = 'ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED';
+// Published 1.0.1 source identity from Annex D; this is not the wrapper's development HEAD.
+const PACKAGE_SOURCE = { source_commit: '873b4104a95e443ba22367cf8378deb7dcbe6cfd', package: '@netsujo/agent-role-contracts', version: '1.0.1' };
 const FLAG_KEYS = ['execution_authorized', 'runtime_enforcement', 'identity_verified', 'evidence_verified', 'source_files_checked', 'sensitive_data_scanned', 'output_schema_validated', 'subject_authenticated', 'review_authenticated', 'human_approval_authenticated', 'action_executed', 'replay_protection_enforced'];
 const NOT_CLAIMED = [
   'no signature: the evidence is unsigned',
@@ -26,7 +30,8 @@ const NOT_CLAIMED = [
   'no claim about ERP effect or no-effect',
   'wrapper_sha256 self-check only guards against accidents; identity is established only when someone outside the runner hashes run-g1.mjs and compares it with the pin',
   'pins are ARC_OWNER_PROPOSED, not in RC, not jointly accepted',
-  'not the partner --runner-pins format and not the partner check 4 index paths; not interoperable with the partner verifier until that format is known',
+  'partner-format ARC components only; not a complete evidence index or C5 package, and no C5 acceptance',
+  'exported runner pins are observations from preparation; they require independent acceptance and freezing before any authorized joint run',
   'no joint freeze, partner acceptance, lab or run authorization'
 ];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -134,10 +139,12 @@ function main() {
     limitation_flags: null, limitation_flags_source_stdout_sha256: null,
     pins: null, observed_identity: { wrapper_sha256: null, node_version: process.version, tarball: null, cli_sha256: null },
     inputs: null, wrapper: { argv_resolved: [process.execPath, fileURLToPath(import.meta.url), ...argv], exit_code: null },
-    cli: { spawned: false, argv_resolved: null, timeout_ms: null, exit_code: null, signal: null, spawn_error: null },
+    cli: { spawned: false, argv_resolved: null, input_files: null, cwd_scope: 'private verified snapshot, removed after the run', timeout_ms: null, exit_code: null, signal: null, spawn_error: null },
+    partner_export: null,
     sequence: seq, wall_clock_utc_informational: new Date().toISOString(), raw_files: {}, not_claimed: NOT_CLAIMED
   };
   let tmp = null, wrapperExit = 3, reason = null, stdout = Buffer.alloc(0), stderr = Buffer.alloc(0);
+  const retainedInputs = {};
   try {
     if (parsed.error) throw new Refusal('ARGS_INVALID', 'expected --case X --tarball Y --out Z in that order, once each');
     if (!Object.hasOwn(CASES, parsed.caseId)) throw new Refusal('CASE_UNKNOWN', parsed.caseId);
@@ -162,30 +169,31 @@ function main() {
     const actionName = CASES[parsed.caseId];
     ev.inputs = { 'manifest.json': { sha256: sha256(manifestBytes) } };
     const roles = { bundle: 'bundle.json', task: 'task.json', action: actionName, binding: 'binding.json' };
-    const verified = {};
-    for (const [role, name] of Object.entries(roles)) {
+    for (const name of INPUT_NAMES) {
       const bytes = readRegular(join(here, 'inputs', name), MAX_INPUT);
       const got = sha256(bytes);
-      ev.inputs[name] = { role, sha256: got };
+      ev.inputs[name] = { sha256: got, bytes: bytes.length, selected_for_cli: Object.values(roles).includes(name) };
       if (got !== manifest.inputs[name]) throw new Refusal('INPUT_HASH_MISMATCH', name);
-      verified[role] = [name, bytes];
+      retainedInputs[name] = bytes;
     }
     step('inputs_hashed');
 
     tmp = mkdtempSync(join(tmpdir(), 'arc-t4-f1-'));
-    const { cliPath, cliSha256 } = unpack(tgz, tmp);
+    const { cliSha256 } = unpack(tgz, tmp);
     // The CLI reads private snapshots of the exact verified bytes, never the original input paths.
     const paths = {};
     mkdirSync(join(tmp, 'inputs'));
-    for (const [role, [name, bytes]] of Object.entries(verified)) {
-      paths[role] = join(tmp, 'inputs', name);
-      writeFileSync(paths[role], bytes, { flag: 'wx', mode: 0o600 });
+    for (const [role, name] of Object.entries(roles)) {
+      // The command stays identical across cases; C1 changes the verified action bytes, not argv.
+      paths[role] = `inputs/${role}.json`;
+      writeFileSync(join(tmp, paths[role]), retainedInputs[name], { flag: 'wx', mode: 0o600 });
     }
     ev.observed_identity.cli_sha256 = cliSha256;
-    const cliArgv = [process.execPath, cliPath, 'action-bind', '--bundle', paths.bundle, '--task', paths.task, '--action', paths.action, '--binding', paths.binding, '--format', 'json'];
+    const cliArgv = [process.execPath, 'package/bin/agent-role-contracts.mjs', 'action-bind', '--bundle', paths.bundle, '--task', paths.task, '--action', paths.action, '--binding', paths.binding, '--format', 'json'];
+    if (cliArgv.some(x => !x || x.length > 1024 || x.includes('\n'))) throw new Refusal('PARTNER_COMMAND_UNREPRESENTABLE');
     const requested = Number(process.env.ARC_T4_F1_TIMEOUT_MS);
     const timeout = Number.isInteger(requested) && requested > 0 && requested < DEFAULT_TIMEOUT_MS ? requested : DEFAULT_TIMEOUT_MS;
-    ev.cli = { ...ev.cli, spawned: true, argv_resolved: cliArgv, timeout_ms: timeout };
+    ev.cli = { ...ev.cli, spawned: true, argv_resolved: cliArgv, input_files: roles, timeout_ms: timeout };
     step('cli_spawned');
     const r = spawnSync(cliArgv[0], cliArgv.slice(1), { cwd: tmp, env: { PATH: '' }, timeout, killSignal: 'SIGKILL', maxBuffer: MAX_OUTPUT, stdio: ['ignore', 'pipe', 'pipe'] });
     step('cli_exited');
@@ -208,14 +216,52 @@ function main() {
   } finally { if (tmp) rmSync(tmp, { recursive: true, force: true }); }
 
   ev.wrapper.exit_code = wrapperExit;
+  const createdComponents = new Set();
   try {
     const raw = {};
-    const put = (name, bytes) => { writeFileSync(join(out, name), bytes, { flag: 'wx' }); raw[name] = { sha256: sha256(bytes), bytes: bytes.length }; };
-    if (ev.cli.spawned) { put('stdout.bin', stdout); put('stderr.bin', stderr); }
+    const put = (name, bytes, component = false) => {
+      const target = join(out, name);
+      mkdirSync(dirname(target), { recursive: true });
+      if (component) {
+        const fd = openSync(target, 'wx', 0o600);
+        createdComponents.add(target); // Track creation before writing, including a partial write failure.
+        try { writeFileSync(fd, bytes); } finally { closeSync(fd); }
+      } else writeFileSync(target, bytes, { flag: 'wx', mode: 0o600 });
+      raw[name] = { sha256: sha256(bytes), bytes: Buffer.byteLength(bytes) };
+    };
+    const putJson = (name, value) => put(name, JSON.stringify(value, null, 2) + '\n', true);
+    if (ev.cli.spawned) {
+      put('stdout.bin', stdout); put('stderr.bin', stderr);
+      put('arc/g1.stdout', stdout); put('arc/g1.stderr', stderr);
+      if (Number.isInteger(ev.cli.exit_code)) put('arc/g1.exit', `${ev.cli.exit_code}\n`);
+      // Export the same verified buffers, including the original action and C1 variant; never reread originals.
+      for (const [name, bytes] of Object.entries(retainedInputs)) put(`arc/inputs/${name}`, bytes);
+    }
     put('exit.json', JSON.stringify({ cli: { exit_code: ev.cli.exit_code, signal: ev.cli.signal, spawn_error: ev.cli.spawn_error, argv_resolved: ev.cli.argv_resolved }, wrapper: { exit_code: wrapperExit, reason, argv_resolved: ev.wrapper.argv_resolved } }, null, 2) + '\n');
+    if (ev.runner_status === 'OK') {
+      const partnerPins = { wrapper_sha256: ev.observed_identity.wrapper_sha256, package_integrity: ev.observed_identity.tarball.integrity, node_version: process.version, command: ev.cli.argv_resolved };
+      const arcInputs = Object.fromEntries(['bundle', 'task', 'action', 'binding'].map(role => [`${role}_sha256`, sha256(retainedInputs[`${role}.json`])]));
+      const variant = parsed.caseId === 'C1' ? { action_sha256: sha256(retainedInputs['action.c1.json']), subject: ev.observed.subject_digest } : null;
+      putJson('partner-runner-pins.json', partnerPins);
+      putJson('arc-runner.json', { ...PACKAGE_SOURCE, ...partnerPins });
+      putJson('arc-inputs.json', arcInputs);
+      putJson('arc-c1-variant.json', variant);
+      putJson('arc-artifacts.json', {
+        schema: 'arc-t4-f1-partial-artifacts/0-candidate', scope: 'ARC_PARTIAL_ONLY', status: PIN_STATUS,
+        artifacts: Object.entries(raw).filter(([path]) => path.startsWith('arc/')).map(([path, value]) => ({ path, sha256: value.sha256, size_bytes: value.bytes }))
+      });
+      ev.partner_export = { status: PIN_STATUS, scope: 'UNSIGNED_ARC_COMPONENTS_ONLY', c5_acceptance: 'NOT_EVALUATED', pins: 'partner-runner-pins.json', runner: 'arc-runner.json', inputs: 'arc-inputs.json', c1_variant: 'arc-c1-variant.json', partial_artifacts: 'arc-artifacts.json' };
+    }
     ev.raw_files = raw;
     writeFileSync(join(out, 'g1-run-evidence.json'), JSON.stringify(ev, null, 2) + '\n', { flag: 'wx' });
-  } catch (e) { console.error(`RUNNER_ERROR: evidence write failed (${e.code || e.message})`); return 3; }
+  } catch (e) {
+    let cleanupFailed = false;
+    for (const path of createdComponents) {
+      try { rmSync(path); } catch { cleanupFailed = true; }
+    }
+    console.error(`RUNNER_ERROR: evidence write failed (${e.code || e.message}); incomplete output must not be used${cleanupFailed ? '; component rollback also failed' : ''}`);
+    return 3;
+  }
   console.error(`${ev.runner_status} g1_verdict=${ev.g1_verdict} wrapper_exit=${wrapperExit}${reason ? ` reason=${reason}` : ''}`);
   return wrapperExit;
 }

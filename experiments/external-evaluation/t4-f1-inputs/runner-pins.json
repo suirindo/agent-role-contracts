@@ -1,8 +1,8 @@
 {
-  "schema": "arc-owned-runner-pins/0 (ARC layout; the partner --runner-pins format was not available and was not guessed)",
+  "schema": "arc-owned-runner-pins/0 (internal wrapper configuration; use the generated partner-runner-pins.json with the partner verifier)",
   "status": "ARC_OWNER_PROPOSED / NOT_IN_RC / NOT_JOINTLY_ACCEPTED",
   "pins": {
-    "wrapper_sha256": "5c3b53ef80897031cdb83bab743e7da0cf802b1533348d906ef552e413d28e31",
+    "wrapper_sha256": "cba323d0288327a91828e6de2737e1a1710a78deeb3c0f18c4d611d2e46f90ab",
     "package_integrity": "sha512-4FSVVjOuNlvT+dBNsEkEZ5ILUfxmhoOdWWMDlCIbYGtZss9mVICT4Yuos5iS2fkJHh1OnAYs1F4PUZpc9NEdCQ==",
     "node_version": "v24.22.1",
     "command": {
