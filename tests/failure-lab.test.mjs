@@ -92,15 +92,59 @@ test('root READMEs point to the intake issue once, after the limits sentence', (
   }
 });
 
-test('the selected next experiment still reproduces and its open items stay marked NOT_RUN', () => {
+test('the binding demo that entry 02 cites still reproduces, and follow-on candidates stay NOT_RUN and unscheduled', () => {
   const result = spawnSync(process.execPath, [join(root, 'examples', 'action-binding', 'demo.mjs')], {
     cwd: root, encoding: 'utf8', timeout: 60000,
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Six expected binding outcomes verified\./);
   assert.equal([...result.stdout.matchAll(/G1_SUBJECT_MISMATCH/g)].length, 3);
-  assert.ok(lab.includes('`G1_SUBJECT_MISMATCH`'));
   assert.equal([...lab.matchAll(/`NOT_RUN`/g)].length, 3);
-  assert.match(lab, /No publication date is set\./);
-  assert.ok(lab.includes('](01-green-tests-out-of-scope-file.md)') && lab.includes('](01-green-tests-out-of-scope-file.ja.md)'));
+  assert.match(lab, /none has a publication date/);
+  assert.doesNotMatch(lab, /Next experiment/);
+});
+
+const entries = [
+  ['02-signed-pass-wrong-commit', '02-signed-pass-wrong-commit/review-receipt-fixture.mjs', /5\/5 fixture assertions passed/],
+  ['03-candidate-controls-own-check', '03-candidate-controls-own-check/run.mjs', /Demo complete: every observed result matched the expectation \(demo exit 0\)\./],
+];
+for (const [name, script, done] of entries) {
+  test(`entry ${name.slice(0, 2)} fixture runs offline, and the index and both languages link it`, () => {
+    const result = spawnSync(process.execPath, [join(labDir, script)], { cwd: tmpdir(), encoding: 'utf8', timeout: 60000 });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, done);
+    const enText = read(labDir, `${name}.md`);
+    const jaText = read(labDir, `${name}.ja.md`);
+    for (const file of [`${name}.md`, `${name}.ja.md`]) assert.ok(lab.includes(`](${file})`), file);
+    const block = enText.match(/## Full output\n[\s\S]*?```text\n([\s\S]*?)\n```/);
+    assert.ok(block, 'full output is in the English entry');
+    assert.equal(block[1] + '\n', result.stdout.replace(/^/, ''), 'printed output matches a real run');
+    for (const text of [enText, jaText]) {
+      assert.match(text, /issues\/134\)/);
+      assert.match(text, /security\/advisories\/new/);
+      assert.doesNotMatch(text, /^---\n/);
+      assert.equal([...text.matchAll(/^```/gm)].length % 2, 0);
+      for (const row of text.split('\n').filter(l => l.startsWith('| '))) {
+        assert.equal(row.split('|').length - 2, 3, `three columns: ${row}`);
+        assert.doesNotMatch(row, /`/, `no inline code in a table cell: ${row}`);
+      }
+      for (const link of prose(text).matchAll(/\]\(([^)]+)\)/g)) assert.match(link[1], /^https:\/\//, `absolute link: ${link[1]}`);
+      assert.doesNotMatch(text, /\]\(\)/, 'no empty link');
+    }
+    assert.ok(jaText.includes('英語版が正本'));
+  });
+}
+
+test('entry 03 credits Iliya Oblakov in both languages, keeps his results separate, and does not claim the cache case', () => {
+  const [enText, jaText] = ['03-candidate-controls-own-check.md', '03-candidate-controls-own-check.ja.md'].map(f => read(labDir, f));
+  for (const text of [enText, jaText]) {
+    assert.ok(text.includes('Iliya Oblakov'));
+    assert.ok(text.includes('https://dev.to/iliyaoblakov/i-forged-a-codex-accept-with-four-lines-of-text-and-my-merge-check-passed-it-4odk'));
+    assert.ok(text.includes('#comment-3m9mf'));
+    assert.ok(text.includes('`NOT_RUN`'));
+    assert.ok(text.indexOf('Iliya Oblakov') < text.indexOf('## '), 'credit comes before the first section');
+  }
+  assert.match(enText, /A fresh checkout is not execution identity/);
+  assert.match(enText, /What ARC checked and did not/);
+  assert.match(enText, /we did not re-run them/);
 });
